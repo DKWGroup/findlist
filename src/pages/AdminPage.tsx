@@ -1,0 +1,28 @@
+import React from 'react';
+import { AdminDashboard } from '../components/admin/AdminDashboard';
+import { ProtectedRoute } from '../components/ProtectedRoute';
+import { SupabaseSetup } from '../components/upload/SupabaseSetup';
+import { debugSession } from '../services/supabaseStorage';
+
+// Add debug logging
+export const AdminPage: React.FC = () => {
+  console.log('Rendering AdminPage');
+  
+  // Debug session state when admin page loads
+  React.useEffect(() => {
+    debugSession();
+  }, []);
+
+  return (
+    <ProtectedRoute requireAdmin>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <SupabaseSetup />
+          </div>
+          <AdminDashboard />
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+};
