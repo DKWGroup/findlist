@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Star, ThumbsUp, ThumbsDown, Flag, User } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { Flag, Star, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Review {
   id: string;
@@ -19,61 +19,67 @@ interface Review {
 interface ProductReviewsProps {
   productId: string;
   reviews: Review[];
-  onAddReview: (review: Omit<Review, 'id' | 'dateCreated' | 'likes' | 'dislikes'>) => void;
+  onAddReview: (
+    review: Omit<Review, "id" | "dateCreated" | "likes" | "dislikes">
+  ) => void;
 }
 
 export const ProductReviews: React.FC<ProductReviewsProps> = ({
   productId,
   reviews,
-  onAddReview
+  onAddReview,
 }) => {
   const { isAuthenticated, user } = useAuth();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 5,
-    comment: ''
+    comment: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const userHasReviewed = reviews.some(review => review.userId === user?.id);
+  const userHasReviewed = reviews.some((review) => review.userId === user?.id);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !newReview.comment.trim()) return;
 
     setIsSubmitting(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+
       onAddReview({
         userId: user.id,
         userName: user.name,
         userAvatar: user.avatar,
         rating: newReview.rating,
         comment: newReview.comment.trim(),
-        isVerified: user.role === 'admin'
+        isVerified: user.role === "admin",
       });
 
-      setNewReview({ rating: 5, comment: '' });
+      setNewReview({ rating: 5, comment: "" });
       setShowReviewForm(false);
     } catch (error) {
-      console.error('Error submitting review:', error);
+      console.error("Error submitting review:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
-    : 0;
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+      : 0;
 
-  const ratingDistribution = [5, 4, 3, 2, 1].map(rating => ({
+  const ratingDistribution = [5, 4, 3, 2, 1].map((rating) => ({
     rating,
-    count: reviews.filter(review => review.rating === rating).length,
-    percentage: reviews.length > 0 
-      ? (reviews.filter(review => review.rating === rating).length / reviews.length) * 100 
-      : 0
+    count: reviews.filter((review) => review.rating === rating).length,
+    percentage:
+      reviews.length > 0
+        ? (reviews.filter((review) => review.rating === rating).length /
+            reviews.length) *
+          100
+        : 0,
   }));
 
   return (
@@ -105,8 +111,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
                   key={i}
                   className={`h-5 w-5 ${
                     i < Math.round(averageRating)
-                      ? 'text-yellow-400 fill-current'
-                      : 'text-gray-300'
+                      ? "text-yellow-400 fill-current"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
@@ -135,9 +141,14 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
 
       {/* Review Form */}
       {showReviewForm && isAuthenticated && (
-        <form onSubmit={handleSubmitReview} className="mb-8 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-gray-900 mb-4">Dodaj swoją opinię</h4>
-          
+        <form
+          onSubmit={handleSubmitReview}
+          className="mb-8 p-4 bg-blue-50 rounded-lg"
+        >
+          <h4 className="font-semibold text-gray-900 mb-4">
+            Dodaj swoją opinię
+          </h4>
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Ocena
@@ -147,14 +158,16 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setNewReview(prev => ({ ...prev, rating: i + 1 }))}
+                  onClick={() =>
+                    setNewReview((prev) => ({ ...prev, rating: i + 1 }))
+                  }
                   className="p-1 hover:scale-110 transition-transform"
                 >
                   <Star
                     className={`h-6 w-6 ${
                       i < newReview.rating
-                        ? 'text-yellow-400 fill-current'
-                        : 'text-gray-300 hover:text-yellow-300'
+                        ? "text-yellow-400 fill-current"
+                        : "text-gray-300 hover:text-yellow-300"
                     }`}
                   />
                 </button>
@@ -168,12 +181,43 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
             </label>
             <textarea
               value={newReview.comment}
-              onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+              onChange={(e) =>
+                setNewReview((prev) => ({ ...prev, comment: e.target.value }))
+              }
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Podziel się swoją opinią o tym produkcie..."
               required
             />
+          </div>
+
+          <div className="mb-4 flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="review-terms"
+              required
+              className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="review-terms" className="text-sm text-gray-600">
+              Akceptuję{" "}
+              <a
+                href="/regulamin"
+                className="text-blue-600 hover:text-blue-800 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                regulamin
+              </a>{" "}
+              oraz{" "}
+              <a
+                href="/polityka-prywatnosci"
+                className="text-blue-600 hover:text-blue-800 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                politykę prywatności
+              </a>
+            </label>
           </div>
 
           <div className="flex gap-3">
@@ -240,7 +284,10 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
           </div>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="border-b border-gray-100 pb-6 last:border-b-0">
+            <div
+              key={review.id}
+              className="border-b border-gray-100 pb-6 last:border-b-0"
+            >
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                   {review.userAvatar ? (
@@ -265,7 +312,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
                       </span>
                     )}
                     <span className="text-sm text-gray-500">
-                      {new Date(review.dateCreated).toLocaleDateString('pl-PL')}
+                      {new Date(review.dateCreated).toLocaleDateString("pl-PL")}
                     </span>
                   </div>
 
@@ -275,8 +322,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
                         key={i}
                         className={`h-4 w-4 ${
                           i < review.rating
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}

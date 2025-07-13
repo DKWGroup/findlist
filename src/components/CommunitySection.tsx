@@ -1,40 +1,73 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Users, Heart, Star, MessageSquare, TrendingUp, ArrowRight, Instagram, Music } from 'lucide-react';
+import {
+  ArrowRight,
+  Heart,
+  Instagram,
+  MessageSquare,
+  Music,
+  Star,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import React from "react";
+import { Link } from "react-router-dom";
 
 export const CommunitySection: React.FC = () => {
   const communityStats = [
-    { icon: Users, label: 'Aktywnych użytkowników', value: '10,000+', color: 'bg-blue-100 text-blue-600' },
-    { icon: Heart, label: 'Produktów w wishlistach', value: '50,000+', color: 'bg-red-100 text-red-600' },
-    { icon: Star, label: 'Wystawionych ocen', value: '25,000+', color: 'bg-yellow-100 text-yellow-600' },
-    { icon: MessageSquare, label: 'Recenzji społeczności', value: '15,000+', color: 'bg-green-100 text-green-600' }
+    {
+      icon: Users,
+      label: "Aktywnych użytkowników",
+      value: "10,000+",
+      color: "bg-blue-100 text-blue-600",
+    },
+    {
+      icon: Heart,
+      label: "Produktów w wishlistach",
+      value: "50,000+",
+      color: "bg-red-100 text-red-600",
+    },
+    {
+      icon: Star,
+      label: "Wystawionych ocen",
+      value: "25,000+",
+      color: "bg-yellow-100 text-yellow-600",
+    },
+    {
+      icon: MessageSquare,
+      label: "Recenzji społeczności",
+      value: "15,000+",
+      color: "bg-green-100 text-green-600",
+    },
   ];
 
   const socialFeatures = [
     {
       icon: Heart,
-      title: 'Twórz Wishlisty',
-      description: 'Zapisuj ulubione produkty i organizuj je w kolekcje. Śledź zmiany cen i dostępność.',
-      color: 'text-red-600'
+      title: "Twórz Wishlisty",
+      description:
+        "Zapisuj ulubione produkty i organizuj je w kolekcje. Śledź zmiany cen i dostępność.",
+      color: "text-red-600",
     },
     {
       icon: Star,
-      title: 'Oceniaj i Recenzuj',
-      description: 'Dziel się swoimi opiniami o produktach. Pomóż innym w podejmowaniu lepszych decyzji zakupowych.',
-      color: 'text-yellow-600'
+      title: "Oceniaj i Recenzuj",
+      description:
+        "Dziel się swoimi opiniami o produktach. Pomóż innym w podejmowaniu lepszych decyzji zakupowych.",
+      color: "text-yellow-600",
     },
     {
       icon: Users,
-      title: 'Dołącz do Społeczności',
-      description: 'Poznaj innych miłośników viralowych produktów. Wymieniaj się opiniami i odkryciami.',
-      color: 'text-blue-600'
+      title: "Dołącz do Społeczności",
+      description:
+        "Poznaj innych miłośników viralowych produktów. Wymieniaj się opiniami i odkryciami.",
+      color: "text-blue-600",
     },
     {
       icon: TrendingUp,
-      title: 'Bądź Pierwszy',
-      description: 'Otrzymuj powiadomienia o najnowszych trendach i produktach zanim staną się popularne.',
-      color: 'text-purple-600'
-    }
+      title: "Bądź Pierwszy",
+      description:
+        "Otrzymuj powiadomienia o najnowszych trendach i produktach zanim staną się popularne.",
+      color: "text-purple-600",
+    },
   ];
 
   return (
@@ -51,8 +84,8 @@ export const CommunitySection: React.FC = () => {
             </h2>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Społeczność, która wie, co jest na topie! Odkrywaj trendy, dziel się opiniami 
-            i bądź pierwszą osobą, która pozna najnowsze viralowe hity.
+            Społeczność, która wie, co jest na topie! Odkrywaj trendy, dziel się
+            opiniami i bądź pierwszą osobą, która pozna najnowsze viralowe hity.
           </p>
         </div>
 
@@ -61,11 +94,18 @@ export const CommunitySection: React.FC = () => {
           {communityStats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
-              <div key={index} className="bg-white rounded-xl p-6 text-center shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
-                <div className={`w-12 h-12 ${stat.color} rounded-full flex items-center justify-center mx-auto mb-3`}>
+              <div
+                key={index}
+                className="bg-white rounded-xl p-6 text-center shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
+              >
+                <div
+                  className={`w-12 h-12 ${stat.color} rounded-full flex items-center justify-center mx-auto mb-3`}
+                >
                   <IconComponent className="h-6 w-6" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {stat.value}
+                </div>
                 <div className="text-sm text-gray-600">{stat.label}</div>
               </div>
             );
@@ -77,12 +117,21 @@ export const CommunitySection: React.FC = () => {
           {socialFeatures.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className={`w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4`}>
+              <div
+                key={index}
+                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <div
+                  className={`w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4`}
+                >
                   <IconComponent className={`h-6 w-6 ${feature.color}`} />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
             );
           })}
@@ -96,8 +145,9 @@ export const CommunitySection: React.FC = () => {
                 Gotowy na odkrywanie najlepszych viralowych produktów?
               </h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                Dołącz do tysięcy użytkowników, którzy już odkrywają najgorętsze trendy z TikToka i Instagrama. 
-                Twórz wishlisty, oceniaj produkty i bądź częścią społeczności, która wie, co jest warte uwagi!
+                Dołącz do tysięcy użytkowników, którzy już odkrywają najgorętsze
+                trendy z TikToka i Instagrama. Twórz wishlisty, oceniaj produkty
+                i bądź częścią społeczności, która wie, co jest warte uwagi!
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
@@ -116,7 +166,7 @@ export const CommunitySection: React.FC = () => {
                 </Link>
               </div>
             </div>
-            
+
             <div className="relative">
               <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 text-center">
                 <div className="flex justify-center gap-4 mb-6">
@@ -134,10 +184,16 @@ export const CommunitySection: React.FC = () => {
                   Bądź na bieżąco z najnowszymi trendami i produktami
                 </p>
                 <div className="flex justify-center gap-3">
-                  <a href="#" className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  <a
+                    href="#"
+                    className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
                     @viralist_pl
                   </a>
-                  <a href="#" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  <a
+                    href="#"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
                     @viralist.pl
                   </a>
                 </div>
@@ -152,18 +208,47 @@ export const CommunitySection: React.FC = () => {
             📧 Newsletter z najgorętszymi trendami
           </h3>
           <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Otrzymuj cotygodniowe zestawienie najlepszych viralowych produktów, 
+            Otrzymuj cotygodniowe zestawienie najlepszych viralowych produktów,
             ekskluzywne promocje i ostrzeżenia przed scamami.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Twój adres email"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap">
-              Zapisz się
-            </button>
+          <div className="max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <input
+                type="email"
+                placeholder="Twój adres email"
+                className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap">
+                Zapisz się
+              </button>
+            </div>
+            <div className="flex items-start gap-2 mb-3">
+              <input
+                type="checkbox"
+                id="newsletter-terms-community"
+                required
+                className="mt-1 rounded border-blue-300 bg-white text-blue-600 focus:ring-blue-500"
+              />
+              <label
+                htmlFor="newsletter-terms-community"
+                className="text-xs text-blue-200 text-left"
+              >
+                Akceptuję{" "}
+                <a
+                  href="/regulamin"
+                  className="text-blue-300 hover:text-white underline"
+                >
+                  regulamin
+                </a>{" "}
+                oraz{" "}
+                <a
+                  href="/polityka-prywatnosci"
+                  className="text-blue-300 hover:text-white underline"
+                >
+                  politykę prywatności
+                </a>
+              </label>
+            </div>
           </div>
           <p className="text-xs text-blue-200 mt-3">
             Bez spamu. Możesz się wypisać w każdej chwili.

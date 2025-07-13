@@ -3,18 +3,22 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SimplifiedAuthProvider } from "./contexts/SimplifiedAuthContext";
 import { AdminPage } from "./pages/AdminPage";
+import { AffiliateProgramPage } from "./pages/AffiliateProgramPage";
 import { BlogEditorPage } from "./pages/BlogEditorPage";
 import { BlogPage } from "./pages/BlogPage";
 import { BlogPostPage } from "./pages/BlogPostPage";
+import { CookiePolicyPage } from "./pages/CookiePolicyPage";
 import { HomePage } from "./pages/HomePage";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
+import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { ProductPage } from "./pages/ProductPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SearchPage } from "./pages/SearchPage";
+import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { UpdatePasswordPage } from "./pages/UpdatePasswordPage";
 import { VerificationRequiredPage } from "./pages/VerificationRequiredPage";
 
@@ -47,6 +51,15 @@ function App() {
               />
               <Route path="/profil" element={<ProfilePage />} />
               <Route path="/admin" element={<AdminPage />} />
+
+              {/* Legal Pages */}
+              <Route path="/regulamin" element={<TermsOfServicePage />} />
+              <Route
+                path="/polityka-prywatnosci"
+                element={<PrivacyPolicyPage />}
+              />
+              <Route path="/cookies" element={<CookiePolicyPage />} />
+              <Route path="/afiliacja" element={<AffiliateProgramPage />} />
             </Routes>
           </div>
         </Router>
