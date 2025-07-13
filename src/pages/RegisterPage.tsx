@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
-import { RegisterForm } from '../components/auth/RegisterForm';
-import { useSimplifiedAuthContext } from '../contexts/SimplifiedAuthContext';
+import React from "react";
+import { Link, Navigate } from "react-router-dom";
+import { RegisterForm } from "../components/auth/RegisterForm";
+import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 
 export const RegisterPage: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useSimplifiedAuthContext();
@@ -26,9 +26,9 @@ export const RegisterPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <img 
-              src="/viralist-logo2.png" 
-              alt="VIRALIST" 
+            <img
+              src="/viralist-logo2.png"
+              alt="VIRALIST"
               className="h-8 w-auto"
             />
           </Link>

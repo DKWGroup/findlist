@@ -1,14 +1,14 @@
-import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Filter, Search } from 'lucide-react';
-import { Layout } from '../components/Layout';
-import { BlogCard } from '../components/blog/BlogCard';
-import { blogPosts, blogCategories, blogLabels } from '../data/blogData';
-import { useSimplifiedAuthContext } from '../contexts/SimplifiedAuthContext';
+import { Filter, Plus, Search } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Layout } from "../components/Layout";
+import { BlogCard } from "../components/blog/BlogCard";
+import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
+import { blogCategories, blogLabels, blogPosts } from "../data/blogData";
 
 export const BlogPage: React.FC = () => {
   const { user } = useSimplifiedAuthContext();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
@@ -19,49 +19,52 @@ export const BlogPage: React.FC = () => {
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(query) ||
-        post.excerpt.toLowerCase().includes(query) ||
-        post.tags.some(tag => tag.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        (post) =>
+          post.title.toLowerCase().includes(query) ||
+          post.excerpt.toLowerCase().includes(query) ||
+          post.tags.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
     // Filter by category
     if (selectedCategory) {
-      filtered = filtered.filter(post => post.category === selectedCategory);
+      filtered = filtered.filter((post) => post.category === selectedCategory);
     }
 
     // Filter by type
     if (selectedType) {
-      filtered = filtered.filter(post => post.type === selectedType);
+      filtered = filtered.filter((post) => post.type === selectedType);
     }
 
     // Filter by labels
     if (selectedLabels.length > 0) {
-      filtered = filtered.filter(post =>
-        selectedLabels.some(label => post.labels.includes(label))
+      filtered = filtered.filter((post) =>
+        selectedLabels.some((label) => post.labels.includes(label))
       );
     }
 
     // Only show published posts for non-admin users
-    if (user?.role !== 'admin') {
-      filtered = filtered.filter(post => post.isPublished);
+    if (user?.role !== "admin") {
+      filtered = filtered.filter((post) => post.isPublished);
     }
 
     // Sort by featured first, then by date
     filtered.sort((a, b) => {
       if (a.isFeatured && !b.isFeatured) return -1;
       if (!a.isFeatured && b.isFeatured) return 1;
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      return (
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      );
     });
 
     return filtered;
   }, [searchQuery, selectedCategory, selectedType, selectedLabels, user]);
 
   const toggleLabel = (labelId: string) => {
-    setSelectedLabels(prev =>
+    setSelectedLabels((prev) =>
       prev.includes(labelId)
-        ? prev.filter(id => id !== labelId)
+        ? prev.filter((id) => id !== labelId)
         : [...prev, labelId]
     );
   };
@@ -72,13 +75,15 @@ export const BlogPage: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Blog VIRALIST</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Blog VIRALIST
+            </h1>
             <p className="text-gray-600">
               Recenzje, porady i ostrzeżenia o viralnych produktach
             </p>
           </div>
-          
-          {user?.role === 'admin' && (
+
+          {user?.role === "admin" && (
             <Link
               to="/blog/edytor/nowy"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -95,28 +100,34 @@ export const BlogPage: React.FC = () => {
             <Filter className="h-5 w-5 text-gray-400" />
             <span className="font-medium text-gray-900">Filtry</span>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Kategoria</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kategoria
+              </label>
               <select
-                value={selectedCategory || ''}
+                value={selectedCategory || ""}
                 onChange={(e) => setSelectedCategory(e.target.value || null)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Wszystkie kategorie</option>
-                {blogCategories.map(category => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
+                {blogCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Typ wpisu</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Typ wpisu
+              </label>
               <select
-                value={selectedType || ''}
+                value={selectedType || ""}
                 onChange={(e) => setSelectedType(e.target.value || null)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -129,7 +140,9 @@ export const BlogPage: React.FC = () => {
 
             {/* Search */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Szukaj</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Szukaj
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
@@ -145,7 +158,9 @@ export const BlogPage: React.FC = () => {
 
           {/* Labels Filter */}
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Etykiety</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Etykiety
+            </label>
             <div className="flex flex-wrap gap-2">
               {blogLabels.map((label) => (
                 <button
@@ -153,7 +168,7 @@ export const BlogPage: React.FC = () => {
                   onClick={() => toggleLabel(label.id)}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                     selectedLabels.includes(label.id)
-                      ? 'bg-blue-600 text-white'
+                      ? "bg-blue-600 text-white"
                       : label.color
                   }`}
                 >
@@ -185,7 +200,8 @@ export const BlogPage: React.FC = () => {
               Brak wpisów
             </h3>
             <p className="text-gray-600 max-w-md mx-auto">
-              Nie znaleziono wpisów spełniających kryteria wyszukiwania. Spróbuj zmienić filtry.
+              Nie znaleziono wpisów spełniających kryteria wyszukiwania. Spróbuj
+              zmienić filtry.
             </p>
           </div>
         )}
