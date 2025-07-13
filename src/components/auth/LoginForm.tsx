@@ -226,17 +226,6 @@ export const LoginForm: React.FC = () => {
             </Link>
           </p>
         </div>
-
-        {/* Demo credentials */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800 font-medium mb-2">Informacja:</p>
-          <div className="text-xs text-blue-700">
-            <p>Logowanie odbywa się przez Supabase Authentication.</p>
-            <p>
-              Zarejestruj nowe konto lub użyj istniejących danych logowania.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
