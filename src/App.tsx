@@ -1,6 +1,6 @@
-import React from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { ScrollToTop } from "./components/ScrollToTop";
 import { SimplifiedAuthProvider } from "./contexts/SimplifiedAuthContext";
 import { AdminPage } from "./pages/AdminPage";
 import { BlogEditorPage } from "./pages/BlogEditorPage";
@@ -25,6 +25,7 @@ function App() {
     <HelmetProvider>
       <SimplifiedAuthProvider>
         <Router>
+          <ScrollToTop />
           <div className="min-h-screen bg-gray-50">
             <Routes>
               <Route path="/" element={<LandingPage />} />
