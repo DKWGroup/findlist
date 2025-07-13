@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { Layout } from "../components/Layout";
 import { UserProfile } from "../components/profile/UserProfile";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 
@@ -20,5 +21,9 @@ export const ProfilePage: React.FC = () => {
     return <Navigate to="/logowanie" replace />;
   }
 
-  return <UserProfile />;
+  return (
+    <Layout>
+      <UserProfile />
+    </Layout>
+  );
 };
