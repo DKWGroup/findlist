@@ -1,21 +1,13 @@
-import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
-import { LoginForm } from '../components/auth/LoginForm';
-import { useAuth } from '../contexts/AuthContext';
-import { clearSessionData } from '../middleware/AuthMiddleware';
+import React from "react";
+import { Link, Navigate } from "react-router-dom";
+import { LoginForm } from "../components/auth/LoginForm";
+import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 
 export const LoginPage: React.FC = () => {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  
-  // Clear any stale session data when login page loads
-  React.useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      clearSessionData();
-    }
-  }, [isAuthenticated, isLoading]);
+  const { user, isLoading } = useSimplifiedAuthContext();
 
   // Only redirect if we're not loading and the user is authenticated
-  if (isAuthenticated && !isLoading && user) {
+  if (user && !isLoading) {
     return <Navigate to="/profil" replace />;
   }
 
@@ -34,9 +26,9 @@ export const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <img 
-              src="/viralist-logo2.png" 
-              alt="VIRALIST" 
+            <img
+              src="/viralist-logo2.png"
+              alt="VIRALIST"
               className="h-8 w-auto"
             />
           </Link>

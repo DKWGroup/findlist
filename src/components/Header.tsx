@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, Heart, User, LogOut, Settings, Shield, BookOpen } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { AdvancedSearchBar } from './search/AdvancedSearchBar';
+import {
+  BookOpen,
+  Heart,
+  LogOut,
+  Menu,
+  Search,
+  Settings,
+  Shield,
+  User,
+  X,
+} from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
+import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
 
 // Add loading state for auth
 interface HeaderProps {
@@ -10,12 +20,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
-  const { isAuthenticated, user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, isAuthenticated } =
+    useSimplifiedAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  console.log('Header auth state:', { isAuthenticated, user, isLoading });
+  console.log("Header auth state:", { user, isLoading, isAuthenticated });
 
   const handleLogout = () => {
     logout();
@@ -38,9 +49,9 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src="/viralist-logo2.png" 
-              alt="VIRALIST" 
+            <img
+              src="/viralist-logo2.png"
+              alt="VIRALIST"
               className="h-8 w-auto"
             />
           </Link>
@@ -57,34 +68,39 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/produkty" className="text-gray-600 hover:text-blue-600 transition-colors">
+            <Link
+              to="/produkty"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
+            >
               Produkty
             </Link>
-            <Link to="/search" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+            <Link
+              to="/search"
+              className="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1"
+            >
               <Search className="h-4 w-4" />
               Wyszukiwanie
             </Link>
-            <Link to="/blog" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+            <Link
+              to="/blog"
+              className="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1"
+            >
               <BookOpen className="h-4 w-4" />
               Blog
             </Link>
-            
+
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
-            ) : (isAuthenticated && user) ? (
+            ) : isAuthenticated && user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
                 >
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    {user?.avatar ? (
-                      <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <User className="h-4 w-4 text-blue-600" />
-                    )}
+                    <User className="h-4 w-4 text-blue-600" />
                   </div>
-                  <span className="font-medium">{user?.name}</span>
+                  <span className="font-medium">{user?.email}</span>
                 </button>
 
                 {isUserMenuOpen && (
@@ -105,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
                       <Heart className="h-4 w-4" />
                       <span>Wishlist</span>
                     </Link>
-                    {user?.role === 'admin' && (
+                    {user?.role === "admin" && (
                       <Link
                         to="/admin"
                         className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
@@ -128,11 +144,14 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
               </div>
             ) : (
               <>
-                <Link to="/logowanie" className="text-gray-600 hover:text-blue-600 transition-colors">
+                <Link
+                  to="/logowanie"
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
+                >
                   Logowanie
                 </Link>
-                <Link 
-                  to="/rejestracja" 
+                <Link
+                  to="/rejestracja"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   Rejestracja
@@ -146,7 +165,11 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100 transition-colors"
           >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
 
@@ -165,51 +188,51 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-4 py-4 space-y-4">
-            <Link 
-              to="/produkty" 
+            <Link
+              to="/produkty"
               className="block text-gray-600 hover:text-blue-600 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Produkty
             </Link>
-            <Link 
-              to="/search" 
+            <Link
+              to="/search"
               className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               <Search className="h-4 w-4" />
               Wyszukiwanie
             </Link>
-            <Link 
-              to="/blog" 
+            <Link
+              to="/blog"
               className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               <BookOpen className="h-4 w-4" />
               Blog
             </Link>
-            
+
             {isAuthenticated && user ? (
               <>
-                <Link 
-                  to="/profil" 
+                <Link
+                  to="/profil"
                   className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <User className="h-5 w-5" />
                   <span>Mój profil</span>
                 </Link>
-                <Link 
-                  to="/profil?tab=wishlist" 
+                <Link
+                  to="/profil?tab=wishlist"
                   className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Heart className="h-5 w-5" />
                   <span>Wishlist</span>
                 </Link>
-                {user?.role === 'admin' && (
-                  <Link 
-                    to="/admin" 
+                {user?.role === "admin" && (
+                  <Link
+                    to="/admin"
                     className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -230,15 +253,15 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
               </>
             ) : (
               <>
-                <Link 
-                  to="/logowanie" 
+                <Link
+                  to="/logowanie"
                   className="block text-gray-600 hover:text-blue-600 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Logowanie
                 </Link>
-                <Link 
-                  to="/rejestracja" 
+                <Link
+                  to="/rejestracja"
                   className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >

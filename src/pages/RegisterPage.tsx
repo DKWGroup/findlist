@@ -1,18 +1,10 @@
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { RegisterForm } from '../components/auth/RegisterForm';
-import { useAuth } from '../contexts/AuthContext';
-import { clearSessionData } from '../middleware/AuthMiddleware';
+import { useSimplifiedAuthContext } from '../contexts/SimplifiedAuthContext';
 
 export const RegisterPage: React.FC = () => {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  
-  // Clear any stale session data when register page loads
-  React.useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      clearSessionData();
-    }
-  }, [isAuthenticated, isLoading]);
+  const { isAuthenticated, isLoading, user } = useSimplifiedAuthContext();
 
   // Only redirect if we're not loading and the user is authenticated
   if (isAuthenticated && !isLoading && user) {

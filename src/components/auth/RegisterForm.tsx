@@ -1,71 +1,82 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, Check, Info } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { clearSessionData } from '../../middleware/AuthMiddleware';
+import {
+  AlertCircle,
+  Check,
+  Eye,
+  EyeOff,
+  Info,
+  Loader2,
+  Lock,
+  Mail,
+  User,
+} from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 
 export const RegisterForm: React.FC = () => {
-  const { register, error, validatePassword } = useAuth();
+  const { register, error, validatePassword } = useSimplifiedAuthContext();
   const navigate = useNavigate();
   const [localLoading, setLocalLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
     acceptTerms: false,
-    marketingConsent: false
+    marketingConsent: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formError, setFormError] = useState<string>('');
+  const [formError, setFormError] = useState<string>("");
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
     uppercase: false,
     number: false,
-    special: false
+    special: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous errors
-    setFormError('');
-    
+    setFormError("");
+
     if (!formData.acceptTerms) {
-      setFormError('Musisz zaakceptować regulamin i politykę prywatności');
+      setFormError("Musisz zaakceptować regulamin i politykę prywatności");
       return;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
-      setFormError('Hasła nie są identyczne');
+      setFormError("Hasła nie są identyczne");
       return;
     }
-    
+
     // Validate email format
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(formData.email)) {
-      setFormError('Nieprawidłowy format adresu email');
+      setFormError("Nieprawidłowy format adresu email");
       return;
     }
-    
+
     // Validate password strength
     if (!validatePassword(formData.password)) {
-      setFormError('Hasło nie spełnia wymagań bezpieczeństwa');
+      setFormError("Hasło nie spełnia wymagań bezpieczeństwa");
       return;
     }
-    
+
     setLocalLoading(true);
     try {
       const result = await register(formData);
-      
-      // Redirect based on result
-      navigate(result?.requiresEmailVerification ? '/verification-required' : '/profil');
+
+      // Redirect to profile on successful registration
+      if (result.success) {
+        navigate("/profil");
+      }
     } catch (error) {
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
-        setFormError('Wystąpił nieznany błąd podczas rejestracji');
+        setFormError("Wystąpił nieznany błąd podczas rejestracji");
       }
     } finally {
       setLocalLoading(false);
@@ -74,37 +85,37 @@ export const RegisterForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    const newValue = type === 'checkbox' ? checked : value;
+    const newValue = type === "checkbox" ? checked : value;
 
-    // Clear any stale session data when user starts typing
-    clearSessionData();
-    
-    setFormData(prev => ({
+    // Clear session data is not needed with simplified auth
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: newValue
+      [name]: newValue,
     }));
-    
+
     // Check password strength when password field changes
-    if (name === 'password') {
+    if (name === "password") {
       const password = value as string;
       setPasswordStrength({
         length: password.length >= 8,
         uppercase: /[A-Z]/.test(password),
         number: /[0-9]/.test(password),
-        special: /[^A-Za-z0-9]/.test(password)
+        special: /[^A-Za-z0-9]/.test(password),
       });
     }
   };
 
   const isFormLoading = localLoading;
-  
+
   // Calculate overall password strength
-  const passwordStrengthScore = Object.values(passwordStrength).filter(Boolean).length;
+  const passwordStrengthScore =
+    Object.values(passwordStrength).filter(Boolean).length;
   const getPasswordStrengthColor = () => {
-    if (passwordStrengthScore <= 1) return 'bg-red-500';
-    if (passwordStrengthScore === 2) return 'bg-orange-500';
-    if (passwordStrengthScore === 3) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (passwordStrengthScore <= 1) return "bg-red-500";
+    if (passwordStrengthScore === 2) return "bg-orange-500";
+    if (passwordStrengthScore === 3) return "bg-yellow-500";
+    return "bg-green-500";
   };
 
   return (
@@ -124,7 +135,10 @@ export const RegisterForm: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Imię i nazwisko
             </label>
             <div className="relative">
@@ -137,14 +151,21 @@ export const RegisterForm: React.FC = () => {
                 onChange={handleChange}
                 required
                 disabled={isFormLoading}
-                className={`w-full pl-10 pr-4 py-3 border ${formError && !formData.name ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                className={`w-full pl-10 pr-4 py-3 border ${
+                  formError && !formData.name
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                 placeholder="Jan Kowalski"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Adres email
             </label>
             <div className="relative">
@@ -157,27 +178,34 @@ export const RegisterForm: React.FC = () => {
                 onChange={handleChange}
                 required
                 disabled={isFormLoading}
-                className={`w-full pl-10 pr-4 py-3 border ${formError && !formData.email ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                className={`w-full pl-10 pr-4 py-3 border ${
+                  formError && !formData.email
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                 placeholder="twoj@email.com"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Hasło
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
                 minLength={6}
-                disabled={isFormLoading} 
+                disabled={isFormLoading}
                 className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="Minimum 6 znaków"
               />
@@ -187,51 +215,82 @@ export const RegisterForm: React.FC = () => {
                 disabled={isFormLoading}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
-          
+
           {/* Password strength indicator */}
           <div className="mb-6">
             <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
+              <div
                 className={`h-full ${getPasswordStrengthColor()} transition-all duration-300`}
                 style={{ width: `${(passwordStrengthScore / 4) * 100}%` }}
               ></div>
             </div>
             <div className="mt-2 text-xs text-gray-600 space-y-1">
               <div className="flex items-center gap-1">
-                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${passwordStrength.length ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                  {passwordStrength.length ? <Check className="w-3 h-3" /> : null}
+                <div
+                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                    passwordStrength.length
+                      ? "bg-green-100 text-green-600"
+                      : "bg-gray-100 text-gray-400"
+                  }`}
+                >
+                  {passwordStrength.length ? (
+                    <Check className="w-3 h-3" />
+                  ) : null}
                 </div>
                 <span>Minimum 8 znaków</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${passwordStrength.uppercase && passwordStrength.number && passwordStrength.special ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                  {passwordStrength.uppercase && passwordStrength.number && passwordStrength.special ? <Check className="w-3 h-3" /> : null}
+                <div
+                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                    passwordStrength.uppercase &&
+                    passwordStrength.number &&
+                    passwordStrength.special
+                      ? "bg-green-100 text-green-600"
+                      : "bg-gray-100 text-gray-400"
+                  }`}
+                >
+                  {passwordStrength.uppercase &&
+                  passwordStrength.number &&
+                  passwordStrength.special ? (
+                    <Check className="w-3 h-3" />
+                  ) : null}
                 </div>
                 <span>Zawiera dużą literę, cyfrę i znak specjalny</span>
               </div>
             </div>
           </div>
-          
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Potwierdź hasło
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
-                type={showConfirmPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? "text" : "password"}
                 id="confirmPassword"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
                 disabled={isFormLoading}
-                className={`w-full pl-10 pr-12 py-3 border ${formData.password !== formData.confirmPassword && formData.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                className={`w-full pl-10 pr-12 py-3 border ${
+                  formData.password !== formData.confirmPassword &&
+                  formData.confirmPassword
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
                 placeholder="Powtórz hasło"
               />
               <button
@@ -240,7 +299,11 @@ export const RegisterForm: React.FC = () => {
                 disabled={isFormLoading}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showConfirmPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
@@ -256,12 +319,18 @@ export const RegisterForm: React.FC = () => {
               className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <label className="ml-2 text-sm text-gray-600">
-              Akceptuję <span className="text-red-500">*</span>{' '}
-              <Link to="/regulamin" className="text-blue-600 hover:text-blue-700">
+              Akceptuję <span className="text-red-500">*</span>{" "}
+              <Link
+                to="/regulamin"
+                className="text-blue-600 hover:text-blue-700"
+              >
                 regulamin
-              </Link>{' '}
-              i{' '}
-              <Link to="/polityka-prywatnosci" className="text-blue-600 hover:text-blue-700">
+              </Link>{" "}
+              i{" "}
+              <Link
+                to="/polityka-prywatnosci"
+                className="text-blue-600 hover:text-blue-700"
+              >
                 politykę prywatności
               </Link>
             </label>
@@ -283,7 +352,10 @@ export const RegisterForm: React.FC = () => {
 
           <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg mb-6 text-xs text-blue-700">
             <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <p>Po rejestracji wyślemy Ci email z linkiem aktywacyjnym. Sprawdź swoją skrzynkę odbiorczą oraz folder spam.</p>
+            <p>
+              Po rejestracji wyślemy Ci email z linkiem aktywacyjnym. Sprawdź
+              swoją skrzynkę odbiorczą oraz folder spam.
+            </p>
           </div>
 
           <button
@@ -304,8 +376,11 @@ export const RegisterForm: React.FC = () => {
 
         <div className="mt-8 text-center">
           <p className="text-gray-600 mb-2">
-            Masz już konto?{' '}
-            <Link to="/logowanie" className="text-blue-600 hover:text-blue-700 font-medium">
+            Masz już konto?{" "}
+            <Link
+              to="/logowanie"
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
               Zaloguj się
             </Link>
           </p>

@@ -1,20 +1,24 @@
-import React from 'react';
-import { Layout } from '../components/Layout';
-import { UserProfile } from '../components/profile/UserProfile';
-import { ProtectedRoute } from '../components/ProtectedRoute';
-import { refreshTokenIfNeeded } from '../middleware/AuthMiddleware';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { UserProfile } from "../components/profile/UserProfile";
+import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 
 export const ProfilePage: React.FC = () => {
-  // Refresh token when profile page loads
-  React.useEffect(() => {
-    refreshTokenIfNeeded();
-  }, []);
+  const { user, isLoading } = useSimplifiedAuthContext();
 
-  return (
-    <ProtectedRoute>
-      <Layout showFooter={false}>
-        <UserProfile />
-      </Layout>
-    </ProtectedRoute>
-  );
+  console.log("ProfilePage: Using simplified auth system");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/logowanie" replace />;
+  }
+
+  return <UserProfile />;
 };

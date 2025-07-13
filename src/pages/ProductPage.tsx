@@ -5,12 +5,15 @@ import { Layout } from '../components/Layout';
 import { products } from '../data/mockData';
 import { Product } from '../types';
 import { ProductReviews } from '../components/ProductReviews';
-import { useAuth } from '../contexts/AuthContext';
+import { useSimplifiedAuthContext } from '../contexts/SimplifiedAuthContext';
 import { productCodeService } from '../services/productCodeService';
 
 export const ProductPage: React.FC = () => {
   const { id, codeOrAlias } = useParams<{ id?: string; codeOrAlias?: string }>();
-  const { user, toggleWishlist, addReview } = useAuth();
+  const { user } = useSimplifiedAuthContext();
+  // toggleWishlist and addReview are not available in simplified auth, will mock them
+  const toggleWishlist = (_productId: string) => Promise.resolve();
+  const addReview = (_productId: string, _review: any) => Promise.resolve();
   const [product, setProduct] = useState<Product | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [productReviews, setProductReviews] = useState<any[]>([]);
@@ -88,7 +91,8 @@ export const ProductPage: React.FC = () => {
     );
   }
 
-  const isInWishlist = user?.wishlist.includes(product.id) || false;
+  // Wishlist is not available in simplified auth, so always false for now
+  const isInWishlist = false;
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -133,8 +137,8 @@ export const ProductPage: React.FC = () => {
     const newReview = {
       id: Date.now().toString(),
       userId: user!.id,
-      userName: user!.name,
-      userAvatar: user!.avatar,
+      userName: user!.email?.split('@')[0] || 'User',
+      userAvatar: '', // No avatar in simplified auth
       ...reviewData,
       dateCreated: new Date().toISOString(),
       likes: 0,
@@ -253,7 +257,7 @@ export const ProductPage: React.FC = () => {
                     <span className="font-mono font-bold text-blue-800">{product.code}</span>
                   </div>
                   <button
-                    onClick={() => copyToClipboard(product.code)}
+                    onClick={() => copyToClipboard(product.code || '')}
                     className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                     title="Kopiuj kod"
                   >

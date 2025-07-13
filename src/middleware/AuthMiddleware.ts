@@ -11,6 +11,9 @@ const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes in milliseconds
 const SESSION_STORAGE_KEY = "viralist-session";
 const AUTH_ERROR_EVENTS = ["SIGNED_OUT", "USER_DELETED", "TOKEN_REFRESHED"];
 
+// Mutex to prevent concurrent token refresh calls
+let refreshInProgress = false;
+
 export interface AuthSession {
   accessToken: string;
   refreshToken: string;
@@ -57,12 +60,44 @@ export const isSessionValid = async (): Promise<boolean> => {
  * Refresh the authentication token if needed
  */
 export const refreshTokenIfNeeded = async (): Promise<boolean> => {
+  // Prevent concurrent refresh attempts
+  if (refreshInProgress) {
+    console.log("Token refresh already in progress, skipping...");
+    return true;
+  }
+
   try {
+    refreshInProgress = true;
+
+    console.log("Starting token refresh check...");
+
+    // DEBUG: Check if session exists before any Supabase calls
+    const sessionBefore = localStorage.getItem("supabase.auth.token");
+    console.log(
+      "Session in localStorage before getSession():",
+      sessionBefore ? "exists" : "missing"
+    );
+
     const { data: sessionData } = await supabase.auth.getSession();
     console.log(
       "Checking if token needs refresh, session:",
       sessionData.session ? "exists" : "none"
     );
+
+    // Debug: Log session details
+    if (sessionData.session) {
+      console.log("Session details:", {
+        accessToken: sessionData.session.access_token.substring(0, 20) + "...",
+        refreshToken:
+          sessionData.session.refresh_token?.substring(0, 20) + "...",
+        expiresAt: new Date(
+          (sessionData.session.expires_at || 0) * 1000
+        ).toISOString(),
+        userId: sessionData.session.user.id,
+      });
+    } else {
+      console.log("No session found in getSession() call");
+    }
 
     if (!sessionData.session) {
       console.log("No active session to refresh");
@@ -73,6 +108,14 @@ export const refreshTokenIfNeeded = async (): Promise<boolean> => {
       ? sessionData.session.expires_at * 1000
       : 0;
     const now = Date.now();
+
+    console.log("Token refresh check details:", {
+      expiresAt: new Date(expiresAt).toISOString(),
+      now: new Date(now).toISOString(),
+      timeUntilExpiry: Math.round((expiresAt - now) / 60000) + " minutes",
+      threshold: Math.round(TOKEN_REFRESH_THRESHOLD / 60000) + " minutes",
+      needsRefresh: expiresAt - now < TOKEN_REFRESH_THRESHOLD,
+    });
 
     // If token is about to expire, refresh it
     if (expiresAt - now < TOKEN_REFRESH_THRESHOLD) {
@@ -114,6 +157,15 @@ export const refreshTokenIfNeeded = async (): Promise<boolean> => {
       return true;
     }
 
+    console.log("Token is still valid, no refresh needed");
+
+    // DEBUG: Verify session still exists after our check
+    const { data: sessionCheck } = await supabase.auth.getSession();
+    console.log(
+      "Session verification after check:",
+      sessionCheck.session ? "still exists" : "DISAPPEARED!"
+    );
+
     return true;
   } catch (error) {
     // Handle expected scenarios where no session exists
@@ -131,6 +183,9 @@ export const refreshTokenIfNeeded = async (): Promise<boolean> => {
       console.error("Token refresh error:", error);
     }
     return false;
+  } finally {
+    // Always release the mutex
+    refreshInProgress = false;
   }
 };
 
@@ -230,15 +285,15 @@ export const clearSessionData = (): void => {
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
     localStorage.removeItem(`${SESSION_STORAGE_KEY}-persistent`);
 
-    // Clear any other auth-related data
+    // Clear only custom auth-related data, not Supabase storage
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("viralist-") || key.includes("supabase")) {
+      if (key.startsWith("viralist-") && !key.includes("supabase.auth.token")) {
         localStorage.removeItem(key);
       }
     });
 
     Object.keys(sessionStorage).forEach((key) => {
-      if (key.startsWith("viralist-") || key.includes("supabase")) {
+      if (key.startsWith("viralist-") && !key.includes("supabase.auth.token")) {
         sessionStorage.removeItem(key);
       }
     });
@@ -304,17 +359,18 @@ export const initializeAuthListeners = (): (() => void) => {
     }
   });
 
-  // Set up token refresh interval
-  const refreshInterval = setInterval(async () => {
-    const isValid = await isSessionValid();
-    if (isValid) {
-      await refreshTokenIfNeeded();
-    }
-  }, 60000); // Check every minute
+  // Set up token refresh interval - DISABLED to prevent race conditions
+  // Token refresh is now handled by useSessionTimeout hook
+  // const refreshInterval = setInterval(async () => {
+  //   const isValid = await isSessionValid();
+  //   if (isValid) {
+  //     await refreshTokenIfNeeded();
+  //   }
+  // }, 60000); // Check every minute
 
   // Return cleanup function
   return () => {
     data.subscription.unsubscribe();
-    clearInterval(refreshInterval);
+    // clearInterval(refreshInterval);
   };
 };

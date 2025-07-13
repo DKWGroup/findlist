@@ -4,10 +4,10 @@ import { Plus, Filter, Search } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { BlogCard } from '../components/blog/BlogCard';
 import { blogPosts, blogCategories, blogLabels } from '../data/blogData';
-import { useAuth } from '../contexts/AuthContext';
+import { useSimplifiedAuthContext } from '../contexts/SimplifiedAuthContext';
 
 export const BlogPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useSimplifiedAuthContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);

@@ -41,9 +41,6 @@ export const useAuthCore = (): UseAuthReturn => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionCheckInterval, setSessionCheckInterval] = useState<
-    number | null
-  >(null);
 
   // Initialize auth state
   useEffect(() => {
@@ -69,10 +66,14 @@ export const useAuthCore = (): UseAuthReturn => {
 
             if (userError || !userData.user) {
               console.error("Error getting user data:", userError);
+              console.log(
+                "CRITICAL: About to call signOut() due to getUser() error"
+              );
               setIsAuthenticated(false);
               setUser(null);
               // Try to sign out to clear invalid session
               await supabase.auth.signOut();
+              console.log("CRITICAL: signOut() completed");
               setIsLoading(false);
               return;
             }
@@ -279,12 +280,22 @@ export const useAuthCore = (): UseAuthReturn => {
       setIsLoading(false);
     });
 
-    // Set up session check interval
+    // Set up session check interval - DISABLED FOR DEBUGGING
+    console.log("useAuth: SKIPPING session check interval for debug");
+    /*
     const interval = window.setInterval(async () => {
-      if (isAuthenticated) {
+      const { data: currentSession } = await supabase.auth.getSession();
+      if (currentSession.session) {
         const valid = await isSessionValid();
         if (!valid) {
+          console.log(
+            "useAuth: Session invalid, about to call refreshTokenIfNeeded()"
+          );
           const refreshed = await refreshTokenIfNeeded();
+          console.log(
+            "useAuth: refreshTokenIfNeeded() completed, result:",
+            refreshed
+          );
           if (!refreshed) {
             // Session couldn't be refreshed, log out
             setUser(null);
@@ -295,16 +306,16 @@ export const useAuthCore = (): UseAuthReturn => {
         }
       }
     }, 60000); // Check every minute
-
-    setSessionCheckInterval(interval);
+    */ // DISABLED FOR DEBUGGING
+    const interval = null; // DISABLED FOR DEBUGGING
 
     return () => {
       data.subscription.unsubscribe();
-      if (sessionCheckInterval) {
-        clearInterval(sessionCheckInterval);
+      if (interval) {
+        clearInterval(interval);
       }
     };
-  }, []);
+  }, []); // Keep empty dependency array as we're using current session state
 
   // Login function
   const login = async (
@@ -650,7 +661,13 @@ export const useAuthCore = (): UseAuthReturn => {
   // Refresh session
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
-      return await refreshTokenIfNeeded();
+      console.log("useAuth: refreshSession callback called");
+      const result = await refreshTokenIfNeeded();
+      console.log(
+        "useAuth: refreshSession callback completed, result:",
+        result
+      );
+      return result;
     } catch (err) {
       console.error("Session refresh error:", err);
       return false;

@@ -1,5 +1,5 @@
-import { supabase } from '../services/supabaseStorage';
-import { refreshTokenIfNeeded } from '../middleware/AuthMiddleware';
+import { supabase } from "../services/supabaseStorage";
+// import { refreshTokenIfNeeded } from '../middleware/AuthMiddleware'; // DISABLED FOR DEBUGGING
 
 /**
  * HTTP client with authentication and error handling
@@ -8,10 +8,10 @@ class HttpClient {
   private baseUrl: string;
   private defaultHeaders: Record<string, string>;
 
-  constructor(baseUrl: string = '') {
+  constructor(baseUrl: string = "") {
     this.baseUrl = baseUrl;
     this.defaultHeaders = {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     };
   }
 
@@ -21,21 +21,22 @@ class HttpClient {
   private async getAuthHeaders(): Promise<Record<string, string>> {
     try {
       // Check if token needs refresh
-      await refreshTokenIfNeeded();
-      
+      console.log("httpClient: SKIPPING refreshTokenIfNeeded() for debug");
+      // await refreshTokenIfNeeded(); // DISABLED FOR DEBUGGING
+
       // Get current session
       const { data } = await supabase.auth.getSession();
-      
+
       if (!data.session) {
         return this.defaultHeaders;
       }
-      
+
       return {
         ...this.defaultHeaders,
-        'Authorization': `Bearer ${data.session.access_token}`
+        Authorization: `Bearer ${data.session.access_token}`,
       };
     } catch (error) {
-      console.error('Error getting auth headers:', error);
+      console.error("Error getting auth headers:", error);
       return this.defaultHeaders;
     }
   }
@@ -48,21 +49,26 @@ class HttpClient {
       // Handle authentication errors
       if (response.status === 401 || response.status === 403) {
         // Try to refresh token
-        const refreshed = await refreshTokenIfNeeded();
-        
-        if (!refreshed) {
-          // If refresh failed, redirect to login
-          window.location.href = '/logowanie';
-        }
-        
-        throw new Error('Błąd autoryzacji. Zaloguj się ponownie.');
+        console.log(
+          "httpClient: SKIPPING refreshTokenIfNeeded() in error handler for debug"
+        );
+        // const refreshed = await refreshTokenIfNeeded(); // DISABLED FOR DEBUGGING
+
+        // if (!refreshed) {
+        //   // If refresh failed, redirect to login
+        //   window.location.href = '/logowanie';
+        // }
+
+        throw new Error("Błąd autoryzacji. Zaloguj się ponownie.");
       }
-      
+
       // Handle other errors
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Błąd ${response.status}: ${response.statusText}`);
+      throw new Error(
+        errorData.message || `Błąd ${response.status}: ${response.statusText}`
+      );
     }
-    
+
     // Parse JSON response
     try {
       return await response.json();
@@ -75,22 +81,25 @@ class HttpClient {
   /**
    * GET request
    */
-  async get<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+  async get<T>(
+    endpoint: string,
+    params: Record<string, string> = {}
+  ): Promise<T> {
     // Build URL with query parameters
     const url = new URL(this.baseUrl + endpoint);
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
-    
+
     // Get auth headers
     const headers = await this.getAuthHeaders();
-    
+
     // Make request
     const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers
+      method: "GET",
+      headers,
     });
-    
+
     return this.handleResponse<T>(response);
   }
 
@@ -100,14 +109,14 @@ class HttpClient {
   async post<T>(endpoint: string, data: any): Promise<T> {
     // Get auth headers
     const headers = await this.getAuthHeaders();
-    
+
     // Make request
     const response = await fetch(this.baseUrl + endpoint, {
-      method: 'POST',
+      method: "POST",
       headers,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
-    
+
     return this.handleResponse<T>(response);
   }
 
@@ -117,14 +126,14 @@ class HttpClient {
   async put<T>(endpoint: string, data: any): Promise<T> {
     // Get auth headers
     const headers = await this.getAuthHeaders();
-    
+
     // Make request
     const response = await fetch(this.baseUrl + endpoint, {
-      method: 'PUT',
+      method: "PUT",
       headers,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
-    
+
     return this.handleResponse<T>(response);
   }
 
@@ -134,40 +143,47 @@ class HttpClient {
   async delete<T>(endpoint: string): Promise<T> {
     // Get auth headers
     const headers = await this.getAuthHeaders();
-    
+
     // Make request
     const response = await fetch(this.baseUrl + endpoint, {
-      method: 'DELETE',
-      headers
+      method: "DELETE",
+      headers,
     });
-    
+
     return this.handleResponse<T>(response);
   }
 
   /**
    * Upload file with authentication
    */
-  async uploadFile<T>(endpoint: string, file: File, additionalData: Record<string, any> = {}): Promise<T> {
+  async uploadFile<T>(
+    endpoint: string,
+    file: File,
+    additionalData: Record<string, any> = {}
+  ): Promise<T> {
     // Get auth headers (without content-type, let browser set it)
     const authHeaders = await this.getAuthHeaders();
-    const { 'Content-Type': _, ...headers } = authHeaders;
-    
+    const { "Content-Type": _, ...headers } = authHeaders;
+
     // Create form data
     const formData = new FormData();
-    formData.append('file', file);
-    
+    formData.append("file", file);
+
     // Add additional data
     Object.entries(additionalData).forEach(([key, value]) => {
-      formData.append(key, typeof value === 'string' ? value : JSON.stringify(value));
+      formData.append(
+        key,
+        typeof value === "string" ? value : JSON.stringify(value)
+      );
     });
-    
+
     // Make request
     const response = await fetch(this.baseUrl + endpoint, {
-      method: 'POST',
+      method: "POST",
       headers,
-      body: formData
+      body: formData,
     });
-    
+
     return this.handleResponse<T>(response);
   }
 }

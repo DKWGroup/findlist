@@ -1,37 +1,56 @@
-import React, { useState } from 'react';
-import { User, Mail, Calendar, Heart, Star, Settings, Shield, Lock, FileText } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { products } from '../../data/mockData';
-import { SecuritySettings } from './SecuritySettings';
-import { PrivacySettings } from './PrivacySettings';
+import {
+  Calendar,
+  FileText,
+  Heart,
+  Lock,
+  Settings,
+  Star,
+  User,
+} from "lucide-react";
+import React, { useState } from "react";
+import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
+import { products } from "../../data/mockData";
+import { PrivacySettings } from "./PrivacySettings";
+import { SecuritySettings } from "./SecuritySettings";
 
 export const UserProfile: React.FC = () => {
-  const { user, updateProfile, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
+  const { user, isLoading } = useSimplifiedAuthContext();
+  const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || ''
+    name: user?.email?.split("@")[0] || "",
+    email: user?.email || "",
   });
 
   if (!user) return null;
 
-  const wishlistProducts = products.filter(p => user.wishlist.includes(p.id));
-  const userReviews = user.reviews || [];
+  // Mock data for wishlist and reviews - in real app these would come from database
+  const wishlistProducts: any[] = []; // products.filter((p) => user.wishlist?.includes(p.id)) || [];
+  const userReviews: any[] = []; // user.reviews || [];
 
   const handleSave = async () => {
-    await updateProfile(formData);
+    // TODO: Implement profile update functionality
+    console.log("Zapisywanie profilu:", formData);
     setIsEditing(false);
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profil', icon: User },
-    { id: 'wishlist', label: `Wishlist (${wishlistProducts.length})`, icon: Heart },
-    { id: 'reviews', label: `Recenzje (${userReviews.length})`, icon: Star },
-    { id: 'security', label: 'Bezpieczeństwo', icon: Lock },
-    { id: 'privacy', label: 'Prywatność', icon: FileText },
-    { id: 'settings', label: 'Ustawienia', icon: Settings }
+    { id: "profile", label: "Profil", icon: User },
+    {
+      id: "wishlist",
+      label: `Wishlist (${wishlistProducts.length})`,
+      icon: Heart,
+    },
+    { id: "reviews", label: `Recenzje (${userReviews.length})`, icon: Star },
+    { id: "security", label: "Bezpieczeństwo", icon: Lock },
+    { id: "privacy", label: "Prywatność", icon: FileText },
+    { id: "settings", label: "Ustawienia", icon: Settings },
   ];
+
+  function toggleWishlist(_id: string): void {
+    // TODO: Implement wishlist toggle functionality
+    console.log("Toggle wishlist for product:", _id);
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -40,26 +59,21 @@ export const UserProfile: React.FC = () => {
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-12">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
-              {user.avatar ? (
-                <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
-              ) : (
-                <User className="h-12 w-12 text-blue-600" />
-              )}
+              <User className="h-12 w-12 text-blue-600" />
             </div>
             <div className="text-white">
-              <h1 className="text-3xl font-bold mb-2">{user.name}</h1>
+              <h1 className="text-3xl font-bold mb-2">
+                {formData.name || user.email?.split("@")[0] || "Użytkownik"}
+              </h1>
               <p className="text-blue-100 mb-1">{user.email}</p>
               <div className="flex items-center gap-4 text-sm text-blue-100">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  Dołączył {new Date(user.createdAt).toLocaleDateString('pl-PL')}
+                  Dołączył{" "}
+                  {user.created_at
+                    ? new Date(user.created_at).toLocaleDateString("pl-PL")
+                    : "Nieznana data"}
                 </span>
-                {user.role === 'admin' && (
-                  <span className="flex items-center gap-1 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full">
-                    <Shield className="h-3 w-3" />
-                    Administrator
-                  </span>
-                )}
               </div>
             </div>
           </div>
@@ -76,8 +90,8 @@ export const UserProfile: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                     activeTab === tab.id
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   <IconComponent className="h-4 w-4" />
@@ -90,15 +104,17 @@ export const UserProfile: React.FC = () => {
 
         {/* Content */}
         <div className="p-8">
-          {activeTab === 'profile' && (
+          {activeTab === "profile" && (
             <div className="max-w-2xl">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Informacje o profilu</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Informacje o profilu
+                </h2>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
-                  {isEditing ? 'Anuluj' : 'Edytuj'}
+                  {isEditing ? "Anuluj" : "Edytuj"}
                 </button>
               </div>
 
@@ -111,11 +127,20 @@ export const UserProfile: React.FC = () => {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{user.name}</p>
+                    <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
+                      {formData.name ||
+                        user.email?.split("@")[0] ||
+                        "Nie ustawiono"}
+                    </p>
                   )}
                 </div>
 
@@ -127,11 +152,18 @@ export const UserProfile: React.FC = () => {
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{user.email}</p>
+                    <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
+                      {user.email}
+                    </p>
                   )}
                 </div>
 
@@ -142,7 +174,7 @@ export const UserProfile: React.FC = () => {
                       disabled={isLoading}
                       className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-6 py-2 rounded-lg transition-colors"
                     >
-                      {isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}
+                      {isLoading ? "Zapisywanie..." : "Zapisz zmiany"}
                     </button>
                   </div>
                 )}
@@ -150,7 +182,7 @@ export const UserProfile: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'wishlist' && (
+          {activeTab === "wishlist" && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Moja Wishlist ({wishlistProducts.length})
@@ -158,15 +190,21 @@ export const UserProfile: React.FC = () => {
               {wishlistProducts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {wishlistProducts.map((product) => (
-                    <div key={product.id} className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors">
+                    <div
+                      key={product.id}
+                      className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors"
+                    >
                       <img
                         src={product.images[0]}
                         alt={product.title}
                         className="w-full h-48 object-cover rounded-lg mb-4"
                       />
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.title}</h3>
+                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                        {product.title}
+                      </h3>
                       <p className="text-blue-600 font-bold mb-3">
-                        {product.price.discounted?.toFixed(2)} {product.price.currency}
+                        {product.price.discounted?.toFixed(2)}{" "}
+                        {product.price.currency}
                       </p>
                       <div className="flex gap-2">
                         <a
@@ -176,7 +214,9 @@ export const UserProfile: React.FC = () => {
                           Zobacz produkt
                         </a>
                         <button
-                          onClick={() => user && toggleWishlist && toggleWishlist(product.id)}
+                          onClick={() =>
+                            user && toggleWishlist && toggleWishlist(product.id)
+                          }
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Usuń z wishlist"
                         >
@@ -189,8 +229,12 @@ export const UserProfile: React.FC = () => {
               ) : (
                 <div className="text-center py-12">
                   <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Pusta wishlist</h3>
-                  <p className="text-gray-600 mb-4">Dodaj produkty do swojej listy życzeń</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Pusta wishlist
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Dodaj produkty do swojej listy życzeń
+                  </p>
                   <a
                     href="/produkty"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors inline-block"
@@ -202,7 +246,7 @@ export const UserProfile: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'reviews' && (
+          {activeTab === "reviews" && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Moje Recenzje ({userReviews.length})
@@ -210,9 +254,14 @@ export const UserProfile: React.FC = () => {
               {userReviews.length > 0 ? (
                 <div className="space-y-6">
                   {userReviews.map((review) => {
-                    const product = products.find(p => p.id === review.productId);
+                    const product = products.find(
+                      (p) => p.id === review.productId
+                    );
                     return (
-                      <div key={review.id} className="bg-gray-50 rounded-xl p-6">
+                      <div
+                        key={review.id}
+                        className="bg-gray-50 rounded-xl p-6"
+                      >
                         {product && (
                           <div className="flex items-center gap-4 mb-4">
                             <img
@@ -221,7 +270,9 @@ export const UserProfile: React.FC = () => {
                               className="w-16 h-16 object-cover rounded-lg"
                             />
                             <div>
-                              <h4 className="font-semibold text-gray-900">{product.title}</h4>
+                              <h4 className="font-semibold text-gray-900">
+                                {product.title}
+                              </h4>
                               <a
                                 href={`/product/${product.id}`}
                                 className="text-blue-600 hover:text-blue-700 text-sm"
@@ -233,10 +284,15 @@ export const UserProfile: React.FC = () => {
                         )}
                         <div className="flex items-center gap-2 mb-2">
                           {Array.from({ length: review.rating }).map((_, i) => (
-                            <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                            <Star
+                              key={i}
+                              className="h-5 w-5 text-yellow-400 fill-current"
+                            />
                           ))}
                           <span className="text-sm text-gray-600 ml-2">
-                            {new Date(review.dateCreated).toLocaleDateString('pl-PL')}
+                            {new Date(review.dateCreated).toLocaleDateString(
+                              "pl-PL"
+                            )}
                           </span>
                         </div>
                         <p className="text-gray-700">{review.comment}</p>
@@ -247,8 +303,12 @@ export const UserProfile: React.FC = () => {
               ) : (
                 <div className="text-center py-12">
                   <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Brak recenzji</h3>
-                  <p className="text-gray-600 mb-4">Podziel się swoimi opiniami o produktach</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Brak recenzji
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Podziel się swoimi opiniami o produktach
+                  </p>
                   <a
                     href="/produkty"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors inline-block"
@@ -260,40 +320,60 @@ export const UserProfile: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'security' && (
-            <SecuritySettings />
-          )}
+          {activeTab === "security" && <SecuritySettings />}
 
-          {activeTab === 'privacy' && (
-            <PrivacySettings />
-          )}
+          {activeTab === "privacy" && <PrivacySettings />}
 
-          {activeTab === 'settings' && (
+          {activeTab === "settings" && (
             <div className="max-w-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Ustawienia konta</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Ustawienia konta
+              </h2>
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-4">Powiadomienia</h3>
+                  <h3 className="font-semibold text-gray-900 mb-4">
+                    Powiadomienia
+                  </h3>
                   <div className="space-y-4">
                     <label className="flex items-center">
-                      <input type="checkbox" defaultChecked className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                      <span className="ml-3 text-gray-700">Powiadomienia o nowych produktach</span>
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-3 text-gray-700">
+                        Powiadomienia o nowych produktach
+                      </span>
                     </label>
                     <label className="flex items-center">
-                      <input type="checkbox" defaultChecked className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                      <span className="ml-3 text-gray-700">Newsletter z trendami</span>
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-3 text-gray-700">
+                        Newsletter z trendami
+                      </span>
                     </label>
                     <label className="flex items-center">
-                      <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                      <span className="ml-3 text-gray-700">Powiadomienia SMS</span>
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-3 text-gray-700">
+                        Powiadomienia SMS
+                      </span>
                     </label>
                   </div>
                 </div>
 
                 <div className="bg-red-50 rounded-xl p-6 border border-red-200">
-                  <h3 className="font-semibold text-red-900 mb-2">Strefa niebezpieczna</h3>
+                  <h3 className="font-semibold text-red-900 mb-2">
+                    Strefa niebezpieczna
+                  </h3>
                   <p className="text-red-700 text-sm mb-4">
-                    Usunięcie konta jest nieodwracalne i spowoduje utratę wszystkich danych.
+                    Usunięcie konta jest nieodwracalne i spowoduje utratę
+                    wszystkich danych.
                   </p>
                   <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
                     Usuń konto
