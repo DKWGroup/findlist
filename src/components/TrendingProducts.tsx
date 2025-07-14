@@ -1,20 +1,22 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { TrendingUp, ArrowRight, Siren as Fire, Clock } from 'lucide-react';
-import { ProductCard } from './ProductCard';
-import { products } from '../data/mockData';
+import { ArrowRight, Clock, Siren as Fire } from "lucide-react";
+import React from "react";
+import { Link } from "react-router-dom";
+import { useProducts } from "../hooks/useProducts";
+import { ProductCard } from "./ProductCard";
 
 export const TrendingProducts: React.FC = () => {
-  // Get trending products
-  const trendingProducts = products
-    .filter(product => product.isTrending)
-    .sort((a, b) => b.popularity.views - a.popularity.views)
-    .slice(0, 8);
+  // Get trending products from database
+  const { products: trendingProducts, loading: trendingLoading } = useProducts({
+    trending: true,
+    limit: 8,
+    autoFetch: true,
+  });
 
-  // Get newest products
-  const newestProducts = products
-    .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
-    .slice(0, 4);
+  // Get newest products from database
+  const { products: newestProducts, loading: newestLoading } = useProducts({
+    limit: 4,
+    autoFetch: true,
+  });
 
   return (
     <section className="py-20 bg-white">
@@ -27,10 +29,13 @@ export const TrendingProducts: React.FC = () => {
                 <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
                   <Fire className="h-5 w-5 text-red-600" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">Top Trendy Tygodnia</h2>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Top Trendy Tygodnia
+                </h2>
               </div>
               <p className="text-gray-600">
-                Najczęściej oglądane i polecane produkty viralowe z social mediów
+                Najczęściej oglądane i polecane produkty viralowe z social
+                mediów
               </p>
             </div>
             <Link
@@ -43,9 +48,30 @@ export const TrendingProducts: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {trendingProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {trendingLoading ? (
+              // Loading skeleton for trending products
+              Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 animate-pulse"
+                >
+                  <div className="aspect-square bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))
+            ) : trendingProducts.length > 0 ? (
+              trendingProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">
+                  Brak produktów trending w bazie danych
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Mobile CTA */}
@@ -68,7 +94,9 @@ export const TrendingProducts: React.FC = () => {
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                   <Clock className="h-5 w-5 text-blue-600" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">Najnowsze Odkrycia</h2>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Najnowsze Odkrycia
+                </h2>
               </div>
               <p className="text-gray-600">
                 Świeżo dodane produkty, które mogą stać się następnymi hitami
@@ -84,9 +112,30 @@ export const TrendingProducts: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {newestProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {newestLoading ? (
+              // Loading skeleton for newest products
+              Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 animate-pulse"
+                >
+                  <div className="aspect-square bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))
+            ) : newestProducts.length > 0 ? (
+              newestProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">
+                  Brak nowych produktów w bazie danych
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Mobile CTA */}
@@ -109,21 +158,30 @@ export const TrendingProducts: React.FC = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">🔍 Weryfikujemy każdy produkt</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  🔍 Weryfikujemy każdy produkt
+                </h4>
                 <p className="text-gray-600 text-sm">
-                  Sprawdzamy jakość, opinie i wiarygodność sprzedawców przed dodaniem do katalogu.
+                  Sprawdzamy jakość, opinie i wiarygodność sprzedawców przed
+                  dodaniem do katalogu.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">📱 Śledzimy social media 24/7</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  📱 Śledzimy social media 24/7
+                </h4>
                 <p className="text-gray-600 text-sm">
-                  Nasze algorytmy monitorują TikToka i Instagrama, aby znaleźć najnowsze trendy.
+                  Nasze algorytmy monitorują TikToka i Instagrama, aby znaleźć
+                  najnowsze trendy.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">💰 Najlepsze ceny i oferty</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  💰 Najlepsze ceny i oferty
+                </h4>
                 <p className="text-gray-600 text-sm">
-                  Porównujemy ceny z różnych sklepów i pokazujemy najkorzystniejsze opcje zakupu.
+                  Porównujemy ceny z różnych sklepów i pokazujemy
+                  najkorzystniejsze opcje zakupu.
                 </p>
               </div>
             </div>
