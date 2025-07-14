@@ -1,10 +1,14 @@
-import { AlertCircle, Check, Eye, EyeOff, Lock, Shield } from "lucide-react";
-import React, { useState } from "react";
+import { AlertCircle, Check, Eye, EyeOff, Lock, Mail, Shield } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
+import { supabase } from "../../services/supabaseStorage";
 
 export const SecuritySettings: React.FC = () => {
   const { user } = useSimplifiedAuthContext();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  const [emailChangeRequested, setEmailChangeRequested] = useState(false);
+  const [emailVerificationSent, setEmailVerificationSent] = useState(false);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -12,12 +16,45 @@ export const SecuritySettings: React.FC = () => {
     confirmPassword: "",
   });
 
+  const [emailData, setEmailData] = useState({
+    newEmail: "",
+    password: "",
+  });
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showEmailPassword, setShowEmailPassword] = useState(false);
 
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const [emailFormError, setEmailFormError] = useState("");
+  const [emailFormSuccess, setEmailFormSuccess] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      checkEmailVerificationStatus();
+    }
+  }, [user]);
+
+  const checkEmailVerificationStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("email_verification_token, email_verification_sent_at")
+        .eq("id", user?.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.email_verification_token && data?.email_verification_sent_at) {
+        setEmailChangeRequested(true);
+        setEmailVerificationSent(true);
+      }
+    } catch (error) {
+      console.error("Error checking email verification status:", error);
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +85,79 @@ export const SecuritySettings: React.FC = () => {
       setFormError("Wystąpił błąd podczas zmiany hasła");
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailFormError("");
+    setEmailFormSuccess("");
+    setIsChangingEmail(true);
+
+    try {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailData.newEmail)) {
+        setEmailFormError("Podany adres email jest nieprawidłowy");
+        setIsChangingEmail(false);
+        return;
+      }
+
+      // Verify current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || "",
+        password: emailData.password,
+      });
+
+      if (signInError) {
+        setEmailFormError("Nieprawidłowe hasło");
+        setIsChangingEmail(false);
+        return;
+      }
+
+      // Update profile with new email (this will trigger the verification process)
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          email: emailData.newEmail,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", user?.id);
+
+      if (updateError) throw updateError;
+
+      setEmailFormSuccess("Link weryfikacyjny został wysłany na nowy adres email");
+      setEmailChangeRequested(true);
+      setEmailVerificationSent(true);
+      setEmailData({
+        newEmail: "",
+        password: "",
+      });
+    } catch (error: any) {
+      setEmailFormError(error.message || "Wystąpił błąd podczas zmiany adresu email");
+    } finally {
+      setIsChangingEmail(false);
+    }
+  };
+
+  const cancelEmailChange = async () => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          email_verification_token: null,
+          email_verification_sent_at: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", user?.id);
+
+      if (error) throw error;
+
+      setEmailChangeRequested(false);
+      setEmailVerificationSent(false);
+      setEmailFormSuccess("Zmiana adresu email została anulowana");
+    } catch (error: any) {
+      setEmailFormError(error.message || "Wystąpił błąd podczas anulowania zmiany adresu email");
     }
   };
 
@@ -191,6 +301,114 @@ export const SecuritySettings: React.FC = () => {
             {isChangingPassword ? "Zmienianie..." : "Zmień hasło"}
           </button>
         </form>
+      </div>
+
+      {/* Email Change Section */}
+      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Mail className="h-6 w-6 text-blue-600" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Zmiana adresu email
+            </h3>
+            <p className="text-sm text-gray-600">
+              Aktualizacja adresu email wymaga weryfikacji
+            </p>
+          </div>
+        </div>
+
+        {emailChangeRequested ? (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-yellow-800 mb-1">Weryfikacja w toku</h4>
+                <p className="text-sm text-yellow-700 mb-2">
+                  Wysłaliśmy link weryfikacyjny na Twój nowy adres email. Kliknij w link, aby potwierdzić zmianę.
+                </p>
+                <button
+                  onClick={cancelEmailChange}
+                  className="text-sm text-yellow-800 underline hover:text-yellow-900"
+                >
+                  Anuluj zmianę adresu email
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleEmailChange} className="space-y-4">
+            {emailFormError && (
+              <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-sm">{emailFormError}</span>
+              </div>
+            )}
+
+            {emailFormSuccess && (
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
+                <Check className="h-4 w-4" />
+                <span className="text-sm">{emailFormSuccess}</span>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nowy adres email
+              </label>
+              <input
+                type="email"
+                value={emailData.newEmail}
+                onChange={(e) =>
+                  setEmailData({
+                    ...emailData,
+                    newEmail: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Potwierdź hasło
+              </label>
+              <div className="relative">
+                <input
+                  type={showEmailPassword ? "text" : "password"}
+                  value={emailData.password}
+                  onChange={(e) =>
+                    setEmailData({
+                      ...emailData,
+                      password: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEmailPassword(!showEmailPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showEmailPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isChangingEmail}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+            >
+              {isChangingEmail ? "Zmienianie..." : "Zmień adres email"}
+            </button>
+          </form>
+        )}
       </div>
 
       {/* Account Security */}

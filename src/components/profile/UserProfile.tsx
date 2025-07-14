@@ -3,24 +3,98 @@ import {
   FileText,
   Heart,
   Lock,
+  Mail,
   Settings,
   Star,
   User,
+  Check,
+  AlertCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 import { products } from "../../data/mockData";
 import { PrivacySettings } from "./PrivacySettings";
 import { SecuritySettings } from "./SecuritySettings";
+import { supabase } from "../../services/supabaseStorage";
 
 export const UserProfile: React.FC = () => {
   const { user, isLoading } = useSimplifiedAuthContext();
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [formSuccess, setFormSuccess] = useState("");
   const [formData, setFormData] = useState({
     name: user?.email?.split("@")[0] || "",
     email: user?.email || "",
+    notification_preferences: {
+      email_notifications: true,
+      product_updates: true,
+      marketing_emails: false,
+      security_alerts: true
+    },
+    privacy_settings: {
+      public_profile: false,
+      show_wishlist: false,
+      show_reviews: true,
+      allow_recommendations: true
+    },
+    theme: "light",
+    language: "pl"
   });
+
+  // Load user settings when component mounts
+  useEffect(() => {
+    if (user) {
+      loadUserSettings();
+    }
+  }, [user]);
+
+  const loadUserSettings = async () => {
+    try {
+      // Get profile data
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user?.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Get user settings
+      const { data: settings, error: settingsError } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("id", user?.id)
+        .single();
+
+      if (settingsError && settingsError.code !== 'PGRST116') throw settingsError;
+
+      setFormData({
+        name: profile?.full_name || user?.email?.split("@")[0] || "",
+        email: user?.email || "",
+        notification_preferences: settings?.notification_preferences || {
+          email_notifications: true,
+          product_updates: true,
+          marketing_emails: false,
+          security_alerts: true
+        },
+        privacy_settings: settings?.privacy_settings || {
+          public_profile: false,
+          show_wishlist: false,
+          show_reviews: true,
+          allow_recommendations: true
+        },
+        theme: settings?.theme || "light",
+        language: settings?.language || "pl"
+      });
+    } catch (error) {
+      console.error("Error loading user settings:", error);
+      setFormError("Nie udało się załadować ustawień użytkownika");
+    }
+  };
 
   if (!user) return null;
 
@@ -28,10 +102,47 @@ export const UserProfile: React.FC = () => {
   const wishlistProducts: any[] = []; // products.filter((p) => user.wishlist?.includes(p.id)) || [];
   const userReviews: any[] = []; // user.reviews || [];
 
-  const handleSave = async () => {
-    // TODO: Implement profile update functionality
-    console.log("Zapisywanie profilu:", formData);
-    setIsEditing(false);
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    setFormError("");
+    setFormSuccess("");
+    setIsSaving(true);
+    
+    try {
+      // Update profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: formData.name,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", user?.id);
+
+      if (profileError) throw profileError;
+
+      // Update user settings using RPC function
+      const { error: settingsError } = await supabase.rpc(
+        "update_user_settings",
+        {
+          user_uuid: user?.id,
+          new_notification_preferences: formData.notification_preferences,
+          new_privacy_settings: formData.privacy_settings,
+          new_theme: formData.theme,
+          new_language: formData.language
+        }
+      );
+
+      if (settingsError) throw settingsError;
+
+      setFormSuccess("Profil został zaktualizowany pomyślnie");
+      setIsEditing(false);
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      setFormError(error.message || "Wystąpił błąd podczas aktualizacji profilu");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const tabs = [
@@ -106,79 +217,307 @@ export const UserProfile: React.FC = () => {
         <div className="p-8">
           {activeTab === "profile" && (
             <div className="max-w-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Informacje o profilu
-                </h2>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  {isEditing ? "Anuluj" : "Edytuj"}
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Imię i nazwisko
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  ) : (
-                    <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
-                      {formData.name ||
-                        user.email?.split("@")[0] ||
-                        "Nie ustawiono"}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Adres email
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  ) : (
-                    <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
-                      {user.email}
-                    </p>
-                  )}
-                </div>
-
-                {isEditing && (
-                  <div className="flex gap-4">
+              <form onSubmit={handleSave}>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Informacje o profilu
+                  </h2>
+                  {!isEditing ? (
                     <button
-                      onClick={handleSave}
-                      disabled={isLoading}
-                      className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-6 py-2 rounded-lg transition-colors"
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                     >
-                      {isLoading ? "Zapisywanie..." : "Zapisz zmiany"}
+                      Edytuj
                     </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(false)}
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      >
+                        Anuluj
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Success/Error messages */}
+                {formSuccess && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2 text-green-800">
+                    <Check className="h-5 w-5 mt-0.5" />
+                    <div>{formSuccess}</div>
                   </div>
                 )}
-              </div>
+                
+                {formError && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-800">
+                    <AlertCircle className="h-5 w-5 mt-0.5" />
+                    <div>{formError}</div>
+                  </div>
+                )}
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Imię i nazwisko
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
+                        {formData.name ||
+                          user.email?.split("@")[0] ||
+                          "Nie ustawiono"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Adres email
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-gray-400" />
+                      <p className="text-gray-900">{user.email}</p>
+                      <div className="flex items-center gap-1 text-green-600">
+                        <Check className="h-4 w-4" />
+                        <span className="text-sm">Zweryfikowany</span>
+                      </div>
+                    </div>
+                    {isEditing && (
+                      <div className="mt-2 p-3 bg-yellow-50 rounded-lg text-sm text-yellow-800">
+                        <p>Zmiana adresu email wymaga weryfikacji i jest dostępna w zakładce Bezpieczeństwo.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Notification Preferences */}
+                  {isEditing && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Preferencje powiadomień</h3>
+                      <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.notification_preferences.email_notifications}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                notification_preferences: {
+                                  ...prev.notification_preferences,
+                                  email_notifications: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Powiadomienia email</span>
+                        </label>
+                        
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.notification_preferences.product_updates}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                notification_preferences: {
+                                  ...prev.notification_preferences,
+                                  product_updates: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Aktualizacje produktów</span>
+                        </label>
+                        
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.notification_preferences.marketing_emails}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                notification_preferences: {
+                                  ...prev.notification_preferences,
+                                  marketing_emails: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Wiadomości marketingowe</span>
+                        </label>
+                        
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.notification_preferences.security_alerts}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                notification_preferences: {
+                                  ...prev.notification_preferences,
+                                  security_alerts: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Alerty bezpieczeństwa</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Privacy Settings */}
+                  {isEditing && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Ustawienia prywatności</h3>
+                      <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.privacy_settings.public_profile}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                privacy_settings: {
+                                  ...prev.privacy_settings,
+                                  public_profile: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Profil publiczny</span>
+                        </label>
+                        
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.privacy_settings.show_wishlist}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                privacy_settings: {
+                                  ...prev.privacy_settings,
+                                  show_wishlist: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Pokazuj moją wishlistę innym</span>
+                        </label>
+                        
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.privacy_settings.show_reviews}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                privacy_settings: {
+                                  ...prev.privacy_settings,
+                                  show_reviews: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Pokazuj moje recenzje</span>
+                        </label>
+                        
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={formData.privacy_settings.allow_recommendations}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                privacy_settings: {
+                                  ...prev.privacy_settings,
+                                  allow_recommendations: e.target.checked,
+                                },
+                              }))
+                            }
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-gray-700">Zezwalaj na personalizowane rekomendacje</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Appearance Settings */}
+                  {isEditing && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Wygląd</h3>
+                      <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Motyw
+                          </label>
+                          <select
+                            value={formData.theme}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                theme: e.target.value,
+                              }))
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="light">Jasny</option>
+                            <option value="dark">Ciemny</option>
+                            <option value="system">Systemowy</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Język
+                          </label>
+                          <select
+                            value={formData.language}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                language: e.target.value,
+                              }))
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="pl">Polski</option>
+                            <option value="en">English</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </form>
             </div>
           )}
 
