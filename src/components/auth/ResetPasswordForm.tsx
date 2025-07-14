@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 
 export const ResetPasswordForm: React.FC = () => {
-  const { resetPassword, updatePassword, validatePassword, error } = useSimplifiedAuthContext();
+  const { resetPassword, updatePassword, validatePassword, error: authError } = useSimplifiedAuthContext();
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,6 +24,7 @@ export const ResetPasswordForm: React.FC = () => {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
     uppercase: false,
@@ -33,9 +34,26 @@ export const ResetPasswordForm: React.FC = () => {
 
   // Check if we have a hash in the URL (for password reset flow)
   React.useEffect(() => {
-    const hash = window.location.hash;
+    const url = new URL(window.location.href);
+    const hash = url.hash;
+    const errorParam = url.searchParams.get('error');
+    const errorCode = url.searchParams.get('error_code');
+    const errorDescription = url.searchParams.get('error_description');
     
-    if (hash && hash.includes("type=recovery")) {
+    // Check for error parameters
+    if (errorParam && errorCode) {
+      let errorMessage = "Link resetowania hasła jest nieprawidłowy.";
+      
+      if (errorCode === 'otp_expired') {
+        errorMessage = "Link resetowania hasła wygasł. Proszę wygenerować nowy link.";
+      } else if (errorDescription) {
+        errorMessage = decodeURIComponent(errorDescription).replace(/\+/g, ' ');
+      }
+      
+      setLinkError(errorMessage);
+      setShowResetForm(true);
+      setShowPasswordForm(false);
+    } else if (hash && hash.includes("type=recovery")) {
       setShowResetForm(false);
       setShowPasswordForm(true);
     }
@@ -207,15 +225,22 @@ export const ResetPasswordForm: React.FC = () => {
           )}
         </div>
 
-        {(error || formError) && (
+        {(authError || formError || linkError) && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-            <div>{error || formError}</div>
+            <div>{linkError || authError || formError}</div>
           </div>
         )}
         
         {showResetForm && (
           <form onSubmit={handleResetSubmit} className="space-y-6">
+            {linkError && (
+              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
+                <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <div>Link resetowania hasła wygasł lub jest nieprawidłowy. Proszę wygenerować nowy link.</div>
+              </div>
+            )}
+            
             <div>
               <label
                 htmlFor="email"
