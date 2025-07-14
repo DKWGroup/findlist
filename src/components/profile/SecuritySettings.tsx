@@ -193,41 +193,6 @@ export const SecuritySettings: React.FC = () => {
         </form>
       </div>
 
-      {/* Active Sessions */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Shield className="h-6 w-6 text-green-600" />
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Aktywne sesje
-            </h3>
-            <p className="text-sm text-gray-600">
-              Zarządzaj urządzeniami zalogowanymi na Twoje konto
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <div>
-                <p className="font-medium text-green-900">Obecna sesja</p>
-                <p className="text-sm text-green-700">
-                  {navigator.userAgent.includes("Chrome")
-                    ? "Chrome"
-                    : navigator.userAgent.includes("Firefox")
-                    ? "Firefox"
-                    : "Przeglądarka"}{" "}
-                  • Teraz
-                </p>
-              </div>
-            </div>
-            <span className="text-sm text-green-600 font-medium">Aktywna</span>
-          </div>
-        </div>
-      </div>
-
       {/* Account Security */}
       <div className="bg-white border border-gray-200 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
@@ -250,18 +215,6 @@ export const SecuritySettings: React.FC = () => {
               </p>
               <p className="text-sm text-gray-600">
                 Dodatkowa warstwa bezpieczeństwa
-              </p>
-            </div>
-            <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
-              Wkrótce
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">Historia logowań</p>
-              <p className="text-sm text-gray-600">
-                Zobacz ostatnią aktywność na koncie
               </p>
             </div>
             <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">

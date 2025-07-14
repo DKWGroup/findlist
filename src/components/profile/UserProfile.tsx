@@ -355,15 +355,6 @@ export const UserProfile: React.FC = () => {
                         Newsletter z trendami
                       </span>
                     </label>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-3 text-gray-700">
-                        Powiadomienia SMS
-                      </span>
-                    </label>
                   </div>
                 </div>
 

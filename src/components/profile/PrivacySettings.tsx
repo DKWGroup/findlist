@@ -43,96 +43,9 @@ export const PrivacySettings: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Prywatność</h2>
       </div>
 
-      {/* Privacy Settings */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Lock className="h-6 w-6 text-blue-600" />
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Ustawienia prywatności
-            </h3>
-            <p className="text-sm text-gray-600">
-              Kontroluj widoczność swojego profilu i danych
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">Profil publiczny</p>
-              <p className="text-sm text-gray-600">
-                Pozwól innym użytkownikom znaleźć Twój profil
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">Pokazuj recenzje</p>
-              <p className="text-sm text-gray-600">
-                Wyświetlaj swoje recenzje publicznie
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">
-                Udostępniaj listę życzeń
-              </p>
-              <p className="text-sm text-gray-600">
-                Pozwól innym zobaczyć Twoją wishlistę
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-
       {/* Data Management */}
       <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Download className="h-6 w-6 text-green-600" />
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Zarządzanie danymi
-            </h3>
-            <p className="text-sm text-gray-600">
-              Eksportuj lub usuń swoje dane
-            </p>
-          </div>
-        </div>
-
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">Eksportuj dane</p>
-              <p className="text-sm text-gray-600">
-                Pobierz kopię wszystkich swoich danych
-              </p>
-            </div>
-            <button
-              onClick={handleDataExport}
-              disabled={isExporting}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              {isExporting ? "Eksportowanie..." : "Eksportuj"}
-            </button>
-          </div>
-
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
