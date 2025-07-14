@@ -17,12 +17,8 @@ export const AdminPage: React.FC = () => {
     debugSession();
     
     const checkAdminStatus = async () => {
-        // Refresh product list from database
-        const { products } = await productService.getProducts({
-          limit: 20,
-          page: 1
-        });
-        setProductList(products);
+        // Check admin status - product list is managed by AdminDashboard
+        console.log('Admin page loaded');
     };
     
     checkAdminStatus();

@@ -214,8 +214,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const saveProductToDatabase = async (productData: Partial<Product>) => {
     try {
-      setIsLoading(true);
-      
       // Prepare data for API
       const apiData = {
         title: productData.title || '',
@@ -249,8 +247,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     } catch (error) {
       console.error('Error saving product:', error);
       alert(`Wystąpił błąd podczas zapisywania produktu: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);
-    } finally {
-      setIsLoading(false);
     }
   };
 
