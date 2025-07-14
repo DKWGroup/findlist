@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 
 export const LoginForm: React.FC = () => {
-  const { login, isLoading: authLoading } = useSimplifiedAuthContext();
+  const { login, error, isLoading: authLoading } = useSimplifiedAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [localLoading, setLocalLoading] = useState<boolean>(false);
@@ -49,16 +49,11 @@ export const LoginForm: React.FC = () => {
         setTimeout(() => {
           navigate(from, { replace: true });
         }, 100);
-      } else {
-        setFormError("Wystąpił nieznany błąd podczas logowania");
       }
+      // Note: If login fails, the error will be displayed from the auth context
     } catch (error) {
       console.error("Login error:", error);
-      if (error instanceof Error) {
-        setFormError(error.message);
-      } else {
-        setFormError("Wystąpił nieznany błąd podczas logowania");
-      }
+      // Additional error handling can be done here if needed
     } finally {
       setLocalLoading(false);
     }
@@ -86,10 +81,10 @@ export const LoginForm: React.FC = () => {
           <p className="text-gray-600">Witaj ponownie w VIRALIST</p>
         </div>
 
-        {formError && (
+        {(error || formError) && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-            <div>{formError}</div>
+            <div>{error || formError}</div>
           </div>
         )}
 

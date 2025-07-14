@@ -32,13 +32,36 @@ export const useSimplifiedAuth = () => {
           password: credentials.password,
         });
 
-        if (error) throw error;
-        if (!data.user) throw new Error("No user returned");
+        if (error) {
+          // Map Supabase errors to user-friendly Polish messages
+          let errorMessage = error.message;
+
+          if (error.message.includes("Invalid login credentials")) {
+            errorMessage = "Nieprawidłowy email lub hasło";
+          } else if (error.message.includes("Email not confirmed")) {
+            errorMessage =
+              "Adres email nie został potwierdzony. Sprawdź swoją skrzynkę pocztową.";
+          } else if (error.message.includes("Too many requests")) {
+            errorMessage =
+              "Zbyt wiele prób logowania. Spróbuj ponownie za chwilę.";
+          } else if (error.message.includes("User not found")) {
+            errorMessage = "Nie znaleziono użytkownika o podanym adresie email";
+          } else if (error.message.includes("Invalid email")) {
+            errorMessage = "Nieprawidłowy format adresu email";
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        if (!data.user) throw new Error("Wystąpił błąd podczas logowania");
 
         console.log("SimplifiedAuth: Login successful");
         return { success: true };
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Login failed";
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Wystąpił błąd podczas logowania";
         console.error("SimplifiedAuth: Login error:", message);
         setError(message);
         return { success: false };
@@ -75,12 +98,27 @@ export const useSimplifiedAuth = () => {
           throw new Error("Hasła nie są identyczne");
         }
 
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email: credentials.email.trim().toLowerCase(),
           password: credentials.password,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Map Supabase errors to user-friendly Polish messages
+          let errorMessage = error.message;
+
+          if (error.message.includes("User already registered")) {
+            errorMessage = "Użytkownik z tym adresem email już istnieje";
+          } else if (error.message.includes("Password should be at least")) {
+            errorMessage = "Hasło musi mieć co najmniej 6 znaków";
+          } else if (error.message.includes("Invalid email")) {
+            errorMessage = "Nieprawidłowy format adresu email";
+          } else if (error.message.includes("Signup is disabled")) {
+            errorMessage = "Rejestracja jest obecnie niedostępna";
+          }
+
+          throw new Error(errorMessage);
+        }
 
         console.log("SimplifiedAuth: Registration successful");
         return { success: true };
@@ -118,7 +156,21 @@ export const useSimplifiedAuth = () => {
           redirectTo: `${window.location.origin}/update-password`,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Map Supabase errors to user-friendly Polish messages
+          let errorMessage = error.message;
+
+          if (error.message.includes("User not found")) {
+            errorMessage = "Nie znaleziono użytkownika o podanym adresie email";
+          } else if (error.message.includes("Invalid email")) {
+            errorMessage = "Nieprawidłowy format adresu email";
+          } else if (error.message.includes("Too many requests")) {
+            errorMessage =
+              "Zbyt wiele próśb resetowania hasła. Spróbuj ponownie za chwilę.";
+          }
+
+          throw new Error(errorMessage);
+        }
 
         console.log("SimplifiedAuth: Password reset email sent");
         return { success: true };
@@ -146,7 +198,18 @@ export const useSimplifiedAuth = () => {
           password: newPassword,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Map Supabase errors to user-friendly Polish messages
+          let errorMessage = error.message;
+
+          if (error.message.includes("Password should be at least")) {
+            errorMessage = "Hasło musi mieć co najmniej 6 znaków";
+          } else if (error.message.includes("Same password")) {
+            errorMessage = "Nowe hasło musi różnić się od poprzedniego";
+          }
+
+          throw new Error(errorMessage);
+        }
 
         console.log("SimplifiedAuth: Password updated successfully");
         return { success: true };
