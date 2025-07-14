@@ -123,12 +123,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const handleCategoryChange = (categoryId: string) => {
     setFormData(prev => ({ 
       ...prev, 
-      category: categoryId,
+      category: categoryId, // This is the category code like "MO"
       productType: '' // Reset typu przy zmianie kategorii
     }));
     
     if (categoryId) {
-      const types = productCodeService.getTypesForCategory(categoryId);
+      // Find the category ID (UUID) that corresponds to this code
+      const categoryObj = availableCategories.find(cat => cat.code === categoryId);
+      const categoryUuid = categoryObj?.id;
+      
+      const types = categoryUuid ? productCodeService.getTypesForCategory(categoryUuid) : [];
       setAvailableTypes(types);
     } else {
       setAvailableTypes([]);
@@ -143,9 +147,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
     setIsGeneratingCode(true);
     try {
+      // Find the category ID (UUID) that corresponds to this code
+      const categoryObj = availableCategories.find(cat => cat.code === formData.category);
+      if (!categoryObj) {
+        throw new Error(`Nie znaleziono kategorii o kodzie ${formData.category}`);
+      }
+      
+      // Find the type ID that corresponds to this code
+      const typeObj = formData.productType ? 
+        availableTypes.find(type => type.code === formData.productType) : 
+        undefined;
+      
       const code = await productCodeService.generateCode(
-        formData.category,
-        formData.productType || undefined
+        categoryObj.id,
+        typeObj?.id
       );
       
       const alias = productCodeService.generateUrlAlias(code, formData.title);
