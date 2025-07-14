@@ -19,6 +19,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SearchPage } from "./pages/SearchPage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
+import { TestProductsPage } from "./pages/TestProductsPage";
 import { UpdatePasswordPage } from "./pages/UpdatePasswordPage";
 import { VerificationRequiredPage } from "./pages/VerificationRequiredPage";
 
@@ -41,6 +42,7 @@ function App() {
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/blog-editor" element={<BlogEditorPage />} />
               <Route path="/szukaj" element={<SearchPage />} />
+              <Route path="/test-products" element={<TestProductsPage />} />
               <Route path="/logowanie" element={<LoginPage />} />
               <Route path="/rejestracja" element={<RegisterPage />} />
               <Route path="/reset-hasla" element={<ResetPasswordPage />} />

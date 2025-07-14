@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FilterBar } from "../components/FilterBar";
 import { Layout } from "../components/Layout";
 import { ProductGrid } from "../components/ProductGrid";
 import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
 import { MetaTags } from "../components/SEO/MetaTags";
-import { products } from "../data/mockData";
+import { useProducts } from "../hooks/useProducts";
 
 export const ProductsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,7 +14,22 @@ export const ProductsPage: React.FC = () => {
     searchParams.get("trending") === "true"
   );
 
+  // Use the products hook
+  const { products, loading, error, loadProducts } = useProducts({
+    trending: showTrendingOnly || undefined,
+    autoFetch: true,
+  });
+
+  // Reload products when filters change
+  useEffect(() => {
+    loadProducts({
+      trending: showTrendingOnly || undefined,
+    });
+  }, [showTrendingOnly, loadProducts]);
+
   const filteredAndSortedProducts = useMemo(() => {
+    if (!products.length) return [];
+
     let filtered = [...products];
 
     // Filter by trending
@@ -47,7 +62,20 @@ export const ProductsPage: React.FC = () => {
     });
 
     return filtered;
-  }, [sortBy, showTrendingOnly]);
+  }, [products, sortBy, showTrendingOnly]);
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="text-center text-red-600 py-8">
+          <h2 className="text-xl font-semibold mb-2">
+            Błąd ładowania produktów
+          </h2>
+          <p>{error}</p>
+        </div>
+      </Layout>
+    );
+  }
 
   const handleTrendingToggle = () => {
     const newValue = !showTrendingOnly;
@@ -123,7 +151,17 @@ export const ProductsPage: React.FC = () => {
           </div>
 
           {/* Products Grid */}
-          <ProductGrid products={filteredAndSortedProducts} />
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">Ładowanie produktów...</p>
+            </div>
+          ) : (
+            <ProductGrid
+              products={filteredAndSortedProducts}
+              loading={loading}
+            />
+          )}
 
           {/* SEO Content */}
           <div className="mt-16 bg-gray-50 rounded-2xl p-8">
