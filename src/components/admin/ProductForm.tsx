@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Upload, Link as LinkIcon, Hash, Copy } from 'lucide-react';
 import { Product } from '../../types';
 import { categories } from '../../data/mockData';
+import { productService } from '../../services/productService';
 import { productCodeService } from '../../services/productCodeService';
 import { CategoryMapping, TypeMapping } from '../../types/productCode';
 import { ImageUploadZone } from '../upload/ImageUploadZone';
@@ -178,6 +179,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
     // Validation
     if (!formData.title?.trim() || !formData.description?.trim() || !formData.category) {
       alert('Wypełnij wszystkie wymagane pola');
@@ -206,7 +208,50 @@ export const ProductForm: React.FC<ProductFormProps> = ({
      }
     };
 
-    onSave(cleanedData);
+    // Save to database
+    saveProductToDatabase(cleanedData);
+  };
+
+  const saveProductToDatabase = async (productData: Partial<Product>) => {
+    try {
+      setIsLoading(true);
+      
+      // Prepare data for API
+      const apiData = {
+        title: productData.title || '',
+        description: productData.description || '',
+        categoryId: productData.category || '',
+        productType: productData.productType,
+        priceOriginal: productData.price?.original,
+        priceDiscounted: productData.price?.discounted,
+        priceCurrency: productData.price?.currency || 'PLN',
+        isVerified: productData.isVerified,
+        isTrending: productData.isTrending,
+        code: productData.code,
+        urlAlias: productData.urlAlias,
+        tags: productData.tags || [],
+        images: productData.images || [],
+        affiliateLinks: productData.affiliateLinks || {},
+        socialLinks: productData.socialLinks || {}
+      };
+      
+      if (product) {
+        // Update existing product
+        await productService.updateProduct(product.id, apiData);
+      } else {
+        // Create new product
+        await productService.createProduct(apiData);
+      }
+      
+      // Call the onSave callback to update UI
+      onSave(productData);
+      
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert(`Wystąpił błąd podczas zapisywania produktu: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const addTag = () => {

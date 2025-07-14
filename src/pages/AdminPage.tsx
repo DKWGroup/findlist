@@ -4,6 +4,7 @@ import { Layout } from "../components/Layout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { SupabaseSetup } from "../components/upload/SupabaseSetup";
 import { debugSession } from "../services/supabaseStorage"; 
+import { productService } from "../services/productService";
 import { isUserAdmin } from "../utils/adminUtils";
 
 // Add debug logging
@@ -15,13 +16,12 @@ export const AdminPage: React.FC = () => {
   React.useEffect(() => {
     debugSession();
     
-    // Check if user is admin
-    const checkAdminStatus = async () => {
-      const adminStatus = await isUserAdmin();
-      setIsAdmin(adminStatus);
-      
-      if (!adminStatus) {
-        console.warn("Non-admin user attempting to access admin page");
+        // Refresh product list from database
+        const { products } = await productService.getProducts({
+          limit: 20,
+          page: 1
+        });
+        setProductList(products);
       }
     };
     
