@@ -2,9 +2,6 @@ import {
   AlertCircle,
   Calendar,
   Check,
-  Eye,
-  EyeOff,
-  FileText,
   Heart,
   Lock,
   Mail,
@@ -19,7 +16,7 @@ import { supabase } from "../../services/supabaseStorage";
 import { SecuritySettings } from "./SecuritySettings";
 
 export const UserProfile: React.FC = () => {
-  const { user, isLoading } = useSimplifiedAuthContext();
+  const { user } = useSimplifiedAuthContext();
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -147,6 +144,90 @@ export const UserProfile: React.FC = () => {
     }
   };
 
+  const handleNotificationChange = async (key: string, value: boolean) => {
+    setFormError("");
+    setFormSuccess("");
+    setIsSaving(true);
+
+    try {
+      const updatedNotificationPreferences = {
+        ...formData.notification_preferences,
+        [key]: value,
+      };
+
+      // Update in database
+      const { error } = await supabase
+        .from("user_settings")
+        .update({
+          notification_preferences: updatedNotificationPreferences,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user?.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setFormData((prev) => ({
+        ...prev,
+        notification_preferences: updatedNotificationPreferences,
+      }));
+
+      setFormSuccess("Ustawienia powiadomień zostały zaktualizowane");
+    } catch (error: any) {
+      console.error("Error updating notification preferences:", error);
+      setFormError(
+        error.message ||
+          "Wystąpił błąd podczas aktualizacji ustawień powiadomień"
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (
+      !window.confirm(
+        "Czy na pewno chcesz usunąć swoje konto? Ta operacja jest nieodwracalna!"
+      )
+    ) {
+      return;
+    }
+
+    setFormError("");
+    setFormSuccess("");
+    setIsSaving(true);
+
+    try {
+      // Mark account for deletion in profiles table
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          data_deletion_requested: true,
+          data_deletion_requested_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user?.id);
+
+      if (profileError) throw profileError;
+
+      setFormSuccess(
+        "Żądanie usunięcia konta zostało zarejestrowane. Skontaktujemy się z Tobą w ciągu 24 godzin."
+      );
+
+      // Optionally sign out the user
+      setTimeout(() => {
+        supabase.auth.signOut();
+      }, 3000);
+    } catch (error: any) {
+      console.error("Error requesting account deletion:", error);
+      setFormError(
+        error.message || "Wystąpił błąd podczas żądania usunięcia konta"
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const tabs = [
     { id: "profile", label: "Profil", icon: User },
     {
@@ -159,10 +240,62 @@ export const UserProfile: React.FC = () => {
     { id: "settings", label: "Ustawienia", icon: Settings },
   ];
 
-  function toggleWishlist(_id: string): void {
-    // TODO: Implement wishlist toggle functionality
-    console.log("Toggle wishlist for product:", _id);
+  function toggleWishlist(productId: string): void {
+    handleWishlistToggle(productId);
   }
+
+  const handleWishlistToggle = async (productId: string) => {
+    if (!user) return;
+
+    try {
+      // Get current wishlist from database
+      const { data: profile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("wishlist")
+        .eq("id", user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const currentWishlist = profile?.wishlist || [];
+      const isInWishlist = currentWishlist.includes(productId);
+
+      let newWishlist;
+      if (isInWishlist) {
+        // Remove from wishlist
+        newWishlist = currentWishlist.filter((id: string) => id !== productId);
+      } else {
+        // Add to wishlist
+        newWishlist = [...currentWishlist, productId];
+      }
+
+      // Update wishlist in database
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          wishlist: newWishlist,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      setFormSuccess(
+        isInWishlist
+          ? "Produkt został usunięty z wishlist"
+          : "Produkt został dodany do wishlist"
+      );
+
+      // Refresh the page data or update local state as needed
+      setTimeout(() => setFormSuccess(""), 3000);
+    } catch (error: any) {
+      console.error("Error updating wishlist:", error);
+      setFormError(
+        error.message || "Wystąpił błąd podczas aktualizacji wishlist"
+      );
+      setTimeout(() => setFormError(""), 3000);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -703,6 +836,22 @@ export const UserProfile: React.FC = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Ustawienia konta
               </h2>
+
+              {/* Success/Error messages */}
+              {formSuccess && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2 text-green-800">
+                  <Check className="h-5 w-5 mt-0.5" />
+                  <div>{formSuccess}</div>
+                </div>
+              )}
+
+              {formError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-800">
+                  <AlertCircle className="h-5 w-5 mt-0.5" />
+                  <div>{formError}</div>
+                </div>
+              )}
+
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-xl p-6">
                   <h3 className="font-semibold text-gray-900 mb-4">
@@ -712,8 +861,17 @@ export const UserProfile: React.FC = () => {
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        defaultChecked
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        checked={
+                          formData.notification_preferences.product_updates
+                        }
+                        onChange={(e) =>
+                          handleNotificationChange(
+                            "product_updates",
+                            e.target.checked
+                          )
+                        }
+                        disabled={isSaving}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
                       />
                       <span className="ml-3 text-gray-700">
                         Powiadomienia o nowych produktach
@@ -722,8 +880,17 @@ export const UserProfile: React.FC = () => {
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        defaultChecked
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        checked={
+                          formData.notification_preferences.marketing_emails
+                        }
+                        onChange={(e) =>
+                          handleNotificationChange(
+                            "marketing_emails",
+                            e.target.checked
+                          )
+                        }
+                        disabled={isSaving}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
                       />
                       <span className="ml-3 text-gray-700">
                         Newsletter z trendami
@@ -740,8 +907,12 @@ export const UserProfile: React.FC = () => {
                     Usunięcie konta jest nieodwracalne i spowoduje utratę
                     wszystkich danych.
                   </p>
-                  <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-                    Usuń konto
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={isSaving}
+                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    {isSaving ? "Przetwarzanie..." : "Usuń konto"}
                   </button>
                 </div>
               </div>

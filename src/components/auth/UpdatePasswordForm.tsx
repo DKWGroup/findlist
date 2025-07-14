@@ -25,6 +25,7 @@ export const UpdatePasswordForm: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
     uppercase: false,
@@ -34,7 +35,11 @@ export const UpdatePasswordForm: React.FC = () => {
 
   // Check if we have a valid hash in the URL (for password reset flow)
   useEffect(() => {
-    const hash = window.location.hash;
+    const url = new URL(window.location.href);
+    const hash = url.hash;
+    const errorParam = url.searchParams.get("error");
+    const errorCode = url.searchParams.get("error_code");
+    const errorDescription = url.searchParams.get("error_description");
 
     // Ensure token is fresh
     console.log(
@@ -42,7 +47,19 @@ export const UpdatePasswordForm: React.FC = () => {
     );
     // refreshTokenIfNeeded(); // DISABLED FOR DEBUGGING
 
-    if (!hash || !hash.includes("type=recovery")) {
+    // Check for error parameters
+    if (errorParam && errorCode) {
+      let errorMessage = "Link resetowania hasła jest nieprawidłowy.";
+
+      if (errorCode === "otp_expired") {
+        errorMessage =
+          "Link resetowania hasła wygasł. Proszę wygenerować nowy link.";
+      } else if (errorDescription) {
+        errorMessage = decodeURIComponent(errorDescription).replace(/\+/g, " ");
+      }
+
+      setLinkError(errorMessage);
+    } else if (!hash || !hash.includes("type=recovery")) {
       setFormError("Nieprawidłowy link resetowania hasła");
     }
   }, []);
@@ -72,13 +89,17 @@ export const UpdatePasswordForm: React.FC = () => {
     setLocalLoading(true);
 
     try {
-      await updatePassword(formData.password);
-      setSuccess(true);
+      const result = await updatePassword(formData.password);
+      if (result.success) {
+        setSuccess(true);
 
-      // Redirect after 3 seconds
-      setTimeout(() => {
-        navigate("/logowanie");
-      }, 3000);
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          navigate("/logowanie");
+        }, 3000);
+      } else {
+        setFormError("Nie udało się zaktualizować hasła");
+      }
     } catch (error) {
       if (error instanceof Error) {
         setFormError(error.message);
@@ -120,6 +141,13 @@ export const UpdatePasswordForm: React.FC = () => {
     if (passwordStrengthScore === 3) return "bg-yellow-500";
     return "bg-green-500";
   };
+
+  // Check if form is valid for submission
+  const isFormValid =
+    formData.password.trim() !== "" &&
+    formData.confirmPassword.trim() !== "" &&
+    formData.password === formData.confirmPassword &&
+    passwordStrengthScore === 4; // All password requirements met
 
   if (success) {
     return (
@@ -166,10 +194,20 @@ export const UpdatePasswordForm: React.FC = () => {
           </p>
         </div>
 
-        {(error || formError) && (
+        {(error || formError || linkError) && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-            <div>{error || formError}</div>
+            <div>{linkError || error || formError}</div>
+          </div>
+        )}
+
+        {linkError && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
+            <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div>
+              Link resetowania hasła wygasł lub jest nieprawidłowy. Proszę
+              wygenerować nowy link.
+            </div>
           </div>
         )}
 
@@ -333,7 +371,7 @@ export const UpdatePasswordForm: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isFormLoading}
+            disabled={isFormLoading || !isFormValid}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             {isFormLoading ? (
@@ -342,7 +380,11 @@ export const UpdatePasswordForm: React.FC = () => {
                 <span>Zapisywanie...</span>
               </>
             ) : (
-              <span>Ustaw nowe hasło</span>
+              <span>
+                {!isFormValid
+                  ? "Spełnij wszystkie wymagania"
+                  : "Ustaw nowe hasło"}
+              </span>
             )}
           </button>
         </form>
