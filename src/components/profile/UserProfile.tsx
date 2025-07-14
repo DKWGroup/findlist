@@ -1,5 +1,9 @@
 import {
+  AlertCircle,
   Calendar,
+  Check,
+  Eye,
+  EyeOff,
   FileText,
   Heart,
   Lock,
@@ -7,17 +11,12 @@ import {
   Settings,
   Star,
   User,
-  Check,
-  AlertCircle,
-  Eye,
-  EyeOff,
 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 import { products } from "../../data/mockData";
-import { PrivacySettings } from "./PrivacySettings";
-import { SecuritySettings } from "./SecuritySettings";
 import { supabase } from "../../services/supabaseStorage";
+import { SecuritySettings } from "./SecuritySettings";
 
 export const UserProfile: React.FC = () => {
   const { user, isLoading } = useSimplifiedAuthContext();
@@ -33,16 +32,16 @@ export const UserProfile: React.FC = () => {
       email_notifications: true,
       product_updates: true,
       marketing_emails: false,
-      security_alerts: true
+      security_alerts: true,
     },
     privacy_settings: {
       public_profile: false,
       show_wishlist: false,
       show_reviews: true,
-      allow_recommendations: true
+      allow_recommendations: true,
     },
     theme: "light",
-    language: "pl"
+    language: "pl",
   });
 
   // Load user settings when component mounts
@@ -70,7 +69,8 @@ export const UserProfile: React.FC = () => {
         .eq("id", user?.id)
         .single();
 
-      if (settingsError && settingsError.code !== 'PGRST116') throw settingsError;
+      if (settingsError && settingsError.code !== "PGRST116")
+        throw settingsError;
 
       setFormData({
         name: profile?.full_name || user?.email?.split("@")[0] || "",
@@ -79,16 +79,16 @@ export const UserProfile: React.FC = () => {
           email_notifications: true,
           product_updates: true,
           marketing_emails: false,
-          security_alerts: true
+          security_alerts: true,
         },
         privacy_settings: settings?.privacy_settings || {
           public_profile: false,
           show_wishlist: false,
           show_reviews: true,
-          allow_recommendations: true
+          allow_recommendations: true,
         },
         theme: settings?.theme || "light",
-        language: settings?.language || "pl"
+        language: settings?.language || "pl",
       });
     } catch (error) {
       console.error("Error loading user settings:", error);
@@ -104,18 +104,18 @@ export const UserProfile: React.FC = () => {
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
     setFormError("");
     setFormSuccess("");
     setIsSaving(true);
-    
+
     try {
       // Update profile
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
           full_name: formData.name,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", user?.id);
 
@@ -129,7 +129,7 @@ export const UserProfile: React.FC = () => {
           new_notification_preferences: formData.notification_preferences,
           new_privacy_settings: formData.privacy_settings,
           new_theme: formData.theme,
-          new_language: formData.language
+          new_language: formData.language,
         }
       );
 
@@ -139,7 +139,9 @@ export const UserProfile: React.FC = () => {
       setIsEditing(false);
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      setFormError(error.message || "Wystąpił błąd podczas aktualizacji profilu");
+      setFormError(
+        error.message || "Wystąpił błąd podczas aktualizacji profilu"
+      );
     } finally {
       setIsSaving(false);
     }
@@ -154,7 +156,6 @@ export const UserProfile: React.FC = () => {
     },
     { id: "reviews", label: `Recenzje (${userReviews.length})`, icon: Star },
     { id: "security", label: "Bezpieczeństwo", icon: Lock },
-    { id: "privacy", label: "Prywatność", icon: FileText },
     { id: "settings", label: "Ustawienia", icon: Settings },
   ];
 
@@ -257,7 +258,7 @@ export const UserProfile: React.FC = () => {
                     <div>{formSuccess}</div>
                   </div>
                 )}
-                
+
                 {formError && (
                   <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-800">
                     <AlertCircle className="h-5 w-5 mt-0.5" />
@@ -305,7 +306,10 @@ export const UserProfile: React.FC = () => {
                     </div>
                     {isEditing && (
                       <div className="mt-2 p-3 bg-yellow-50 rounded-lg text-sm text-yellow-800">
-                        <p>Zmiana adresu email wymaga weryfikacji i jest dostępna w zakładce Bezpieczeństwo.</p>
+                        <p>
+                          Zmiana adresu email wymaga weryfikacji i jest dostępna
+                          w zakładce Bezpieczeństwo.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -313,12 +317,17 @@ export const UserProfile: React.FC = () => {
                   {/* Notification Preferences */}
                   {isEditing && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Preferencje powiadomień</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                        Preferencje powiadomień
+                      </h3>
                       <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
                         <label className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={formData.notification_preferences.email_notifications}
+                            checked={
+                              formData.notification_preferences
+                                .email_notifications
+                            }
                             onChange={(e) =>
                               setFormData((prev) => ({
                                 ...prev,
@@ -330,13 +339,17 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Powiadomienia email</span>
+                          <span className="ml-2 text-gray-700">
+                            Powiadomienia email
+                          </span>
                         </label>
-                        
+
                         <label className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={formData.notification_preferences.product_updates}
+                            checked={
+                              formData.notification_preferences.product_updates
+                            }
                             onChange={(e) =>
                               setFormData((prev) => ({
                                 ...prev,
@@ -348,13 +361,17 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Aktualizacje produktów</span>
+                          <span className="ml-2 text-gray-700">
+                            Aktualizacje produktów
+                          </span>
                         </label>
-                        
+
                         <label className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={formData.notification_preferences.marketing_emails}
+                            checked={
+                              formData.notification_preferences.marketing_emails
+                            }
                             onChange={(e) =>
                               setFormData((prev) => ({
                                 ...prev,
@@ -366,13 +383,17 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Wiadomości marketingowe</span>
+                          <span className="ml-2 text-gray-700">
+                            Wiadomości marketingowe
+                          </span>
                         </label>
-                        
+
                         <label className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={formData.notification_preferences.security_alerts}
+                            checked={
+                              formData.notification_preferences.security_alerts
+                            }
                             onChange={(e) =>
                               setFormData((prev) => ({
                                 ...prev,
@@ -384,7 +405,9 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Alerty bezpieczeństwa</span>
+                          <span className="ml-2 text-gray-700">
+                            Alerty bezpieczeństwa
+                          </span>
                         </label>
                       </div>
                     </div>
@@ -393,7 +416,9 @@ export const UserProfile: React.FC = () => {
                   {/* Privacy Settings */}
                   {isEditing && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Ustawienia prywatności</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                        Ustawienia prywatności
+                      </h3>
                       <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
                         <label className="flex items-center">
                           <input
@@ -410,9 +435,11 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Profil publiczny</span>
+                          <span className="ml-2 text-gray-700">
+                            Profil publiczny
+                          </span>
                         </label>
-                        
+
                         <label className="flex items-center">
                           <input
                             type="checkbox"
@@ -428,9 +455,11 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Pokazuj moją wishlistę innym</span>
+                          <span className="ml-2 text-gray-700">
+                            Pokazuj moją wishlistę innym
+                          </span>
                         </label>
-                        
+
                         <label className="flex items-center">
                           <input
                             type="checkbox"
@@ -446,13 +475,17 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Pokazuj moje recenzje</span>
+                          <span className="ml-2 text-gray-700">
+                            Pokazuj moje recenzje
+                          </span>
                         </label>
-                        
+
                         <label className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={formData.privacy_settings.allow_recommendations}
+                            checked={
+                              formData.privacy_settings.allow_recommendations
+                            }
                             onChange={(e) =>
                               setFormData((prev) => ({
                                 ...prev,
@@ -464,7 +497,9 @@ export const UserProfile: React.FC = () => {
                             }
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-gray-700">Zezwalaj na personalizowane rekomendacje</span>
+                          <span className="ml-2 text-gray-700">
+                            Zezwalaj na personalizowane rekomendacje
+                          </span>
                         </label>
                       </div>
                     </div>
@@ -473,7 +508,9 @@ export const UserProfile: React.FC = () => {
                   {/* Appearance Settings */}
                   {isEditing && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Wygląd</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                        Wygląd
+                      </h3>
                       <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -494,7 +531,7 @@ export const UserProfile: React.FC = () => {
                             <option value="system">Systemowy</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Język
@@ -660,8 +697,6 @@ export const UserProfile: React.FC = () => {
           )}
 
           {activeTab === "security" && <SecuritySettings />}
-
-          {activeTab === "privacy" && <PrivacySettings />}
 
           {activeTab === "settings" && (
             <div className="max-w-2xl">

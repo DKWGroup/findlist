@@ -1,14 +1,19 @@
-import { AlertCircle, Check, Eye, EyeOff, Lock, Mail, Shield } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  Check,
+  Eye,
+  EyeOff,
+  Info,
+  Loader2,
+  Lock,
+  Shield,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
-import { supabase } from "../../services/supabaseStorage";
 
 export const SecuritySettings: React.FC = () => {
-  const { user } = useSimplifiedAuthContext();
+  const { user, updatePassword, validatePassword } = useSimplifiedAuthContext();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [isChangingEmail, setIsChangingEmail] = useState(false);
-  const [emailChangeRequested, setEmailChangeRequested] = useState(false);
-  const [emailVerificationSent, setEmailVerificationSent] = useState(false);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -16,45 +21,24 @@ export const SecuritySettings: React.FC = () => {
     confirmPassword: "",
   });
 
-  const [emailData, setEmailData] = useState({
-    newEmail: "",
-    password: "",
-  });
-
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showEmailPassword, setShowEmailPassword] = useState(false);
 
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
-  const [emailFormError, setEmailFormError] = useState("");
-  const [emailFormSuccess, setEmailFormSuccess] = useState("");
+
+  // Password strength state
+  const [passwordStrength, setPasswordStrength] = useState({
+    length: false,
+    uppercase: false,
+    number: false,
+    special: false,
+  });
 
   useEffect(() => {
-    if (user) {
-      checkEmailVerificationStatus();
-    }
+    // Component initialization if needed
   }, [user]);
-
-  const checkEmailVerificationStatus = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("email_verification_token, email_verification_sent_at")
-        .eq("id", user?.id)
-        .single();
-
-      if (error) throw error;
-
-      if (data?.email_verification_token && data?.email_verification_sent_at) {
-        setEmailChangeRequested(true);
-        setEmailVerificationSent(true);
-      }
-    } catch (error) {
-      console.error("Error checking email verification status:", error);
-    }
-  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,101 +47,63 @@ export const SecuritySettings: React.FC = () => {
     setIsChangingPassword(true);
 
     try {
+      // Basic validation
+      if (!passwordData.newPassword || !passwordData.confirmPassword) {
+        setFormError("Wszystkie pola są wymagane");
+        return;
+      }
+
       if (passwordData.newPassword !== passwordData.confirmPassword) {
         setFormError("Nowe hasła nie są identyczne");
         return;
       }
 
-      if (passwordData.newPassword.length < 8) {
-        setFormError("Hasło musi mieć co najmniej 8 znaków");
+      // Validate password strength
+      if (!validatePassword(passwordData.newPassword)) {
+        setFormError("Hasło nie spełnia wymagań bezpieczeństwa");
         return;
       }
 
-      // TODO: Implement password change with Supabase
-      console.log("Zmiana hasła - do implementacji");
-      setFormSuccess("Hasło zostało zmienione pomyślnie");
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      // Update password using Supabase
+      const result = await updatePassword(passwordData.newPassword);
+      
+      if (result.success) {
+        setFormSuccess("Hasło zostało zmienione pomyślnie");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        setFormError("Nie udało się zmienić hasła");
+      }
     } catch (error) {
-      setFormError("Wystąpił błąd podczas zmiany hasła");
+      if (error instanceof Error) {
+        setFormError(error.message);
+      } else {
+        setFormError("Wystąpił błąd podczas zmiany hasła");
+      }
     } finally {
       setIsChangingPassword(false);
     }
   };
 
-  const handleEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEmailFormError("");
-    setEmailFormSuccess("");
-    setIsChangingEmail(true);
+  // Handle password input change with strength checking
+  const handlePasswordInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
 
-    try {
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailData.newEmail)) {
-        setEmailFormError("Podany adres email jest nieprawidłowy");
-        setIsChangingEmail(false);
-        return;
-      }
-
-      // Verify current password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || "",
-        password: emailData.password,
+    // Check password strength when new password field changes
+    if (name === "newPassword") {
+      setPasswordStrength({
+        length: value.length >= 8,
+        uppercase: /[A-Z]/.test(value),
+        number: /[0-9]/.test(value),
+        special: /[^A-Za-z0-9]/.test(value),
       });
-
-      if (signInError) {
-        setEmailFormError("Nieprawidłowe hasło");
-        setIsChangingEmail(false);
-        return;
-      }
-
-      // Update profile with new email (this will trigger the verification process)
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          email: emailData.newEmail,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", user?.id);
-
-      if (updateError) throw updateError;
-
-      setEmailFormSuccess("Link weryfikacyjny został wysłany na nowy adres email");
-      setEmailChangeRequested(true);
-      setEmailVerificationSent(true);
-      setEmailData({
-        newEmail: "",
-        password: "",
-      });
-    } catch (error: any) {
-      setEmailFormError(error.message || "Wystąpił błąd podczas zmiany adresu email");
-    } finally {
-      setIsChangingEmail(false);
-    }
-  };
-
-  const cancelEmailChange = async () => {
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          email_verification_token: null,
-          email_verification_sent_at: null,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", user?.id);
-
-      if (error) throw error;
-
-      setEmailChangeRequested(false);
-      setEmailVerificationSent(false);
-      setEmailFormSuccess("Zmiana adresu email została anulowana");
-    } catch (error: any) {
-      setEmailFormError(error.message || "Wystąpił błąd podczas anulowania zmiany adresu email");
     }
   };
 
@@ -193,14 +139,11 @@ export const SecuritySettings: React.FC = () => {
             <div className="relative">
               <input
                 type={showCurrentPassword ? "text" : "password"}
+                name="currentPassword"
                 value={passwordData.currentPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    currentPassword: e.target.value,
-                  })
-                }
+                onChange={handlePasswordInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                placeholder="Wprowadź obecne hasło"
                 required
               />
               <button
@@ -224,14 +167,11 @@ export const SecuritySettings: React.FC = () => {
             <div className="relative">
               <input
                 type={showNewPassword ? "text" : "password"}
+                name="newPassword"
                 value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    newPassword: e.target.value,
-                  })
-                }
+                onChange={handlePasswordInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                placeholder="Minimum 8 znaków"
                 required
               />
               <button
@@ -246,6 +186,80 @@ export const SecuritySettings: React.FC = () => {
                 )}
               </button>
             </div>
+
+            {/* Password strength indicator */}
+            {passwordData.newPassword && (
+              <div className="mt-3">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      Object.values(passwordStrength).filter(Boolean).length <= 1
+                        ? "bg-red-500"
+                        : Object.values(passwordStrength).filter(Boolean).length === 2
+                        ? "bg-orange-500"
+                        : Object.values(passwordStrength).filter(Boolean).length === 3
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
+                    }`}
+                    style={{
+                      width: `${
+                        (Object.values(passwordStrength).filter(Boolean).length / 4) * 100
+                      }%`,
+                    }}
+                  ></div>
+                </div>
+                <div className="mt-2 text-xs text-gray-600 space-y-1">
+                  <div className="flex items-center gap-1">
+                    <div
+                      className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                        passwordStrength.length
+                          ? "bg-green-100 text-green-600"
+                          : "bg-gray-100 text-gray-400"
+                      }`}
+                    >
+                      {passwordStrength.length ? <Check className="w-3 h-3" /> : null}
+                    </div>
+                    <span>Minimum 8 znaków</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div
+                      className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                        passwordStrength.uppercase
+                          ? "bg-green-100 text-green-600"
+                          : "bg-gray-100 text-gray-400"
+                      }`}
+                    >
+                      {passwordStrength.uppercase ? <Check className="w-3 h-3" /> : null}
+                    </div>
+                    <span>Przynajmniej jedna duża litera</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div
+                      className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                        passwordStrength.number
+                          ? "bg-green-100 text-green-600"
+                          : "bg-gray-100 text-gray-400"
+                      }`}
+                    >
+                      {passwordStrength.number ? <Check className="w-3 h-3" /> : null}
+                    </div>
+                    <span>Przynajmniej jedna cyfra</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div
+                      className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                        passwordStrength.special
+                          ? "bg-green-100 text-green-600"
+                          : "bg-gray-100 text-gray-400"
+                      }`}
+                    >
+                      {passwordStrength.special ? <Check className="w-3 h-3" /> : null}
+                    </div>
+                    <span>Przynajmniej jeden znak specjalny</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -255,14 +269,16 @@ export const SecuritySettings: React.FC = () => {
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
                 value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    confirmPassword: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                onChange={handlePasswordInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 ${
+                  passwordData.newPassword !== passwordData.confirmPassword &&
+                  passwordData.confirmPassword
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                }`}
+                placeholder="Powtórz hasło"
                 required
               />
               <button
@@ -277,6 +293,12 @@ export const SecuritySettings: React.FC = () => {
                 )}
               </button>
             </div>
+            {passwordData.newPassword !== passwordData.confirmPassword &&
+              passwordData.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">
+                  Hasła nie są identyczne
+                </p>
+              )}
           </div>
 
           {formError && (
@@ -293,122 +315,28 @@ export const SecuritySettings: React.FC = () => {
             </div>
           )}
 
+          <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+            <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <p>
+              Silne hasło jest kluczem do bezpieczeństwa Twojego konta. Nie używaj tego samego hasła w innych serwisach.
+            </p>
+          </div>
+
           <button
             type="submit"
             disabled={isChangingPassword}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
           >
-            {isChangingPassword ? "Zmienianie..." : "Zmień hasło"}
+            {isChangingPassword ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Zmienianie...</span>
+              </>
+            ) : (
+              <span>Zmień hasło</span>
+            )}
           </button>
         </form>
-      </div>
-
-      {/* Email Change Section */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Mail className="h-6 w-6 text-blue-600" />
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Zmiana adresu email
-            </h3>
-            <p className="text-sm text-gray-600">
-              Aktualizacja adresu email wymaga weryfikacji
-            </p>
-          </div>
-        </div>
-
-        {emailChangeRequested ? (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-              <div>
-                <h4 className="font-medium text-yellow-800 mb-1">Weryfikacja w toku</h4>
-                <p className="text-sm text-yellow-700 mb-2">
-                  Wysłaliśmy link weryfikacyjny na Twój nowy adres email. Kliknij w link, aby potwierdzić zmianę.
-                </p>
-                <button
-                  onClick={cancelEmailChange}
-                  className="text-sm text-yellow-800 underline hover:text-yellow-900"
-                >
-                  Anuluj zmianę adresu email
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleEmailChange} className="space-y-4">
-            {emailFormError && (
-              <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                <AlertCircle className="h-4 w-4" />
-                <span className="text-sm">{emailFormError}</span>
-              </div>
-            )}
-
-            {emailFormSuccess && (
-              <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
-                <Check className="h-4 w-4" />
-                <span className="text-sm">{emailFormSuccess}</span>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nowy adres email
-              </label>
-              <input
-                type="email"
-                value={emailData.newEmail}
-                onChange={(e) =>
-                  setEmailData({
-                    ...emailData,
-                    newEmail: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Potwierdź hasło
-              </label>
-              <div className="relative">
-                <input
-                  type={showEmailPassword ? "text" : "password"}
-                  value={emailData.password}
-                  onChange={(e) =>
-                    setEmailData({
-                      ...emailData,
-                      password: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowEmailPassword(!showEmailPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showEmailPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isChangingEmail}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg transition-colors font-medium"
-            >
-              {isChangingEmail ? "Zmienianie..." : "Zmień adres email"}
-            </button>
-          </form>
-        )}
       </div>
 
       {/* Account Security */}

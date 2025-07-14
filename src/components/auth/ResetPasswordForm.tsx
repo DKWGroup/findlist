@@ -4,6 +4,7 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  Info,
   Loader2,
   Lock,
   Mail,
@@ -13,7 +14,12 @@ import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 
 export const ResetPasswordForm: React.FC = () => {
-  const { resetPassword, updatePassword, validatePassword, error: authError } = useSimplifiedAuthContext();
+  const {
+    resetPassword,
+    updatePassword,
+    validatePassword,
+    error: authError,
+  } = useSimplifiedAuthContext();
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -36,20 +42,21 @@ export const ResetPasswordForm: React.FC = () => {
   React.useEffect(() => {
     const url = new URL(window.location.href);
     const hash = url.hash;
-    const errorParam = url.searchParams.get('error');
-    const errorCode = url.searchParams.get('error_code');
-    const errorDescription = url.searchParams.get('error_description');
-    
+    const errorParam = url.searchParams.get("error");
+    const errorCode = url.searchParams.get("error_code");
+    const errorDescription = url.searchParams.get("error_description");
+
     // Check for error parameters
     if (errorParam && errorCode) {
       let errorMessage = "Link resetowania hasła jest nieprawidłowy.";
-      
-      if (errorCode === 'otp_expired') {
-        errorMessage = "Link resetowania hasła wygasł. Proszę wygenerować nowy link.";
+
+      if (errorCode === "otp_expired") {
+        errorMessage =
+          "Link resetowania hasła wygasł. Proszę wygenerować nowy link.";
       } else if (errorDescription) {
-        errorMessage = decodeURIComponent(errorDescription).replace(/\+/g, ' ');
+        errorMessage = decodeURIComponent(errorDescription).replace(/\+/g, " ");
       }
-      
+
       setLinkError(errorMessage);
       setShowResetForm(true);
       setShowPasswordForm(false);
@@ -139,7 +146,7 @@ export const ResetPasswordForm: React.FC = () => {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const password = e.target.value;
     setNewPassword(password);
-    
+
     // Check password strength
     setPasswordStrength({
       length: password.length >= 8,
@@ -219,9 +226,7 @@ export const ResetPasswordForm: React.FC = () => {
               Podaj adres email, na który wyślemy link do resetowania hasła
             </p>
           ) : (
-            <p className="text-gray-600">
-              Utwórz nowe hasło dla swojego konta
-            </p>
+            <p className="text-gray-600">Utwórz nowe hasło dla swojego konta</p>
           )}
         </div>
 
@@ -231,16 +236,19 @@ export const ResetPasswordForm: React.FC = () => {
             <div>{linkError || authError || formError}</div>
           </div>
         )}
-        
+
         {showResetForm && (
           <form onSubmit={handleResetSubmit} className="space-y-6">
             {linkError && (
               <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
                 <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                <div>Link resetowania hasła wygasł lub jest nieprawidłowy. Proszę wygenerować nowy link.</div>
+                <div>
+                  Link resetowania hasła wygasł lub jest nieprawidłowy. Proszę
+                  wygenerować nowy link.
+                </div>
               </div>
             )}
-            
+
             <div>
               <label
                 htmlFor="email"
@@ -281,7 +289,7 @@ export const ResetPasswordForm: React.FC = () => {
             </button>
           </form>
         )}
-        
+
         {showPasswordForm && (
           <form onSubmit={handlePasswordSubmit} className="space-y-6">
             <div>
@@ -317,7 +325,7 @@ export const ResetPasswordForm: React.FC = () => {
                 </button>
               </div>
             </div>
-            
+
             {/* Password strength indicator */}
             <div>
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
