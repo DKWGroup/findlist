@@ -1,6 +1,7 @@
 import { User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../services/supabaseStorage";
+import { isUserAdmin } from "../utils/adminUtils";
 
 interface LoginCredentials {
   email: string;
@@ -18,6 +19,7 @@ export const useSimplifiedAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>("user");
 
   // Simple login
   const login = useCallback(
@@ -240,6 +242,17 @@ export const useSimplifiedAuth = () => {
           setUser(session?.user ?? null);
           setIsLoading(false);
           console.log("SimplifiedAuth: Initial session loaded");
+          
+          // Check if user is admin and update role
+          if (session?.user) {
+            isUserAdmin().then(isAdmin => {
+              if (isAdmin) {
+                setUserRole("admin");
+              }
+            }).catch(err => {
+              console.error("Error checking admin status:", err);
+            });
+          }
         }
       } catch (err) {
         console.error("SimplifiedAuth: Error getting initial session:", err);
@@ -274,6 +287,7 @@ export const useSimplifiedAuth = () => {
   return {
     user,
     isAuthenticated: !!user,
+    userRole,
     isLoading,
     error,
     login,

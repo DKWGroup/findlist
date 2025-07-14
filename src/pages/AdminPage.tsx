@@ -3,15 +3,29 @@ import { AdminDashboard } from "../components/admin/AdminDashboard";
 import { Layout } from "../components/Layout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { SupabaseSetup } from "../components/upload/SupabaseSetup";
-import { debugSession } from "../services/supabaseStorage";
+import { debugSession } from "../services/supabaseStorage"; 
+import { isUserAdmin } from "../utils/adminUtils";
 
 // Add debug logging
 export const AdminPage: React.FC = () => {
   console.log("Rendering AdminPage");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Debug session state when admin page loads
   React.useEffect(() => {
     debugSession();
+    
+    // Check if user is admin
+    const checkAdminStatus = async () => {
+      const adminStatus = await isUserAdmin();
+      setIsAdmin(adminStatus);
+      
+      if (!adminStatus) {
+        console.warn("Non-admin user attempting to access admin page");
+      }
+    };
+    
+    checkAdminStatus();
   }, []);
 
   return (
