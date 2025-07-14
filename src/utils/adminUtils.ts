@@ -1,3 +1,4 @@
+import React from 'react';
 import { supabase } from '../services/supabaseStorage';
 
 /**
@@ -54,9 +55,11 @@ export const withAdminAccess = (Component: React.ComponentType, fallback: React.
     }, []);
     
     if (isLoading) {
-      return <div className="min-h-screen flex items-center justify-center">
+      return (
+        <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>;
+        </div>
+      );
     }
     
     return isAdmin ? <Component {...props} /> : <fallback {...props} />;
