@@ -16,13 +16,13 @@ export const AdminPage: React.FC = () => {
   React.useEffect(() => {
     debugSession();
     
+    const checkAdminStatus = async () => {
         // Refresh product list from database
         const { products } = await productService.getProducts({
           limit: 20,
           page: 1
         });
         setProductList(products);
-      }
     };
     
     checkAdminStatus();
