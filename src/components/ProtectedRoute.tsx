@@ -56,6 +56,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         setIsCheckingAdmin(true);
         try {
           const adminStatus = await isUserAdmin();
+          console.log("Admin status check result:", adminStatus);
           setIsAdmin(adminStatus);
         } catch (error) {
           console.error("Error checking admin status:", error);
@@ -63,6 +64,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         } finally {
           setIsCheckingAdmin(false);
         }
+      } else if (!requireAdmin) {
+        // If admin access is not required, set isAdmin to true to allow access
+        setIsAdmin(true);
+        setIsCheckingAdmin(false);
+      } else {
+        // If user is not authenticated, reset admin status
+        setIsAdmin(null);
+        setIsCheckingAdmin(false);
       }
     };
 
@@ -80,11 +89,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Show loading while checking admin status
-  if (requireAdmin && isCheckingAdmin) {
+  if (requireAdmin && (isCheckingAdmin || isAdmin === null)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600">
-          <span className="sr-only">Loading...</span>
+          <span className="sr-only">Checking admin permissions...</span>
         </div>
       </div>
     );
@@ -97,10 +106,20 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Check admin status from database
-  if (requireAdmin && !isAdmin) {
+  if (requireAdmin && isAdmin !== true) {
+    console.log("Admin check failed:", {
+      requireAdmin,
+      isAdmin,
+      isCheckingAdmin,
+    });
     console.log("Admin required but user is not admin, redirecting to profile");
     return <Navigate to="/profil" state={{ from: location }} replace />;
   }
 
+  console.log("ProtectedRoute: Access granted", {
+    requireAdmin,
+    isAdmin,
+    isAuthenticated,
+  });
   return <>{children}</>;
 };

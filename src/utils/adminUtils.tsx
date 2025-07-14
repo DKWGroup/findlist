@@ -6,6 +6,17 @@ import { supabase } from "../services/supabaseStorage";
  * @returns Promise<boolean> True if user is admin, false otherwise
  */
 export const isUserAdmin = async (): Promise<boolean> => {
+  // Admin role ID from the database
+  const ADMIN_ROLE_ID = "4fc5fbc4-927a-46ff-9afa-9692fe7a6e6f";
+  return await userHasRole(ADMIN_ROLE_ID);
+};
+
+/**
+ * Check if the current user has a specific role
+ * @param roleId The UUID of the role to check
+ * @returns Promise<boolean> True if user has the role, false otherwise
+ */
+export const userHasRole = async (roleId: string): Promise<boolean> => {
   try {
     // Get current user
     const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -15,20 +26,23 @@ export const isUserAdmin = async (): Promise<boolean> => {
       return false;
     }
 
-    // Check if user has admin role using the user_role_assignments table
-    const { data, error } = await supabase.rpc("user_has_role_simple", {
-      user_uuid: userData.user.id,
-      role_name: "admin",
-    });
+    // Check if user has the specific role through user_role_assignments
+    const { data, error } = await supabase
+      .from("user_role_assignments")
+      .select("id")
+      .eq("user_id", userData.user.id)
+      .eq("role_id", roleId)
+      .eq("is_active", true)
+      .maybeSingle();
 
     if (error) {
-      console.error("Error checking admin role:", error);
+      console.error("Error checking user role:", error);
       return false;
     }
 
     return !!data;
   } catch (error) {
-    console.error("Error in isUserAdmin:", error);
+    console.error("Error in userHasRole:", error);
     return false;
   }
 };
