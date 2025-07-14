@@ -1,16 +1,16 @@
 import { Product, Category } from '../types';
 
 export const categories: Category[] = [
-  { id: 'dom-ogrod', name: 'Dom i ogród', icon: 'Home', productCount: 124, code: 'DO' },
-  { id: 'elektronika', name: 'Elektronika i akcesoria', icon: 'Smartphone', productCount: 89, code: 'EL' },
-  { id: 'moda', name: 'Moda i dodatki', icon: 'Shirt', productCount: 156, code: 'MO' },
-  { id: 'uroda', name: 'Uroda i zdrowie', icon: 'Heart', productCount: 67, code: 'UR' },
-  { id: 'zabawki', name: 'Zabawki i dzieci', icon: 'Baby', productCount: 43, code: 'ZA' },
-  { id: 'sport', name: 'Sport i hobby', icon: 'Dumbbell', productCount: 78, code: 'SP' },
-  { id: 'motoryzacja', name: 'Motoryzacja i narzędzia', icon: 'Car', productCount: 34, code: 'AU' },
-  { id: 'zwierzeta', name: 'Zwierzęta', icon: 'Dog', productCount: 29, code: 'PE' },
-  { id: 'torby', name: 'Torby i podróże', icon: 'Luggage', productCount: 52, code: 'TR' },
-  { id: 'okazje', name: 'Okazje i przebrania', icon: 'Gift', productCount: 38, code: 'OC' }
+  { id: '550e8400-e29b-41d4-a716-446655440002', name: 'Dom i ogród', icon: 'Home', productCount: 124, code: 'DO' },
+  { id: '550e8400-e29b-41d4-a716-446655440001', name: 'Elektronika i akcesoria', icon: 'Smartphone', productCount: 89, code: 'EL' },
+  { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Moda i dodatki', icon: 'Shirt', productCount: 156, code: 'MO' },
+  { id: '550e8400-e29b-41d4-a716-446655440004', name: 'Uroda i zdrowie', icon: 'Heart', productCount: 67, code: 'UR' },
+  { id: '550e8400-e29b-41d4-a716-446655440005', name: 'Zabawki i dzieci', icon: 'Baby', productCount: 43, code: 'ZA' },
+  { id: '550e8400-e29b-41d4-a716-446655440006', name: 'Sport i hobby', icon: 'Dumbbell', productCount: 78, code: 'SP' },
+  { id: '550e8400-e29b-41d4-a716-446655440007', name: 'Motoryzacja i narzędzia', icon: 'Car', productCount: 34, code: 'AU' },
+  { id: '550e8400-e29b-41d4-a716-446655440008', name: 'Zwierzęta', icon: 'Dog', productCount: 29, code: 'PE' },
+  { id: '550e8400-e29b-41d4-a716-446655440009', name: 'Torby i podróże', icon: 'Luggage', productCount: 52, code: 'TR' },
+  { id: '550e8400-e29b-41d4-a716-44665544000a', name: 'Okazje i przebrania', icon: 'Gift', productCount: 38, code: 'OC' }
 ];
 
 export const products: Product[] = [
@@ -23,7 +23,7 @@ export const products: Product[] = [
       'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg',
       'https://images.pexels.com/photos/1029757/pexels-photo-1029757.jpeg'
     ],
-    category: 'elektronika',
+    category: '550e8400-e29b-41d4-a716-446655440001',
     productType: 'smart-home',
     tags: ['smart home', 'bluetooth', 'led', 'muzyka', 'dekoracja'],
     price: {
@@ -63,7 +63,7 @@ export const products: Product[] = [
       'https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg',
       'https://images.pexels.com/photos/1080696/pexels-photo-1080696.jpeg'
     ],
-    category: 'dom-ogrod',
+    category: '550e8400-e29b-41d4-a716-446655440002',
     productType: 'organization',
     tags: ['organizacja', 'szafa', 'przechowywanie', 'dom'],
     price: {
@@ -101,7 +101,7 @@ export const products: Product[] = [
       'https://images.pexels.com/photos/3997369/pexels-photo-3997369.jpeg',
       'https://images.pexels.com/photos/3852577/pexels-photo-3852577.jpeg'
     ],
-    category: 'uroda',
+    category: '550e8400-e29b-41d4-a716-446655440004',
     productType: 'skincare',
     tags: ['skincare', 'maski', 'uroda', 'pielęgnacja'],
     price: {
@@ -139,7 +139,7 @@ export const products: Product[] = [
       'https://images.pexels.com/photos/163143/mobile-phone-battery-charging-station-163143.jpeg',
       'https://images.pexels.com/photos/1038628/pexels-photo-1038628.jpeg'
     ],
-    category: 'elektronika',
+    category: '550e8400-e29b-41d4-a716-446655440001',
     productType: 'charger',
     tags: ['powerbank', 'bezprzewodowe', 'ładowanie', 'usb-c'],
     price: {
@@ -178,7 +178,7 @@ export const products: Product[] = [
       'https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg',
       'https://images.pexels.com/photos/985635/pexels-photo-985635.jpeg'
     ],
-    category: 'moda',
+    category: '550e8400-e29b-41d4-a716-446655440003',
     productType: 'clothing',
     tags: ['sukienka', 'elegancka', 'vintage', 'satyna'],
     price: {
@@ -217,7 +217,7 @@ export const products: Product[] = [
       'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
       'https://images.pexels.com/photos/1404819/pexels-photo-1404819.jpeg'
     ],
-    category: 'zwierzeta',
+    category: '550e8400-e29b-41d4-a716-446655440008',
     productType: 'food',
     tags: ['smart', 'dozownik', 'karma', 'aplikacja', 'zwierzęta'],
     price: {
