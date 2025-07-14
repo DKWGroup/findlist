@@ -389,7 +389,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 >
                   <option value="">Wybierz kategorię</option>
                   {availableCategories.map(cat => (
-                    <option key={cat.id} value={cat.id}>
+                    <option key={cat.id} value={cat.code}>
                       {cat.name} ({cat.code})
                     </option>
                   ))}
@@ -410,7 +410,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 >
                   <option value="">Domyślny typ</option>
                   {availableTypes.map(type => (
-                    <option key={type.id} value={type.id}>
+                    <option key={type.id} value={type.code}>
                       {type.name} ({type.code})
                     </option>
                   ))}
