@@ -139,7 +139,7 @@ export const ProductPage: React.FC = () => {
   const loadProductReviews = async (productId: string) => {
     try {
       const { data, error } = await supabase.rpc("get_product_reviews", {
-        product_id: productId,
+        p_product_id: productId,
       });
 
       if (error) throw error;
