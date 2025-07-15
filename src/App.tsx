@@ -14,6 +14,9 @@ import { LoginPage } from "./pages/LoginPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { ProductPage } from "./pages/ProductPage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { AboutUsPage } from "./pages/AboutUsPage";
+import { HowItWorksPage } from "./pages/HowItWorksPage";
+import { ContactPage } from "./pages/ContactPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
@@ -42,6 +45,9 @@ function App() {
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/blog-editor" element={<BlogEditorPage />} />
               <Route path="/szukaj" element={<SearchPage />} />
+              <Route path="/o-nas" element={<AboutUsPage />} />
+              <Route path="/jak-to-dziala" element={<HowItWorksPage />} />
+              <Route path="/kontakt" element={<ContactPage />} />
               <Route path="/test-products" element={<TestProductsPage />} />
               <Route path="/logowanie" element={<LoginPage />} />
               <Route path="/rejestracja" element={<RegisterPage />} />
