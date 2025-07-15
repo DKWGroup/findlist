@@ -716,31 +716,26 @@ export const useAuthCore = (): UseAuthReturn => {
     }
 
     try {
-      const currentWishlist = user.wishlist || [];
-      const isInWishlist = currentWishlist.includes(productId);
-
-      let newWishlist;
-      if (isInWishlist) {
-        newWishlist = currentWishlist.filter((id) => id !== productId);
-      } else {
-        newWishlist = [...currentWishlist, productId];
-      }
-
-      // Update wishlist in Supabase
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          wishlist: newWishlist,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
+      // Use the RPC function to toggle wishlist
+      const { data, error } = await supabase.rpc('toggle_wishlist', {
+        product_id: productId,
+        user_uuid: user.id
+      });
 
       if (error) {
         throw error;
       }
 
-      // Update local user state
-      setUser((prev) => (prev ? { ...prev, wishlist: newWishlist } : null));
+      // Reload user data to get updated wishlist
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("wishlist")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        setUser((prev) => (prev ? { ...prev, wishlist: profile.wishlist || [] } : null));
+      }
     } catch (err: any) {
       const errorMessage = err.message || "Błąd aktualizacji listy życzeń";
       setError(errorMessage);
@@ -755,35 +750,28 @@ export const useAuthCore = (): UseAuthReturn => {
     }
 
     try {
-      const currentReviews = user.reviews || [];
-      const newReview = {
-        id: Date.now().toString(),
-        productId,
+      // Use the RPC function to add review
+      const { data, error } = await supabase.rpc('add_product_review', {
+        product_id: productId,
         rating: review.rating,
         comment: review.comment,
-        createdAt: new Date().toISOString(),
-        userId: user.id,
-        dateCreated: new Date().toISOString(),
-        isVerified: false,
-      };
-
-      const newReviews = [...currentReviews, newReview];
-
-      // Update reviews in Supabase
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          reviews: newReviews,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
+        user_uuid: user.id
+      });
 
       if (error) {
         throw error;
       }
 
-      // Update local user state
-      setUser((prev) => (prev ? { ...prev, reviews: newReviews } : null));
+      // Reload user data to get updated reviews
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("reviews")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        setUser((prev) => (prev ? { ...prev, reviews: profile.reviews || [] } : null));
+      }
     } catch (err: any) {
       const errorMessage = err.message || "Błąd dodawania recenzji";
       setError(errorMessage);

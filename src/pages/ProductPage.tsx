@@ -158,6 +158,7 @@ export const ProductPage: React.FC = () => {
     try {
       const { data, error } = await supabase.rpc("toggle_wishlist", {
         product_id: productId,
+        user_uuid: user.id
       });
 
       if (error) throw error;
@@ -176,6 +177,7 @@ export const ProductPage: React.FC = () => {
         product_id: productId,
         rating: review.rating,
         comment: review.comment,
+        user_uuid: user.id
       });
 
       if (error) throw error;

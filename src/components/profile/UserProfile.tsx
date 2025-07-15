@@ -57,13 +57,27 @@ export const UserProfile: React.FC = () => {
 
   const loadWishlistProducts = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_user_wishlist');
+      const { data, error } = await supabase.rpc('get_user_wishlist', {
+        user_uuid: user?.id
+      });
       
       if (error) throw error;
       
-      setWishlistProducts(data || []);
+      // Handle the case where data might be a string representation of JSON
+      let wishlistData = data || [];
+      if (typeof wishlistData === 'string') {
+        try {
+          wishlistData = JSON.parse(wishlistData);
+        } catch (parseError) {
+          console.error('Error parsing wishlist data:', parseError);
+          wishlistData = [];
+        }
+      }
+      
+      setWishlistProducts(wishlistData);
     } catch (error) {
       console.error("Error loading wishlist:", error);
+      setWishlistProducts([]);
     }
   };
   
@@ -303,9 +317,12 @@ export const UserProfile: React.FC = () => {
   }
 
   const handleWishlistToggle = async (productId: string) => {
+    if (!user) return;
+    
     try {
       const { data, error } = await supabase.rpc('toggle_wishlist', {
-        product_id: productId
+        product_id: productId,
+        user_uuid: user.id
       });
       
       if (error) throw error;

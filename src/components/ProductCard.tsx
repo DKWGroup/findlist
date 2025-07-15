@@ -23,9 +23,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Safe auth hook usage with error handling
   let user = null;
   let toggleWishlist = async (productId: string) => {
+    if (!user) return false;
+    
     try {
       const { data, error } = await supabase.rpc('toggle_wishlist', {
-        product_id: productId
+        product_id: productId,
+        user_uuid: user.id
       });
       
       if (error) throw error;
