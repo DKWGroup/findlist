@@ -2,6 +2,29 @@
 
 Platforma agregująca najlepsze viralowe produkty z TikToka i Instagrama z funkcją przesyłania i optymalizacji obrazów.
 
+## 🔐 Uwierzytelnianie
+
+Platforma obsługuje następujące metody logowania:
+
+- **Email i hasło** - standardowe logowanie
+- **Google OAuth** - logowanie za pomocą konta Google
+
+### Konfiguracja Google OAuth
+
+Aby skonfigurować logowanie przez Google:
+
+1. Przejdź do [Google Cloud Console](https://console.cloud.google.com/)
+2. Utwórz nowy projekt lub wybierz istniejący
+3. Przejdź do "APIs & Services" > "Credentials"
+4. Kliknij "Create Credentials" > "OAuth client ID"
+5. Wybierz "Web application" jako typ aplikacji
+6. Dodaj dozwolone URI przekierowania:
+   - `https://[YOUR_SUPABASE_PROJECT].supabase.co/auth/v1/callback`
+   - `http://localhost:5173/auth/callback` (dla środowiska deweloperskiego)
+7. Skopiuj Client ID i Client Secret
+8. W panelu Supabase przejdź do Authentication > Providers > Google
+9. Włącz Google i wprowadź Client ID i Client Secret
+
 ## 🚀 Funkcje
 
 - **Drag & Drop Upload**: Intuicyjne przesyłanie obrazów z optymalizacją
@@ -9,6 +32,7 @@ Platforma agregująca najlepsze viralowe produkty z TikToka i Instagrama z funkc
 - **Supabase Storage**: Bezpieczne przechowywanie plików w chmurze
 - **Responsywny Design**: Pełna responsywność na wszystkich urządzeniach
 - **Dostępność**: Zgodność z WCAG 2.1 AA
+- **Uwierzytelnianie**: Logowanie przez email/hasło oraz Google OAuth
 
 ## 📋 Wymagania
 
