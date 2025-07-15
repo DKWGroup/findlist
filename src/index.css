@@ -3,12 +3,13 @@
 @tailwind utilities;
 
 @layer base {
-  [type='checkbox']:checked {
+  [type="checkbox"]:checked {
     background-color: #2563eb; /* blue-600 */
     border-color: #2563eb; /* blue-600 */
+    accent-color: #2563eb; /* blue-600 */
   }
-  
-  [type='checkbox']:focus {
+
+  [type="checkbox"]:focus {
     --tw-ring-color: #3b82f6; /* blue-500 */
   }
 }
