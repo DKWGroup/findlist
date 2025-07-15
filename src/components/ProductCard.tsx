@@ -8,7 +8,7 @@ import {
   Star,
   ThumbsUp,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { Product } from "../types";
