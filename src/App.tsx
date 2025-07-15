@@ -25,7 +25,6 @@ import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { TestProductsPage } from "./pages/TestProductsPage";
 import { UpdatePasswordPage } from "./pages/UpdatePasswordPage";
 import { VerificationRequiredPage } from "./pages/VerificationRequiredPage";
-import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 
 function App() {
   console.log("App: Starting with simplified auth...");
@@ -58,7 +57,6 @@ function App() {
                 path="/verification-required"
                 element={<VerificationRequiredPage />}
               />
-              <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/profil" element={<ProfilePage />} />
               <Route path="/admin" element={<AdminPage />} />
 

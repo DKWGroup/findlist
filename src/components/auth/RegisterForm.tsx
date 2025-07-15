@@ -12,7 +12,6 @@ import {
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
-import { GoogleSignIn } from "./GoogleSignIn";
 
 export const RegisterForm: React.FC = () => {
   const { register, error, validatePassword } = useSimplifiedAuthContext();
@@ -374,22 +373,6 @@ export const RegisterForm: React.FC = () => {
             )}
           </button>
         </form>
-
-        {/* Google Sign-In */}
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Lub kontynuuj przez</span>
-            </div>
-          </div>
-          
-          <div className="mt-6">
-            <GoogleSignIn />
-          </div>
-        </div>
 
         <div className="mt-8 text-center">
           <p className="text-gray-600 mb-2">
