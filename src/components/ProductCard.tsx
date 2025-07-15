@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { Product } from "../types";
 import { LazyImage } from "./Performance/LazyImage";
+import { supabase } from "../services/supabaseStorage";
 
 interface ProductCardProps {
   product: Product;
@@ -21,22 +22,38 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Safe auth hook usage with error handling
   let user = null;
-  let toggleWishlist = (_productId: string) => Promise.resolve();
+  let toggleWishlist = async (productId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('toggle_wishlist', {
+        product_id: productId
+      });
+      
+      if (error) throw error;
+      
+      return data;
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      return false;
+    }
+  };
 
   try {
     const auth = useSimplifiedAuthContext();
     user = auth.user;
-    // toggleWishlist is not available in simplified auth, will mock it for now
-    toggleWishlist = (_productId: string) => Promise.resolve();
   } catch (error) {
     // AuthProvider not ready yet, use defaults
     console.warn("AuthProvider not ready in ProductCard, using defaults");
   }
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
-  // Wishlist is not available in simplified auth, so always false for now
-  const isInWishlist = false;
+  // Check if product is in user's wishlist
+  useEffect(() => {
+    if (user && user.wishlist) {
+      setIsInWishlist(user.wishlist.includes(product.id));
+    }
+  }, [user, product.id]);
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -82,9 +99,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
+    
     if (user) {
-      toggleWishlist(product.id);
+      toggleWishlist(product.id).then(result => {
+        if (result !== null) {
+          setIsInWishlist(result);
+        }
+      });
     }
   };
 

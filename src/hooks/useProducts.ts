@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { productService } from "../services/productService";
 import { Product } from "../types";
+import { supabase } from "../services/supabaseStorage";
 
 interface UseProductsOptions {
   page?: number;
@@ -113,9 +114,49 @@ export const useProduct = (productId: string | null) => {
     console.log("🔄 Loading product with ID:", id);
 
     try {
-      const result = await productService.getProduct(id);
-      console.log("✅ Product loaded successfully:", result);
-      setProduct(result);
+      // Get product with all related data
+      const { data, error } = await supabase.rpc('get_product_complete', {
+        p_product_id: id
+      });
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Transform to Product type
+        const productData: Product = {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          category: data.category_id,
+          productType: data.product_type,
+          tags: data.tags || [],
+          images: data.images || [],
+          price: {
+            original: data.price_original,
+            discounted: data.price_discounted,
+            currency: data.price_currency || 'PLN'
+          },
+          affiliateLinks: data.affiliate_links || {},
+          socialLinks: data.social_links || {},
+          popularity: data.popularity || {
+            views: 0,
+            likes: 0,
+            shares: 0
+          },
+          ratings: {
+            average: data.ratings?.average || 0,
+            count: data.ratings?.count || 0
+          },
+          dateAdded: data.created_at,
+          isVerified: data.is_verified,
+          isTrending: data.is_trending,
+          code: data.code,
+          urlAlias: data.url_alias
+        };
+        
+        console.log("✅ Product loaded successfully:", productData);
+        setProduct(productData);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load product";

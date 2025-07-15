@@ -1,6 +1,7 @@
 import { Flag, Star, ThumbsDown, ThumbsUp, User } from "lucide-react";
-import React, { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import React, { useState, useEffect } from "react";
+import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
+import { supabase } from "../services/supabaseStorage";
 
 interface Review {
   id: string;
@@ -29,15 +30,16 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
   reviews,
   onAddReview,
 }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useSimplifiedAuthContext();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 5,
     comment: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reviewsState, setReviews] = useState(reviews);
 
-  const userHasReviewed = reviews.some((review) => review.userId === user?.id);
+  const userHasReviewed = reviewsState.some((review) => review.userId === user?.id);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +48,14 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      // Add review to database
+      const { data, error } = await supabase.rpc('add_product_review', {
+        product_id: productId,
+        rating: newReview.rating,
+        comment: newReview.comment.trim()
+      });
+      
+      if (error) throw error;
 
       onAddReview({
         userId: user.id,
@@ -67,26 +76,46 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
   };
 
   const averageRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+    reviewsState.length > 0
+      ? reviewsState.reduce((sum, review) => sum + review.rating, 0) / reviewsState.length
       : 0;
 
   const ratingDistribution = [5, 4, 3, 2, 1].map((rating) => ({
     rating,
-    count: reviews.filter((review) => review.rating === rating).length,
+    count: reviewsState.filter((review) => review.rating === rating).length,
     percentage:
-      reviews.length > 0
-        ? (reviews.filter((review) => review.rating === rating).length /
-            reviews.length) *
+      reviewsState.length > 0
+        ? (reviewsState.filter((review) => review.rating === rating).length /
+            reviewsState.length) *
           100
         : 0,
   }));
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_product_reviews', {
+          product_id: productId
+        });
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setReviews(data);
+        }
+      } catch (error) {
+        console.error("Error loading reviews:", error);
+      }
+    };
+
+    loadReviews();
+  }, [productId]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-gray-900">
-          Opinie użytkowników ({reviews.length})
+          Opinie użytkowników ({reviewsState.length})
         </h3>
         {isAuthenticated && !userHasReviewed && (
           <button
@@ -99,7 +128,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
       </div>
 
       {/* Rating Summary */}
-      {reviews.length > 0 && (
+      {reviewsState.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-4 bg-gray-50 rounded-lg">
           <div className="text-center">
             <div className="text-4xl font-bold text-gray-900 mb-2">
@@ -118,7 +147,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
               ))}
             </div>
             <p className="text-sm text-gray-600">
-              Na podstawie {reviews.length} opinii
+              Na podstawie {reviewsState.length} opinii
             </p>
           </div>
 
@@ -272,7 +301,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
 
       {/* Reviews List */}
       <div className="space-y-6">
-        {reviews.length === 0 ? (
+        {reviewsState.length === 0 ? (
           <div className="text-center py-8">
             <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h4 className="text-lg font-semibold text-gray-900 mb-2">
@@ -283,7 +312,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
             </p>
           </div>
         ) : (
-          reviews.map((review) => (
+          reviewsState.map((review) => (
             <div
               key={review.id}
               className="border-b border-gray-100 pb-6 last:border-b-0"

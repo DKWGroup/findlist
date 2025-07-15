@@ -17,8 +17,9 @@ import { Link, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
-import { products } from "../data/mockData";
+import { useProduct } from "../hooks/useProducts";
 import { productCodeService } from "../services/productCodeService";
+import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
 
 export const ProductPage: React.FC = () => {
@@ -26,76 +27,169 @@ export const ProductPage: React.FC = () => {
     id?: string;
     codeOrAlias?: string;
   }>();
-  const { user } = useSimplifiedAuthContext();
-  // toggleWishlist and addReview are not available in simplified auth, will mock them
-  const toggleWishlist = (_productId: string) => Promise.resolve();
-  const addReview = (_productId: string, _review: any) => Promise.resolve();
+  const { user, isAuthenticated } = useSimplifiedAuthContext();
   const [product, setProduct] = useState<Product | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [productReviews, setProductReviews] = useState<any[]>([]);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Use the product hook to fetch product data
+  const { 
+    product: fetchedProduct, 
+    loading: productLoading,
+    error: productError
+  } = useProduct(id);
 
   useEffect(() => {
-    let foundProduct: Product | null = null;
-
-    if (id) {
-      // Direct product ID access
-      foundProduct = products.find((p) => p.id === id) || null;
-    } else if (codeOrAlias) {
-      // Search by product code or URL alias
-      foundProduct =
-        products.find(
-          (p) =>
-            p.code?.toLowerCase() === codeOrAlias.toLowerCase() ||
-            p.urlAlias?.toLowerCase() === codeOrAlias.toLowerCase()
-        ) || null;
+    const loadProduct = async () => {
+      setIsLoading(true);
+      try {
+        let foundProduct = fetchedProduct;
+        
+        // If we have a code or alias but no direct ID
+        if (!id && codeOrAlias) {
+          // Query by code or alias
+          const { data, error } = await supabase
+            .from('products')
+            .select(`
+              *,
+              product_images(url, position),
+              product_tags(tag),
+              product_affiliate_links(platform, url),
+              product_social_links(platform, url),
+              product_stats(*)
+            `)
+            .or(`code.eq.${codeOrAlias},url_alias.eq.${codeOrAlias}`)
+            .single();
+            
+          if (error) throw error;
+          
+          if (data) {
+            // Transform to Product type
+            foundProduct = {
+              id: data.id,
+              title: data.title,
+              description: data.description,
+              category: data.category_id,
+              productType: data.product_type,
+              tags: data.product_tags?.map((t: any) => t.tag) || [],
+              images: data.product_images?.map((i: any) => i.url) || [],
+              price: {
+                original: data.price_original,
+                discounted: data.price_discounted,
+                currency: data.price_currency || 'PLN'
+              },
+              affiliateLinks: data.product_affiliate_links?.reduce((acc: any, link: any) => {
+                acc[link.platform] = link.url;
+                return acc;
+              }, {}) || {},
+              socialLinks: data.product_social_links?.reduce((acc: any, link: any) => {
+                acc[link.platform] = link.url;
+                return acc;
+              }, {}) || {},
+              popularity: {
+                views: data.product_stats?.views || 0,
+                likes: data.product_stats?.likes || 0,
+                shares: data.product_stats?.shares || 0
+              },
+              ratings: {
+                average: data.product_stats?.rating_average || 0,
+                count: data.product_stats?.rating_count || 0
+              },
+              dateAdded: data.created_at,
+              isVerified: data.is_verified,
+              isTrending: data.is_trending,
+              code: data.code,
+              urlAlias: data.url_alias
+            };
+          }
+        }
+        
+        setProduct(foundProduct);
+        
+        // Check if product is in user's wishlist
+        if (isAuthenticated && user && foundProduct) {
+          const isInList = user.wishlist?.includes(foundProduct.id) || false;
+          setIsInWishlist(isInList);
+        }
+        
+        // Load reviews for the product
+        if (foundProduct) {
+          loadProductReviews(foundProduct.id);
+        }
+      } catch (error) {
+        console.error("Error loading product:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadProduct();
+  }, [id, codeOrAlias, fetchedProduct, isAuthenticated, user]);
+  
+  const loadProductReviews = async (productId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('get_product_reviews', {
+        product_id: productId
+      });
+      
+      if (error) throw error;
+      
+      if (data) {
+        setProductReviews(data);
+      }
+    } catch (error) {
+      console.error("Error loading reviews:", error);
     }
+  };
 
-    setProduct(foundProduct);
-
-    // Mock reviews for demo
-    if (foundProduct) {
-      setProductReviews([
-        {
-          id: "1",
-          userId: "1",
-          userName: "Administrator",
-          rating: 5,
-          comment:
-            "Świetny produkt! Bardzo polecam wszystkim. Jakość wykonania jest na najwyższym poziomie.",
-          dateCreated: "2024-01-10",
-          isVerified: true,
-          likes: 12,
-          dislikes: 1,
-        },
-        {
-          id: "2",
-          userId: "2",
-          userName: "Anna Kowalska",
-          rating: 4,
-          comment:
-            "Dobry produkt, ale mogłby być lepszy. Przydałoby się więcej opcji kolorystycznych.",
-          dateCreated: "2024-01-12",
-          isVerified: false,
-          likes: 8,
-          dislikes: 2,
-        },
-        {
-          id: "3",
-          userId: "3",
-          userName: "Michał Nowak",
-          rating: 5,
-          comment:
-            "Dokładnie to, czego szukałem! Szybka dostawa i produkt zgodny z opisem.",
-          dateCreated: "2024-01-14",
-          isVerified: false,
-          likes: 15,
-          dislikes: 0,
-        },
-      ]);
+  const toggleWishlist = async (productId: string) => {
+    if (!isAuthenticated || !user) return;
+    
+    try {
+      const { data, error } = await supabase.rpc('toggle_wishlist', {
+        product_id: productId
+      });
+      
+      if (error) throw error;
+      
+      setIsInWishlist(!!data);
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
     }
-  }, [id, codeOrAlias]);
+  };
+  
+  const addReview = async (productId: string, review: any) => {
+    if (!isAuthenticated || !user) return;
+    
+    try {
+      const { data, error } = await supabase.rpc('add_product_review', {
+        product_id: productId,
+        rating: review.rating,
+        comment: review.comment
+      });
+      
+      if (error) throw error;
+      
+      // Reload reviews after adding a new one
+      loadProductReviews(productId);
+    } catch (error) {
+      console.error("Error adding review:", error);
+    }
+  };
 
-  if (!product) {
+  if (isLoading || productLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!product || productError) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
@@ -118,9 +212,6 @@ export const ProductPage: React.FC = () => {
       </Layout>
     );
   }
-
-  // Wishlist is not available in simplified auth, so always false for now
-  const isInWishlist = false;
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -162,6 +253,7 @@ export const ProductPage: React.FC = () => {
   const handleWishlistToggle = () => {
     if (user) {
       toggleWishlist(product.id);
+      setIsInWishlist(!isInWishlist);
     }
   };
 
