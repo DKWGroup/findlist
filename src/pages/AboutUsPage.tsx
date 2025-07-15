@@ -1,38 +1,35 @@
+import {
+  Award,
+  Clock,
+  ExternalLink,
+  Heart,
+  Mail,
+  MapPin,
+  Phone,
+  Users,
+} from "lucide-react";
 import React from "react";
+import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
 import { MetaTags } from "../components/SEO/MetaTags";
-import { Link } from "react-router-dom";
-import { Mail, MapPin, Phone, ExternalLink, Users, Award, Clock, Heart } from "lucide-react";
 
 export const AboutUsPage: React.FC = () => {
   const breadcrumbItems = [{ label: "O nas", current: true }];
 
   const teamMembers = [
     {
-      name: "Anna Kowalska",
-      role: "Założycielka & CEO",
-      bio: "Z doświadczeniem w e-commerce i marketingu cyfrowym. Pasjonatka social mediów i trendów internetowych.",
-      image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=300"
+      name: "Karol Wolny",
+      role: "CEO & Founder",
+      bio: "Pasjonat social mediów i e-commerce. Wierzy, że viralowe produkty mogą zmienić sposób, w jaki kupujemy.",
+      image: "/images/Karol-Wolny.webp",
     },
     {
-      name: "Michał Nowak",
-      role: "CTO",
-      bio: "Ekspert technologiczny z 10-letnim doświadczeniem w tworzeniu platform e-commerce i aplikacji webowych.",
-      image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=300"
+      name: "Kamil Krukowski",
+      role: "CTO & Marketing",
+      bio: "Specjalista od technologii webowych i aplikacji mobilnych. Uwielbia tworzyć innowacyjne rozwiązania.",
+      image: "/images/Kamil-Krukowski.webp",
     },
-    {
-      name: "Karolina Wiśniewska",
-      role: "Head of Content",
-      bio: "Specjalistka od treści z doświadczeniem w mediach społecznościowych i blogowaniu. Pasjonatka nowych trendów.",
-      image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=300"
-    },
-    {
-      name: "Piotr Jankowski",
-      role: "Product Manager",
-      bio: "Odpowiedzialny za weryfikację produktów i zarządzanie katalogiem. Ekspert w dziedzinie e-commerce.",
-      image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300"
-    }
   ];
 
   return (
@@ -55,11 +52,14 @@ export const AboutUsPage: React.FC = () => {
           <section className="bg-gradient-to-r from-blue-50 to-purple-50 py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-3xl mx-auto">
-                <h1 className="text-4xl font-bold text-gray-900 mb-6">Poznaj zespół VIRALIST</h1>
+                <h1 className="text-4xl font-bold text-gray-900 mb-6">
+                  Poznaj zespół VIRALIST
+                </h1>
                 <p className="text-xl text-gray-600 mb-8">
-                  Jesteśmy grupą pasjonatów social mediów, e-commerce i nowych technologii, 
-                  którzy połączyli siły, aby stworzyć pierwszą w Polsce platformę agregującą 
-                  viralowe produkty z TikToka i Instagrama.
+                  Jesteśmy grupą pasjonatów social mediów, e-commerce i nowych
+                  technologii, którzy połączyli siły, aby stworzyć pierwszą w
+                  Polsce platformę agregującą viralowe produkty z TikToka i
+                  Instagrama.
                 </p>
               </div>
             </div>
@@ -70,10 +70,13 @@ export const AboutUsPage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">Nasza misja</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                    Nasza misja
+                  </h2>
                   <p className="text-lg text-gray-600 mb-6">
-                    W VIRALIST wierzymy, że odkrywanie najnowszych trendów i produktów powinno być 
-                    łatwe, przyjemne i bezpieczne. Naszą misją jest:
+                    W VIRALIST wierzymy, że odkrywanie najnowszych trendów i
+                    produktów powinno być łatwe, przyjemne i bezpieczne. Naszą
+                    misją jest:
                   </p>
                   <ul className="space-y-4">
                     <li className="flex items-start gap-3">
@@ -81,8 +84,13 @@ export const AboutUsPage: React.FC = () => {
                         <Award className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Weryfikacja jakości</p>
-                        <p className="text-gray-600">Sprawdzamy każdy produkt, aby upewnić się, że spełnia obietnice z reklam.</p>
+                        <p className="font-medium text-gray-900">
+                          Weryfikacja jakości
+                        </p>
+                        <p className="text-gray-600">
+                          Sprawdzamy każdy produkt, aby upewnić się, że spełnia
+                          obietnice z reklam.
+                        </p>
                       </div>
                     </li>
                     <li className="flex items-start gap-3">
@@ -90,8 +98,13 @@ export const AboutUsPage: React.FC = () => {
                         <Clock className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Oszczędność czasu</p>
-                        <p className="text-gray-600">Agregujemy najlepsze produkty w jednym miejscu, abyś nie musiał przeszukiwać całego internetu.</p>
+                        <p className="font-medium text-gray-900">
+                          Oszczędność czasu
+                        </p>
+                        <p className="text-gray-600">
+                          Agregujemy najlepsze produkty w jednym miejscu, abyś
+                          nie musiał przeszukiwać całego internetu.
+                        </p>
                       </div>
                     </li>
                     <li className="flex items-start gap-3">
@@ -99,16 +112,21 @@ export const AboutUsPage: React.FC = () => {
                         <Heart className="h-5 w-5 text-purple-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Budowanie społeczności</p>
-                        <p className="text-gray-600">Tworzymy miejsce, gdzie pasjonaci nowych trendów mogą dzielić się opiniami i odkryciami.</p>
+                        <p className="font-medium text-gray-900">
+                          Budowanie społeczności
+                        </p>
+                        <p className="text-gray-600">
+                          Tworzymy miejsce, gdzie pasjonaci nowych trendów mogą
+                          dzielić się opiniami i odkryciami.
+                        </p>
                       </div>
                     </li>
                   </ul>
                 </div>
                 <div className="relative">
-                  <img 
-                    src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800" 
-                    alt="Zespół VIRALIST podczas pracy" 
+                  <img
+                    src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800"
+                    alt="Zespół VIRALIST podczas pracy"
                     className="rounded-xl shadow-lg"
                   />
                   <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
@@ -124,24 +142,34 @@ export const AboutUsPage: React.FC = () => {
           <section className="py-16 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Poznaj nasz zespół</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Poznaj nasz zespół
+                </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  Za VIRALIST stoi zespół pasjonatów, którzy codziennie pracują nad tym, 
-                  aby dostarczać Ci najlepsze viralowe produkty i treści.
+                  Za VIRALIST stoi zespół pasjonatów, którzy codziennie pracują
+                  nad tym, aby dostarczać Ci najlepsze viralowe produkty i
+                  treści.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
                 {teamMembers.map((member, index) => (
-                  <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                    <img 
-                      src={member.image} 
-                      alt={member.name} 
+                  <div
+                    key={index}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={member.image}
+                      alt={member.name}
                       className="w-full h-64 object-cover"
                     />
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">{member.name}</h3>
-                      <p className="text-blue-600 font-medium mb-3">{member.role}</p>
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                        {member.name}
+                      </h3>
+                      <p className="text-blue-600 font-medium mb-3">
+                        {member.role}
+                      </p>
                       <p className="text-gray-600">{member.bio}</p>
                     </div>
                   </div>
@@ -154,10 +182,12 @@ export const AboutUsPage: React.FC = () => {
           <section className="py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Nasze wartości</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Nasze wartości
+                </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  W VIRALIST kierujemy się wartościami, które pomagają nam tworzyć platformę 
-                  godną zaufania naszych użytkowników.
+                  W VIRALIST kierujemy się wartościami, które pomagają nam
+                  tworzyć platformę godną zaufania naszych użytkowników.
                 </p>
               </div>
 
@@ -166,10 +196,13 @@ export const AboutUsPage: React.FC = () => {
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                     <Award className="h-6 w-6 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Jakość</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    Jakość
+                  </h3>
                   <p className="text-gray-600">
-                    Stawiamy na jakość ponad ilość. Każdy produkt jest weryfikowany 
-                    przez nasz zespół, aby upewnić się, że spełnia nasze standardy.
+                    Stawiamy na jakość ponad ilość. Każdy produkt jest
+                    weryfikowany przez nasz zespół, aby upewnić się, że spełnia
+                    nasze standardy.
                   </p>
                 </div>
 
@@ -177,10 +210,13 @@ export const AboutUsPage: React.FC = () => {
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
                     <Users className="h-6 w-6 text-green-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Transparentność</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    Transparentność
+                  </h3>
                   <p className="text-gray-600">
-                    Zawsze jasno komunikujemy, które produkty zostały przez nas przetestowane, 
-                    a które są polecane na podstawie opinii społeczności.
+                    Zawsze jasno komunikujemy, które produkty zostały przez nas
+                    przetestowane, a które są polecane na podstawie opinii
+                    społeczności.
                   </p>
                 </div>
 
@@ -188,10 +224,13 @@ export const AboutUsPage: React.FC = () => {
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
                     <Heart className="h-6 w-6 text-purple-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Społeczność</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    Społeczność
+                  </h3>
                   <p className="text-gray-600">
-                    Wierzymy w siłę społeczności. Opinie i recenzje naszych użytkowników 
-                    są dla nas niezwykle cenne i pomagają innym w podejmowaniu decyzji.
+                    Wierzymy w siłę społeczności. Opinie i recenzje naszych
+                    użytkowników są dla nas niezwykle cenne i pomagają innym w
+                    podejmowaniu decyzji.
                   </p>
                 </div>
               </div>
@@ -201,9 +240,11 @@ export const AboutUsPage: React.FC = () => {
           {/* Join Us */}
           <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <h2 className="text-3xl font-bold mb-6">Dołącz do społeczności VIRALIST</h2>
+              <h2 className="text-3xl font-bold mb-6">
+                Dołącz do społeczności VIRALIST
+              </h2>
               <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Odkrywaj najnowsze trendy, dziel się opiniami i bądź na bieżąco 
+                Odkrywaj najnowsze trendy, dziel się opiniami i bądź na bieżąco
                 z viralowymi produktami z całego świata.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
