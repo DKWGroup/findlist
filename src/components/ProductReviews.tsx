@@ -50,9 +50,11 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
     try {
       // Add review to database
       const { data, error } = await supabase.rpc('add_product_review', {
-        product_id: productId,
+        p_product_id: productId,
+        p_user_uuid: user.id,
         rating: newReview.rating,
-        comment: newReview.comment.trim()
+        p_comment: newReview.comment.trim(),
+        p_rating: newReview.rating
       });
       
       if (error) throw error;

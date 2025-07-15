@@ -58,7 +58,7 @@ export const UserProfile: React.FC = () => {
   const loadWishlistProducts = async () => {
     try {
       const { data, error } = await supabase.rpc('get_user_wishlist', {
-        user_uuid: user?.id
+        p_user_id: user?.id
       });
       
       if (error) throw error;
@@ -321,8 +321,8 @@ export const UserProfile: React.FC = () => {
     
     try {
       const { data, error } = await supabase.rpc('toggle_wishlist', {
-        product_id: productId,
-        user_uuid: user.id
+        p_product_id: productId,
+        p_user_id: user.id
       });
       
       if (error) throw error;

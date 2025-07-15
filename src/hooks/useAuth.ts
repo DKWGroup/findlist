@@ -718,8 +718,8 @@ export const useAuthCore = (): UseAuthReturn => {
     try {
       // Use the RPC function to toggle wishlist
       const { data, error } = await supabase.rpc('toggle_wishlist', {
-        product_id: productId,
-        user_uuid: user.id
+        p_product_id: productId,
+        p_user_id: user.id
       });
 
       if (error) {
@@ -752,10 +752,10 @@ export const useAuthCore = (): UseAuthReturn => {
     try {
       // Use the RPC function to add review
       const { data, error } = await supabase.rpc('add_product_review', {
-        product_id: productId,
-        rating: review.rating,
-        comment: review.comment,
-        user_uuid: user.id
+        p_product_id: productId,
+        p_user_uuid: user.id,
+        p_rating: review.rating,
+        p_comment: review.comment
       });
 
       if (error) {

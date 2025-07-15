@@ -27,8 +27,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     
     try {
       const { data, error } = await supabase.rpc('toggle_wishlist', {
-        product_id: productId,
-        user_uuid: user.id
+        p_product_id: productId,
+        p_user_id: user.id
       });
       
       if (error) throw error;
