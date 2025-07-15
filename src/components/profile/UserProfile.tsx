@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
-import { products } from "../../data/mockData";
 import { supabase } from "../../services/supabaseStorage";
 import { SecuritySettings } from "./SecuritySettings";
 
@@ -40,13 +39,76 @@ export const UserProfile: React.FC = () => {
     theme: "light",
     language: "pl",
   });
+  const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
+  const [userReviews, setUserReviews] = useState<any[]>([]);
 
   // Load user settings when component mounts
   useEffect(() => {
     if (user) {
       loadUserSettings();
+      
+      // Load wishlist products
+      loadWishlistProducts();
+      
+      // Load user reviews
+      loadUserReviews();
     }
   }, [user]);
+
+  const loadWishlistProducts = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_user_wishlist');
+      
+      if (error) throw error;
+      
+      setWishlistProducts(data || []);
+    } catch (error) {
+      console.error("Error loading wishlist:", error);
+    }
+  };
+  
+  const loadUserReviews = async () => {
+    try {
+      // Get user reviews from profile
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('reviews')
+        .eq('id', user?.id)
+        .single();
+        
+      if (error) throw error;
+      
+      if (profile && profile.reviews) {
+        // Get product details for each review
+        const reviewsWithProducts = await Promise.all(
+          profile.reviews.map(async (review: any) => {
+            try {
+              const { data: product } = await supabase
+                .from('products')
+                .select('id, title, images:product_images(url)')
+                .eq('id', review.productId)
+                .single();
+                
+              return {
+                ...review,
+                product: product ? {
+                  id: product.id,
+                  title: product.title,
+                  image: product.images?.[0]?.url
+                } : null
+              };
+            } catch (err) {
+              return review;
+            }
+          })
+        );
+        
+        setUserReviews(reviewsWithProducts || []);
+      }
+    } catch (error) {
+      console.error("Error loading reviews:", error);
+    }
+  };
 
   const loadUserSettings = async () => {
     try {
@@ -94,10 +156,6 @@ export const UserProfile: React.FC = () => {
   };
 
   if (!user) return null;
-
-  // Mock data for wishlist and reviews - in real app these would come from database
-  const wishlistProducts: any[] = []; // products.filter((p) => user.wishlist?.includes(p.id)) || [];
-  const userReviews: any[] = []; // user.reviews || [];
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -245,48 +303,22 @@ export const UserProfile: React.FC = () => {
   }
 
   const handleWishlistToggle = async (productId: string) => {
-    if (!user) return;
-
     try {
-      // Get current wishlist from database
-      const { data: profile, error: fetchError } = await supabase
-        .from("profiles")
-        .select("wishlist")
-        .eq("id", user.id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      const currentWishlist = profile?.wishlist || [];
-      const isInWishlist = currentWishlist.includes(productId);
-
-      let newWishlist;
-      if (isInWishlist) {
-        // Remove from wishlist
-        newWishlist = currentWishlist.filter((id: string) => id !== productId);
-      } else {
-        // Add to wishlist
-        newWishlist = [...currentWishlist, productId];
-      }
-
-      // Update wishlist in database
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          wishlist: newWishlist,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
+      const { data, error } = await supabase.rpc('toggle_wishlist', {
+        product_id: productId
+      });
+      
+      if (error) throw error;
 
       setFormSuccess(
-        isInWishlist
+        !data
           ? "Produkt został usunięty z wishlist"
           : "Produkt został dodany do wishlist"
       );
 
-      // Refresh the page data or update local state as needed
+      // Reload wishlist products
+      loadWishlistProducts();
+      
       setTimeout(() => setFormSuccess(""), 3000);
     } catch (error: any) {
       console.error("Error updating wishlist:", error);
@@ -717,7 +749,7 @@ export const UserProfile: React.FC = () => {
                       </p>
                       <div className="flex gap-2">
                         <a
-                          href={`/product/${product.id}`}
+                          href={`/produkt/${product.id}`}
                           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors text-sm"
                         >
                           Zobacz produkt
@@ -763,9 +795,7 @@ export const UserProfile: React.FC = () => {
               {userReviews.length > 0 ? (
                 <div className="space-y-6">
                   {userReviews.map((review) => {
-                    const product = products.find(
-                      (p) => p.id === review.productId
-                    );
+                    const product = review.product;
                     return (
                       <div
                         key={review.id}
@@ -774,16 +804,16 @@ export const UserProfile: React.FC = () => {
                         {product && (
                           <div className="flex items-center gap-4 mb-4">
                             <img
-                              src={product.images[0]}
+                              src={product.image}
                               alt={product.title}
                               className="w-16 h-16 object-cover rounded-lg"
                             />
                             <div>
                               <h4 className="font-semibold text-gray-900">
-                                {product.title}
+                                {product?.title || "Produkt"}
                               </h4>
                               <a
-                                href={`/product/${product.id}`}
+                                href={`/produkt/${product.id}`}
                                 className="text-blue-600 hover:text-blue-700 text-sm"
                               >
                                 Zobacz produkt →
