@@ -3,6 +3,11 @@ import { CategoryNav } from "../components/CategoryNav";
 import { FilterBar } from "../components/FilterBar";
 import { Header } from "../components/Header";
 import { ProductGrid } from "../components/ProductGrid";
+import SEOHead from "../components/SEO/SEOHead";
+import {
+  generateOrganizationSchema,
+  generateWebSiteSchema,
+} from "../components/SEO/SchemaMarkup";
 import { useProducts } from "../hooks/useProducts";
 
 export const HomePage: React.FC = () => {
@@ -60,6 +65,14 @@ export const HomePage: React.FC = () => {
     return filtered;
   }, [products, sortBy]);
 
+  const organizationSchema = generateOrganizationSchema();
+  const websiteSchema = generateWebSiteSchema();
+
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [organizationSchema, websiteSchema],
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -77,45 +90,57 @@ export const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header onSearch={setSearchQuery} />
-
-      <CategoryNav
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
+    <>
+      <SEOHead
+        title="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama"
+        description="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty."
+        keywords="viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping"
+        canonicalUrl="https://viralist.pl/"
+        structuredData={combinedSchema}
       />
+      <div className="min-h-screen bg-gray-50">
+        <Header onSearch={setSearchQuery} />
 
-      <main className="container mx-auto px-4 py-6">
-        <FilterBar
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          showTrendingOnly={showTrendingOnly}
-          onTrendingToggle={() => setShowTrendingOnly(!showTrendingOnly)}
+        <CategoryNav
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
         />
 
-        {/* Search Results Summary */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {searchQuery ? `Wyniki dla "${searchQuery}"` : "Viralne Produkty"}
-          </h1>
-          <p className="text-gray-600">
-            {loading
-              ? "Ładowanie..."
-              : `Znaleziono ${filteredAndSortedProducts.length} produktów`}
-            {selectedCategory && ` w kategorii`}
-            {showTrendingOnly && ` (tylko trendy)`}
-          </p>
-        </div>
+        <main className="container mx-auto px-4 py-6">
+          <FilterBar
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            showTrendingOnly={showTrendingOnly}
+            onTrendingToggle={() => setShowTrendingOnly(!showTrendingOnly)}
+          />
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Ładowanie produktów...</p>
+          {/* Search Results Summary */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {searchQuery ? `Wyniki dla "${searchQuery}"` : "Viralne Produkty"}
+            </h1>
+            <p className="text-gray-600">
+              {loading
+                ? "Ładowanie..."
+                : `Znaleziono ${filteredAndSortedProducts.length} produktów`}
+              {selectedCategory && ` w kategorii`}
+              {showTrendingOnly && ` (tylko trendy)`}
+            </p>
           </div>
-        ) : (
-          <ProductGrid products={filteredAndSortedProducts} loading={loading} />
-        )}
-      </main>
-    </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">Ładowanie produktów...</p>
+            </div>
+          ) : (
+            <ProductGrid
+              products={filteredAndSortedProducts}
+              loading={loading}
+            />
+          )}
+        </main>
+      </div>
+    </>
   );
 };

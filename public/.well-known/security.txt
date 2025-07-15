@@ -1,0 +1,18 @@
+# Security Headers
+security.txt
+
+# Contact Information
+Contact: mailto:kontakt@viralist.pl
+Contact: https://viralist.pl/kontakt
+
+# Security Policy
+Policy: https://viralist.pl/security-policy
+
+# Preferred Languages
+Preferred-Languages: pl, en
+
+# Canonical URL
+Canonical: https://viralist.pl/.well-known/security.txt
+
+# Expires
+Expires: 2025-12-31T23:59:59.000Z

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+
+  <!-- Główna strona bloga -->
+  <url>
+    <loc>https://viralist.pl/blog</loc>
+    <lastmod>2025-01-15T10:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Kategorie bloga -->
+  <url>
+    <loc>https://viralist.pl/blog/kategoria/recenzje</loc>
+    <lastmod>2025-01-15T10:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://viralist.pl/blog/kategoria/trendy</loc>
+    <lastmod>2025-01-15T10:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://viralist.pl/blog/kategoria/poradniki</loc>
+    <lastmod>2025-01-15T10:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Przykładowe posty na blogu -->
+  <url>
+    <loc>https://viralist.pl/blog/jak-rozpoznac-viral-scam</loc>
+    <lastmod>2025-01-15T10:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <news:news>
+      <news:publication>
+        <news:name>VIRALIST Blog</news:name>
+        <news:language>pl</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-15T10:00:00+00:00</news:publication_date>
+      <news:title>Jak rozpoznać viral scam? Kompletny przewodnik</news:title>
+      <news:keywords>viral scam, oszustwa, TikTok, Instagram, bezpieczeństwo</news:keywords>
+    </news:news>
+  </url>
+
+  <url>
+    <loc>https://viralist.pl/blog/najlepsze-produkty-z-tiktoka-2025</loc>
+    <lastmod>2025-01-14T10:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <news:news>
+      <news:publication>
+        <news:name>VIRALIST Blog</news:name>
+        <news:language>pl</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-14T10:00:00+00:00</news:publication_date>
+      <news:title>Najlepsze produkty z TikToka 2025</news:title>
+      <news:keywords>TikTok, produkty 2025, trendy, viral produkty</news:keywords>
+    </news:news>
+  </url>
+
+</urlset>

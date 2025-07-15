@@ -16,8 +16,12 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
+import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
+import { generateProductSchema } from "../components/SEO/SchemaMarkup";
+import SEOHead from "../components/SEO/SEOHead";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { useProduct } from "../hooks/useProducts";
+import { useSEO } from "../hooks/useSEO";
 import { productCodeService } from "../services/productCodeService";
 import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
@@ -33,12 +37,12 @@ export const ProductPage: React.FC = () => {
   const [productReviews, setProductReviews] = useState<any[]>([]);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Use the product hook to fetch product data
-  const { 
-    product: fetchedProduct, 
+  const {
+    product: fetchedProduct,
     loading: productLoading,
-    error: productError
+    error: productError,
   } = useProduct(id);
 
   useEffect(() => {
@@ -46,25 +50,27 @@ export const ProductPage: React.FC = () => {
       setIsLoading(true);
       try {
         let foundProduct = fetchedProduct;
-        
+
         // If we have a code or alias but no direct ID
         if (!id && codeOrAlias) {
           // Query by code or alias
           const { data, error } = await supabase
-            .from('products')
-            .select(`
+            .from("products")
+            .select(
+              `
               *,
               product_images(url, position),
               product_tags(tag),
               product_affiliate_links(platform, url),
               product_social_links(platform, url),
               product_stats(*)
-            `)
+            `
+            )
             .or(`code.eq.${codeOrAlias},url_alias.eq.${codeOrAlias}`)
             .single();
-            
+
           if (error) throw error;
-          
+
           if (data) {
             // Transform to Product type
             foundProduct = {
@@ -78,42 +84,44 @@ export const ProductPage: React.FC = () => {
               price: {
                 original: data.price_original,
                 discounted: data.price_discounted,
-                currency: data.price_currency || 'PLN'
+                currency: data.price_currency || "PLN",
               },
-              affiliateLinks: data.product_affiliate_links?.reduce((acc: any, link: any) => {
-                acc[link.platform] = link.url;
-                return acc;
-              }, {}) || {},
-              socialLinks: data.product_social_links?.reduce((acc: any, link: any) => {
-                acc[link.platform] = link.url;
-                return acc;
-              }, {}) || {},
+              affiliateLinks:
+                data.product_affiliate_links?.reduce((acc: any, link: any) => {
+                  acc[link.platform] = link.url;
+                  return acc;
+                }, {}) || {},
+              socialLinks:
+                data.product_social_links?.reduce((acc: any, link: any) => {
+                  acc[link.platform] = link.url;
+                  return acc;
+                }, {}) || {},
               popularity: {
                 views: data.product_stats?.views || 0,
                 likes: data.product_stats?.likes || 0,
-                shares: data.product_stats?.shares || 0
+                shares: data.product_stats?.shares || 0,
               },
               ratings: {
                 average: data.product_stats?.rating_average || 0,
-                count: data.product_stats?.rating_count || 0
+                count: data.product_stats?.rating_count || 0,
               },
               dateAdded: data.created_at,
               isVerified: data.is_verified,
               isTrending: data.is_trending,
               code: data.code,
-              urlAlias: data.url_alias
+              urlAlias: data.url_alias,
             };
           }
         }
-        
+
         setProduct(foundProduct);
-        
+
         // Check if product is in user's wishlist
         if (isAuthenticated && user && foundProduct) {
           const isInList = user.wishlist?.includes(foundProduct.id) || false;
           setIsInWishlist(isInList);
         }
-        
+
         // Load reviews for the product
         if (foundProduct) {
           loadProductReviews(foundProduct.id);
@@ -124,18 +132,18 @@ export const ProductPage: React.FC = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadProduct();
   }, [id, codeOrAlias, fetchedProduct, isAuthenticated, user]);
-  
+
   const loadProductReviews = async (productId: string) => {
     try {
-      const { data, error } = await supabase.rpc('get_product_reviews', {
-        product_id: productId
+      const { data, error } = await supabase.rpc("get_product_reviews", {
+        product_id: productId,
       });
-      
+
       if (error) throw error;
-      
+
       if (data) {
         setProductReviews(data);
       }
@@ -146,32 +154,32 @@ export const ProductPage: React.FC = () => {
 
   const toggleWishlist = async (productId: string) => {
     if (!isAuthenticated || !user) return;
-    
+
     try {
-      const { data, error } = await supabase.rpc('toggle_wishlist', {
-        product_id: productId
+      const { data, error } = await supabase.rpc("toggle_wishlist", {
+        product_id: productId,
       });
-      
+
       if (error) throw error;
-      
+
       setIsInWishlist(!!data);
     } catch (error) {
       console.error("Error toggling wishlist:", error);
     }
   };
-  
+
   const addReview = async (productId: string, review: any) => {
     if (!isAuthenticated || !user) return;
-    
+
     try {
-      const { data, error } = await supabase.rpc('add_product_review', {
+      const { data, error } = await supabase.rpc("add_product_review", {
         product_id: productId,
         rating: review.rating,
-        comment: review.comment
+        comment: review.comment,
       });
-      
+
       if (error) throw error;
-      
+
       // Reload reviews after adding a new one
       loadProductReviews(productId);
     } catch (error) {
@@ -284,6 +292,20 @@ export const ProductPage: React.FC = () => {
 
   return (
     <Layout showFooter={false}>
+      {/* SEO Head */}
+      <SEOHead
+        title={`${product.title} - VIRALIST`}
+        description={product.description}
+        canonicalUrl={
+          product.urlAlias
+            ? `https://viralist.pl/${product.urlAlias}`
+            : `https://viralist.pl/produkt/${product.id}`
+        }
+        ogImage={product.images[0]}
+        ogType="product"
+        structuredData={generateProductSchema(product)}
+      />
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

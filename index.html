@@ -1,51 +1,70 @@
 <!doctype html>
 <html lang="pl">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- SEO Meta Tags -->
-    <title>VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama w jednym miejscu</title>
-    <meta name="description" content="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne. Dołącz do społeczności, która wie, co jest na topie!" />
-    
-    <!-- Keywords -->
-    <meta name="keywords" content="viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping, hity z TikToka" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://viralist.pl/" />
-    <meta property="og:title" content="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama" />
-    <meta property="og:description" content="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! Katalog viralowych produktów, recenzji i inspiracji." />
-    <meta property="og:image" content="https://viralist.pl/og-image.jpg" />
-    <meta property="og:locale" content="pl_PL" />
-    <meta property="og:site_name" content="VIRALIST" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://viralist.pl/" />
-    <meta property="twitter:title" content="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama" />
-    <meta property="twitter:description" content="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! Katalog viralowych produktów, recenzji i inspiracji." />
-    <meta property="twitter:image" content="https://viralist.pl/og-image.jpg" />
-    
-    <!-- Additional SEO -->
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content="VIRALIST" />
-    <link rel="canonical" href="https://viralist.pl/" />
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Favicons and PWA -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Viewport and responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Default SEO Meta Tags (will be overridden by Helmet) -->
+  <title>VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama</title>
+  <meta name="description"
+    content="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji." />
+
+  <!-- Performance and Preloading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="//www.google-analytics.com" />
+  <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+  <link rel="preload" href="/og-image.png" as="image" type="image/png" />
+
+  <!-- Security -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+  <!-- Basic Open Graph (will be enhanced by Helmet) -->
+  <meta property="og:site_name" content="VIRALIST" />
+  <meta property="og:locale" content="pl_PL" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://viralist.pl/" />
+  <meta property="og:title" content="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama" />
+  <meta property="og:description"
+    content="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji." />
+  <meta property="og:image" content="https://viralist.pl/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="VIRALIST - Najlepsze viralowe produkty z TikToka i Instagrama" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@viralist_pl" />
+  <meta name="twitter:creator" content="@viralist_pl" />
+  <meta name="twitter:title" content="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama" />
+  <meta name="twitter:description"
+    content="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji." />
+  <meta name="twitter:image" content="https://viralist.pl/og-image.png" />
+  <meta name="twitter:image:alt" content="VIRALIST - Najlepsze viralowe produkty z TikToka i Instagrama" />
+
+  <!-- Basic structured data -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "VIRALIST",
       "url": "https://viralist.pl",
       "description": "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://viralist.pl/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      },
       "publisher": {
         "@type": "Organization",
         "name": "VIRALIST",
@@ -53,9 +72,11 @@
       }
     }
     </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

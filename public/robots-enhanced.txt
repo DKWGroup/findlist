@@ -1,3 +1,4 @@
+# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
 
@@ -16,6 +17,9 @@ Disallow: /dev/
 Disallow: /*?utm_*
 Disallow: /*?fbclid=*
 Disallow: /*?gclid=*
+Disallow: /*?ref=*
+Disallow: /*?source=*
+Disallow: /*/print$
 
 # Allow important pages
 Allow: /produkty/
@@ -31,12 +35,30 @@ Crawl-delay: 1
 # Specific rules for different bots
 User-agent: Googlebot
 Crawl-delay: 0.5
+Allow: /
 
 User-agent: Bingbot
 Crawl-delay: 1
+Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
+Crawl-delay: 0
 
 User-agent: Twitterbot
 Allow: /
+Crawl-delay: 0
+
+User-agent: LinkedInBot
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /

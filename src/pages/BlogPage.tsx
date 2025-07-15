@@ -1,8 +1,11 @@
 import { Filter, Plus, Search } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Layout } from "../components/Layout";
 import { BlogCard } from "../components/blog/BlogCard";
+import { Layout } from "../components/Layout";
+import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
+import { generateWebSiteSchema } from "../components/SEO/SchemaMarkup";
+import SEOHead from "../components/SEO/SEOHead";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { blogCategories, blogLabels, blogPosts } from "../data/blogData";
 
@@ -69,9 +72,24 @@ export const BlogPage: React.FC = () => {
     );
   };
 
+  const websiteSchema = generateWebSiteSchema();
+
+  const breadcrumbItems = [{ label: "Blog", href: "/blog", current: true }];
+
   return (
     <Layout>
+      <SEOHead
+        title="Blog - VIRALIST"
+        description="Recenzje, porady i ostrzeżenia o viralnych produktach. Odkryj najlepsze i najgorsze produkty z TikToka i Instagrama."
+        canonicalUrl="https://viralist.pl/blog"
+        structuredData={websiteSchema}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumbs */}
+        <div className="mb-4">
+          <Breadcrumbs items={breadcrumbItems} />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
