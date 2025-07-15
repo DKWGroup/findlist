@@ -60,84 +60,14 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Add review to database - z rozbudowanym debugowaniem
-      console.log("📤 [REVIEW_SUBMIT] Wysyłanie RPC add_product_review...");
-
-      // Spróbujmy różnych wariantów parametrów
-      let data, error;
-
-      // Wariant 1: aktualne parametry
-      console.log("🔧 [REVIEW_SUBMIT] Próba 1: obecne parametry");
-      const rpcParams1 = {
-        product_id: productId,
-        user_uuid: user.id,
-        rating: newReview.rating,
-        comment: newReview.comment.trim(),
-      };
-      console.log("📊 [REVIEW_SUBMIT] Parametry wariant 1:", rpcParams1);
-
-      try {
-        const result1 = await supabase.rpc("add_product_review", rpcParams1);
-        data = result1.data;
-        error = result1.error;
-        console.log("✅ [REVIEW_SUBMIT] Wariant 1 działa!");
-      } catch (err) {
-        console.log("❌ [REVIEW_SUBMIT] Wariant 1 nie działa:", err);
-
-        // Wariant 2: parametry z prefiksami p_
-        console.log("🔧 [REVIEW_SUBMIT] Próba 2: parametry z prefiksami p_");
-        const rpcParams2 = {
-          p_product_id: productId,
-          p_user_id: user.id,
-          p_rating: newReview.rating,
-          p_comment: newReview.comment.trim(),
-        };
-        console.log("📊 [REVIEW_SUBMIT] Parametry wariant 2:", rpcParams2);
-
-        try {
-          const result2 = await supabase.rpc("add_product_review", rpcParams2);
-          data = result2.data;
-          error = result2.error;
-          console.log("✅ [REVIEW_SUBMIT] Wariant 2 działa!");
-        } catch (err2) {
-          console.log("❌ [REVIEW_SUBMIT] Wariant 2 nie działa:", err2);
-
-          // Wariant 3: user_id zamiast user_uuid
-          console.log("🔧 [REVIEW_SUBMIT] Próba 3: user_id zamiast user_uuid");
-          const rpcParams3 = {
-            product_id: productId,
-            user_id: user.id,
-            rating: newReview.rating,
-            comment: newReview.comment.trim(),
-          };
-          console.log("📊 [REVIEW_SUBMIT] Parametry wariant 3:", rpcParams3);
-
-          try {
-            const result3 = await supabase.rpc(
-              "add_product_review",
-              rpcParams3
-            );
-            data = result3.data;
-            error = result3.error;
-            console.log("✅ [REVIEW_SUBMIT] Wariant 3 działa!");
-          } catch (err3) {
-            console.log(
-              "❌ [REVIEW_SUBMIT] Wszystkie warianty nie działają:",
-              err3
-            );
-            // Użyj ostatniego błędu
-            error = (err3 as any)?.error || err3;
-          }
-        }
-      }
-
-      console.log(
-        "📊 [REVIEW_SUBMIT] Finalna odpowiedź z RPC add_product_review:",
-        {
-          data,
-          error,
-        }
-      );
+      // Add review to database using the new function
+      console.log("📤 [REVIEW_SUBMIT] Wysyłanie RPC add_product_review z parametrami p_*");
+      const { data, error } = await supabase.rpc("add_product_review", {
+        p_product_id: productId,
+        p_user_id: user.id,
+        p_rating: newReview.rating,
+        p_comment: newReview.comment.trim()
+      });
 
       if (error) {
         console.error("❌ [REVIEW_SUBMIT] Błąd RPC:", error);
@@ -208,63 +138,10 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
         productId
       );
       try {
-        // Najpierw sprawdźmy czy funkcja w ogóle istnieje
-        console.log("� [DEBUG] Sprawdzanie dostępnych funkcji RPC...");
-
-        // Spróbujmy różnych wariantów parametrów
-        let data, error;
-
-        // Wariant 1: p_product_id
-        try {
-          console.log("�📤 [LOAD_REVIEWS] Próba 1: p_product_id");
-          const result1 = await supabase.rpc("get_product_reviews", {
-            p_product_id: productId,
-          });
-          data = result1.data;
-          error = result1.error;
-          console.log("✅ [LOAD_REVIEWS] Wariant 1 działa!");
-        } catch (err) {
-          console.log("❌ [LOAD_REVIEWS] Wariant 1 nie działa:", err);
-
-          // Wariant 2: product_id
-          try {
-            console.log("📤 [LOAD_REVIEWS] Próba 2: product_id");
-            const result2 = await supabase.rpc("get_product_reviews", {
-              product_id: productId,
-            });
-            data = result2.data;
-            error = result2.error;
-            console.log("✅ [LOAD_REVIEWS] Wariant 2 działa!");
-          } catch (err2) {
-            console.log("❌ [LOAD_REVIEWS] Wariant 2 nie działa:", err2);
-
-            // Wariant 3: bez parametrów, może funkcja nie istnieje
-            try {
-              console.log(
-                "� [LOAD_REVIEWS] Próba 3: sprawdzenie funkcji bez parametrów"
-              );
-              const result3 = await supabase.rpc("get_product_reviews");
-              console.log(
-                "📄 [LOAD_REVIEWS] Funkcja istnieje ale bez parametrów:",
-                result3
-              );
-            } catch (err3) {
-              console.log(
-                "❌ [LOAD_REVIEWS] Funkcja nie istnieje wcale:",
-                err3
-              );
-              error = {
-                code: "FUNCTION_NOT_FOUND",
-                message:
-                  "Funkcja get_product_reviews nie istnieje w bazie danych",
-              };
-            }
-          }
-        }
-
-        console.log("📊 [LOAD_REVIEWS] Finalna odpowiedź:", {
-          data,
-          error,
+        // Use the new get_product_reviews function
+        console.log("📤 [LOAD_REVIEWS] Pobieranie recenzji z parametrem p_product_id");
+        const { data, error } = await supabase.rpc("get_product_reviews", {
+          p_product_id: productId
         });
 
         if (error) {
