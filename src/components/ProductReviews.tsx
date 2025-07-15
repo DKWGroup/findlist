@@ -1,5 +1,5 @@
 import { Flag, Star, ThumbsDown, ThumbsUp, User } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { supabase } from "../services/supabaseStorage";
 
@@ -39,39 +39,146 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviewsState, setReviews] = useState(reviews);
 
-  const userHasReviewed = reviewsState.some((review) => review.userId === user?.id);
+  const userHasReviewed = reviewsState.some(
+    (review) => review.userId === user?.id
+  );
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !newReview.comment.trim()) return;
+    console.log(
+      "🔄 [REVIEW_SUBMIT] Rozpoczęcie dodawania recenzji dla produktu:",
+      productId
+    );
+    console.log("👤 [REVIEW_SUBMIT] Użytkownik:", user?.id);
+    console.log("📝 [REVIEW_SUBMIT] Dane recenzji:", newReview);
+
+    if (!user || !newReview.comment.trim()) {
+      console.warn("⚠️ [REVIEW_SUBMIT] Brak użytkownika lub komentarza");
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
-      // Add review to database
-      const { data, error } = await supabase.rpc('add_product_review', {
-        p_product_id: productId,
-        p_user_uuid: user.id,
-        rating: newReview.rating,
-        p_comment: newReview.comment.trim(),
-        p_rating: newReview.rating
-      });
-      
-      if (error) throw error;
+      // Add review to database - z rozbudowanym debugowaniem
+      console.log("📤 [REVIEW_SUBMIT] Wysyłanie RPC add_product_review...");
 
-      onAddReview({
-        userId: user.id,
-        userName: user.name,
-        userAvatar: user.avatar,
+      // Spróbujmy różnych wariantów parametrów
+      let data, error;
+
+      // Wariant 1: aktualne parametry
+      console.log("🔧 [REVIEW_SUBMIT] Próba 1: obecne parametry");
+      const rpcParams1 = {
+        product_id: productId,
+        user_uuid: user.id,
         rating: newReview.rating,
         comment: newReview.comment.trim(),
-        isVerified: user.role === "admin",
-      });
+      };
+      console.log("📊 [REVIEW_SUBMIT] Parametry wariant 1:", rpcParams1);
 
+      try {
+        const result1 = await supabase.rpc("add_product_review", rpcParams1);
+        data = result1.data;
+        error = result1.error;
+        console.log("✅ [REVIEW_SUBMIT] Wariant 1 działa!");
+      } catch (err) {
+        console.log("❌ [REVIEW_SUBMIT] Wariant 1 nie działa:", err);
+
+        // Wariant 2: parametry z prefiksami p_
+        console.log("🔧 [REVIEW_SUBMIT] Próba 2: parametry z prefiksami p_");
+        const rpcParams2 = {
+          p_product_id: productId,
+          p_user_id: user.id,
+          p_rating: newReview.rating,
+          p_comment: newReview.comment.trim(),
+        };
+        console.log("📊 [REVIEW_SUBMIT] Parametry wariant 2:", rpcParams2);
+
+        try {
+          const result2 = await supabase.rpc("add_product_review", rpcParams2);
+          data = result2.data;
+          error = result2.error;
+          console.log("✅ [REVIEW_SUBMIT] Wariant 2 działa!");
+        } catch (err2) {
+          console.log("❌ [REVIEW_SUBMIT] Wariant 2 nie działa:", err2);
+
+          // Wariant 3: user_id zamiast user_uuid
+          console.log("🔧 [REVIEW_SUBMIT] Próba 3: user_id zamiast user_uuid");
+          const rpcParams3 = {
+            product_id: productId,
+            user_id: user.id,
+            rating: newReview.rating,
+            comment: newReview.comment.trim(),
+          };
+          console.log("📊 [REVIEW_SUBMIT] Parametry wariant 3:", rpcParams3);
+
+          try {
+            const result3 = await supabase.rpc(
+              "add_product_review",
+              rpcParams3
+            );
+            data = result3.data;
+            error = result3.error;
+            console.log("✅ [REVIEW_SUBMIT] Wariant 3 działa!");
+          } catch (err3) {
+            console.log(
+              "❌ [REVIEW_SUBMIT] Wszystkie warianty nie działają:",
+              err3
+            );
+            // Użyj ostatniego błędu
+            error = (err3 as any)?.error || err3;
+          }
+        }
+      }
+
+      console.log(
+        "📊 [REVIEW_SUBMIT] Finalna odpowiedź z RPC add_product_review:",
+        {
+          data,
+          error,
+        }
+      );
+
+      if (error) {
+        console.error("❌ [REVIEW_SUBMIT] Błąd RPC:", error);
+        throw error;
+      }
+
+      console.log(
+        "✅ [REVIEW_SUBMIT] Recenzja dodana do bazy danych, review_id:",
+        data
+      );
+
+      // Sprawdźmy strukturę user obiektu
+      console.log("🔍 [DEBUG] Struktura user obiektu:", user);
+
+      const reviewData = {
+        userId: user.id,
+        userName:
+          (user as any).name ||
+          (user as any).user_metadata?.name ||
+          user.email?.split("@")[0] ||
+          "Użytkownik",
+        userAvatar:
+          (user as any).avatar || (user as any).user_metadata?.avatar_url,
+        rating: newReview.rating,
+        comment: newReview.comment.trim(),
+        isVerified: (user as any).role === "admin",
+      };
+
+      console.log(
+        "📤 [REVIEW_SUBMIT] Wywołanie onAddReview z danymi:",
+        reviewData
+      );
+      onAddReview(reviewData);
+
+      console.log("🧹 [REVIEW_SUBMIT] Czyszczenie formularza...");
       setNewReview({ rating: 5, comment: "" });
       setShowReviewForm(false);
+
+      console.log("✅ [REVIEW_SUBMIT] Recenzja została pomyślnie dodana");
     } catch (error) {
-      console.error("Error submitting review:", error);
+      console.error("❌ [REVIEW_SUBMIT] Błąd dodawania recenzji:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -79,7 +186,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
 
   const averageRating =
     reviewsState.length > 0
-      ? reviewsState.reduce((sum, review) => sum + review.rating, 0) / reviewsState.length
+      ? reviewsState.reduce((sum, review) => sum + review.rating, 0) /
+        reviewsState.length
       : 0;
 
   const ratingDistribution = [5, 4, 3, 2, 1].map((rating) => ({
@@ -95,21 +203,104 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
 
   useEffect(() => {
     const loadReviews = async () => {
+      console.log(
+        "🔄 [LOAD_REVIEWS] Rozpoczęcie ładowania recenzji dla produktu:",
+        productId
+      );
       try {
-        const { data, error } = await supabase.rpc('get_product_reviews', {
-          p_product_id: productId
+        // Najpierw sprawdźmy czy funkcja w ogóle istnieje
+        console.log("� [DEBUG] Sprawdzanie dostępnych funkcji RPC...");
+
+        // Spróbujmy różnych wariantów parametrów
+        let data, error;
+
+        // Wariant 1: p_product_id
+        try {
+          console.log("�📤 [LOAD_REVIEWS] Próba 1: p_product_id");
+          const result1 = await supabase.rpc("get_product_reviews", {
+            p_product_id: productId,
+          });
+          data = result1.data;
+          error = result1.error;
+          console.log("✅ [LOAD_REVIEWS] Wariant 1 działa!");
+        } catch (err) {
+          console.log("❌ [LOAD_REVIEWS] Wariant 1 nie działa:", err);
+
+          // Wariant 2: product_id
+          try {
+            console.log("📤 [LOAD_REVIEWS] Próba 2: product_id");
+            const result2 = await supabase.rpc("get_product_reviews", {
+              product_id: productId,
+            });
+            data = result2.data;
+            error = result2.error;
+            console.log("✅ [LOAD_REVIEWS] Wariant 2 działa!");
+          } catch (err2) {
+            console.log("❌ [LOAD_REVIEWS] Wariant 2 nie działa:", err2);
+
+            // Wariant 3: bez parametrów, może funkcja nie istnieje
+            try {
+              console.log(
+                "� [LOAD_REVIEWS] Próba 3: sprawdzenie funkcji bez parametrów"
+              );
+              const result3 = await supabase.rpc("get_product_reviews");
+              console.log(
+                "📄 [LOAD_REVIEWS] Funkcja istnieje ale bez parametrów:",
+                result3
+              );
+            } catch (err3) {
+              console.log(
+                "❌ [LOAD_REVIEWS] Funkcja nie istnieje wcale:",
+                err3
+              );
+              error = {
+                code: "FUNCTION_NOT_FOUND",
+                message:
+                  "Funkcja get_product_reviews nie istnieje w bazie danych",
+              };
+            }
+          }
+        }
+
+        console.log("📊 [LOAD_REVIEWS] Finalna odpowiedź:", {
+          data,
+          error,
         });
-        
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
+
+        if (error) {
+          console.error("❌ [LOAD_REVIEWS] Błąd RPC:", error);
+          // Nie rzucamy błędu, tylko ustawiamy pustą tablicę
+          setReviews([]);
+          return;
+        }
+
+        if (data && Array.isArray(data) && data.length > 0) {
+          console.log(
+            "✅ [LOAD_REVIEWS] Załadowano recenzje:",
+            data.length,
+            "recenzji"
+          );
+          console.log("📄 [LOAD_REVIEWS] Szczegóły recenzji:", data);
           setReviews(data);
+        } else {
+          console.log("ℹ️ [LOAD_REVIEWS] Brak recenzji dla produktu");
+          console.log(
+            "📄 [LOAD_REVIEWS] Typ i zawartość data:",
+            typeof data,
+            data
+          );
+          setReviews([]);
         }
       } catch (error) {
-        console.error("Error loading reviews:", error);
+        console.error("❌ [LOAD_REVIEWS] Błąd ładowania recenzji:", error);
+        setReviews([]);
       }
     };
 
+    console.log(
+      "🚀 [LOAD_REVIEWS] useEffect uruchomiony dla produktu:",
+      productId
+    );
     loadReviews();
   }, [productId]);
 

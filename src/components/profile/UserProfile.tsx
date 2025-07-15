@@ -44,108 +44,228 @@ export const UserProfile: React.FC = () => {
 
   // Load user settings when component mounts
   useEffect(() => {
+    console.log(
+      "🚀 [INIT] UserProfile useEffect uruchomiony, użytkownik:",
+      user?.id
+    );
+
     if (user) {
+      console.log("👤 [INIT] Użytkownik zalogowany, ładowanie danych...");
+
+      console.log("🔄 [INIT] Ładowanie ustawień użytkownika...");
       loadUserSettings();
-      
+
+      console.log("🔄 [INIT] Ładowanie produktów wishlisty...");
       // Load wishlist products
       loadWishlistProducts();
-      
+
+      console.log("🔄 [INIT] Ładowanie recenzji użytkownika...");
       // Load user reviews
       loadUserReviews();
+    } else {
+      console.log("❌ [INIT] Brak zalogowanego użytkownika");
     }
   }, [user]);
 
   const loadWishlistProducts = async () => {
+    console.log(
+      "🔄 [WISHLIST] Rozpoczęcie ładowania wishlisty dla użytkownika:",
+      user?.id
+    );
     try {
-      const { data, error } = await supabase.rpc('get_user_wishlist', {
-        p_user_id: user?.id
+      const { data, error } = await supabase.rpc("get_user_wishlist", {
+        user_uuid: user?.id,
       });
-      
-      if (error) throw error;
-      
+
+      console.log("📊 [WISHLIST] Odpowiedź z RPC get_user_wishlist:", {
+        data,
+        error,
+      });
+
+      if (error) {
+        console.error(
+          "❌ [WISHLIST] Błąd podczas pobierania wishlisty:",
+          error
+        );
+        throw error;
+      }
+
       // Handle the case where data might be a string representation of JSON
       let wishlistData = data || [];
-      if (typeof wishlistData === 'string') {
+      console.log(
+        "📝 [WISHLIST] Surowe dane wishlisty:",
+        wishlistData,
+        "Typ:",
+        typeof wishlistData
+      );
+
+      if (typeof wishlistData === "string") {
         try {
+          console.log("🔄 [WISHLIST] Parsowanie stringowych danych JSON...");
           wishlistData = JSON.parse(wishlistData);
+          console.log("✅ [WISHLIST] Dane po parsowaniu:", wishlistData);
         } catch (parseError) {
-          console.error('Error parsing wishlist data:', parseError);
+          console.error(
+            "❌ [WISHLIST] Błąd parsowania danych wishlisty:",
+            parseError
+          );
           wishlistData = [];
         }
       }
-      
+
+      console.log(
+        "✅ [WISHLIST] Załadowano produkty wishlisty:",
+        wishlistData.length,
+        "produktów"
+      );
       setWishlistProducts(wishlistData);
     } catch (error) {
-      console.error("Error loading wishlist:", error);
+      console.error("❌ [WISHLIST] Błąd ładowania wishlisty:", error);
       setWishlistProducts([]);
     }
   };
-  
+
   const loadUserReviews = async () => {
+    console.log(
+      "🔄 [REVIEWS] Rozpoczęcie ładowania recenzji dla użytkownika:",
+      user?.id
+    );
     try {
       // Get user reviews from profile
       const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('reviews')
-        .eq('id', user?.id)
+        .from("profiles")
+        .select("reviews")
+        .eq("id", user?.id)
         .single();
-        
-      if (error) throw error;
-      
+
+      console.log("📊 [REVIEWS] Odpowiedź z tabeli profiles:", {
+        profile,
+        error,
+      });
+
+      if (error) {
+        console.error("❌ [REVIEWS] Błąd podczas pobierania profilu:", error);
+        throw error;
+      }
+
       if (profile && profile.reviews) {
+        console.log(
+          "📝 [REVIEWS] Znalezione recenzje w profilu:",
+          profile.reviews.length,
+          "recenzji"
+        );
+        console.log("📄 [REVIEWS] Surowe dane recenzji:", profile.reviews);
+
         // Get product details for each review
         const reviewsWithProducts = await Promise.all(
-          profile.reviews.map(async (review: any) => {
+          profile.reviews.map(async (review: any, index: number) => {
+            console.log(
+              `🔄 [REVIEWS] Ładowanie produktu ${index + 1}/${
+                profile.reviews.length
+              } dla recenzji:`,
+              review.productId
+            );
             try {
-              const { data: product } = await supabase
-                .from('products')
-                .select('id, title, images:product_images(url)')
-                .eq('id', review.productId)
+              const { data: product, error: productError } = await supabase
+                .from("products")
+                .select("id, title, images:product_images(url)")
+                .eq("id", review.productId)
                 .single();
-                
-              return {
+
+              console.log(`📊 [REVIEWS] Produkt ${index + 1}:`, {
+                product,
+                productError,
+              });
+
+              if (productError) {
+                console.warn(
+                  `⚠️ [REVIEWS] Nie znaleziono produktu ${review.productId}:`,
+                  productError
+                );
+              }
+
+              const reviewWithProduct = {
                 ...review,
-                product: product ? {
-                  id: product.id,
-                  title: product.title,
-                  image: product.images?.[0]?.url
-                } : null
+                product: product
+                  ? {
+                      id: product.id,
+                      title: product.title,
+                      image: product.images?.[0]?.url,
+                    }
+                  : null,
               };
+
+              console.log(
+                `✅ [REVIEWS] Recenzja ${index + 1} z produktem:`,
+                reviewWithProduct
+              );
+              return reviewWithProduct;
             } catch (err) {
+              console.error(
+                `❌ [REVIEWS] Błąd ładowania produktu dla recenzji ${review.productId}:`,
+                err
+              );
               return review;
             }
           })
         );
-        
+
+        console.log(
+          "✅ [REVIEWS] Wszystkie recenzje z produktami załadowane:",
+          reviewsWithProducts.length
+        );
         setUserReviews(reviewsWithProducts || []);
+      } else {
+        console.log("ℹ️ [REVIEWS] Brak recenzji w profilu użytkownika");
+        setUserReviews([]);
       }
     } catch (error) {
-      console.error("Error loading reviews:", error);
+      console.error("❌ [REVIEWS] Błąd ładowania recenzji:", error);
+      setUserReviews([]);
     }
   };
 
   const loadUserSettings = async () => {
+    console.log("🔄 [SETTINGS] Ładowanie ustawień użytkownika:", user?.id);
     try {
       // Get profile data
+      console.log("📤 [SETTINGS] Pobieranie danych profilu...");
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user?.id)
         .single();
 
-      if (profileError) throw profileError;
+      console.log("📊 [SETTINGS] Dane profilu:", { profile, profileError });
+
+      if (profileError) {
+        console.error("❌ [SETTINGS] Błąd profilu:", profileError);
+        throw profileError;
+      }
 
       // Get user settings
+      console.log("📤 [SETTINGS] Pobieranie ustawień użytkownika...");
       const { data: settings, error: settingsError } = await supabase
         .from("user_settings")
         .select("*")
         .eq("id", user?.id)
         .single();
 
-      if (settingsError && settingsError.code !== "PGRST116")
-        throw settingsError;
+      console.log("📊 [SETTINGS] Ustawienia użytkownika:", {
+        settings,
+        settingsError,
+      });
 
-      setFormData({
+      if (settingsError && settingsError.code !== "PGRST116") {
+        console.error("❌ [SETTINGS] Błąd ustawień:", settingsError);
+        throw settingsError;
+      }
+
+      if (settingsError?.code === "PGRST116") {
+        console.log("ℹ️ [SETTINGS] Brak ustawień - używanie domyślnych");
+      }
+
+      const finalFormData = {
         name: profile?.full_name || user?.email?.split("@")[0] || "",
         email: user?.email || "",
         notification_preferences: settings?.notification_preferences || {
@@ -162,9 +282,15 @@ export const UserProfile: React.FC = () => {
         },
         theme: settings?.theme || "light",
         language: settings?.language || "pl",
-      });
+      };
+
+      console.log("✅ [SETTINGS] Finalne dane formularza:", finalFormData);
+      setFormData(finalFormData);
     } catch (error) {
-      console.error("Error loading user settings:", error);
+      console.error(
+        "❌ [SETTINGS] Błąd ładowania ustawień użytkownika:",
+        error
+      );
       setFormError("Nie udało się załadować ustawień użytkownika");
     }
   };
@@ -174,40 +300,65 @@ export const UserProfile: React.FC = () => {
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
+    console.log(
+      "🔄 [SAVE] Rozpoczęcie zapisywania profilu dla użytkownika:",
+      user?.id
+    );
+    console.log("📝 [SAVE] Dane do zapisania:", formData);
+
     setFormError("");
     setFormSuccess("");
     setIsSaving(true);
 
     try {
       // Update profile
+      console.log("📤 [SAVE] Aktualizacja profilu...");
+      const profileUpdateData = {
+        full_name: formData.name,
+        updated_at: new Date().toISOString(),
+      };
+      console.log("📊 [SAVE] Dane profilu do aktualizacji:", profileUpdateData);
+
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({
-          full_name: formData.name,
-          updated_at: new Date().toISOString(),
-        })
+        .update(profileUpdateData)
         .eq("id", user?.id);
 
-      if (profileError) throw profileError;
+      console.log("📊 [SAVE] Wynik aktualizacji profilu:", { profileError });
+
+      if (profileError) {
+        console.error("❌ [SAVE] Błąd aktualizacji profilu:", profileError);
+        throw profileError;
+      }
 
       // Update user settings using RPC function
+      console.log("📤 [SAVE] Aktualizacja ustawień użytkownika przez RPC...");
+      const rpcParams = {
+        user_uuid: user?.id,
+        new_notification_preferences: formData.notification_preferences,
+        new_privacy_settings: formData.privacy_settings,
+        new_theme: formData.theme,
+        new_language: formData.language,
+      };
+      console.log("📊 [SAVE] Parametry RPC:", rpcParams);
+
       const { error: settingsError } = await supabase.rpc(
         "update_user_settings",
-        {
-          user_uuid: user?.id,
-          new_notification_preferences: formData.notification_preferences,
-          new_privacy_settings: formData.privacy_settings,
-          new_theme: formData.theme,
-          new_language: formData.language,
-        }
+        rpcParams
       );
 
-      if (settingsError) throw settingsError;
+      console.log("📊 [SAVE] Wynik aktualizacji ustawień:", { settingsError });
 
+      if (settingsError) {
+        console.error("❌ [SAVE] Błąd aktualizacji ustawień:", settingsError);
+        throw settingsError;
+      }
+
+      console.log("✅ [SAVE] Profil został pomyślnie zaktualizowany");
       setFormSuccess("Profil został zaktualizowany pomyślnie");
       setIsEditing(false);
     } catch (error: any) {
-      console.error("Error updating profile:", error);
+      console.error("❌ [SAVE] Błąd aktualizacji profilu:", error);
       setFormError(
         error.message || "Wystąpił błąd podczas aktualizacji profilu"
       );
@@ -317,28 +468,54 @@ export const UserProfile: React.FC = () => {
   }
 
   const handleWishlistToggle = async (productId: string) => {
-    if (!user) return;
-    
+    console.log(
+      "🔄 [WISHLIST_TOGGLE] Przełączanie wishlisty dla produktu:",
+      productId,
+      "użytkownik:",
+      user?.id
+    );
+
+    if (!user) {
+      console.warn("⚠️ [WISHLIST_TOGGLE] Brak zalogowanego użytkownika");
+      return;
+    }
+
     try {
-      const { data, error } = await supabase.rpc('toggle_wishlist', {
+      console.log("📤 [WISHLIST_TOGGLE] Wysyłanie RPC toggle_wishlist...");
+      const { data, error } = await supabase.rpc("toggle_wishlist", {
         p_product_id: productId,
-        p_user_id: user.id
+        p_user_id: user.id,
       });
-      
-      if (error) throw error;
+
+      console.log("📊 [WISHLIST_TOGGLE] Odpowiedź z RPC toggle_wishlist:", {
+        data,
+        error,
+      });
+
+      if (error) {
+        console.error("❌ [WISHLIST_TOGGLE] Błąd RPC:", error);
+        throw error;
+      }
+
+      const isAdded = data;
+      console.log(
+        "✅ [WISHLIST_TOGGLE] Operacja zakończona:",
+        isAdded ? "DODANO" : "USUNIĘTO"
+      );
 
       setFormSuccess(
-        !data
+        !isAdded
           ? "Produkt został usunięty z wishlist"
           : "Produkt został dodany do wishlist"
       );
 
       // Reload wishlist products
-      loadWishlistProducts();
-      
+      console.log("🔄 [WISHLIST_TOGGLE] Przeładowywanie wishlisty...");
+      await loadWishlistProducts();
+
       setTimeout(() => setFormSuccess(""), 3000);
     } catch (error: any) {
-      console.error("Error updating wishlist:", error);
+      console.error("❌ [WISHLIST_TOGGLE] Błąd aktualizacji wishlist:", error);
       setFormError(
         error.message || "Wystąpił błąd podczas aktualizacji wishlist"
       );
