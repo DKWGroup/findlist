@@ -2,7 +2,6 @@ import { Flag, Star, ThumbsDown, ThumbsUp, User } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { supabase } from "../services/supabaseStorage";
-import { supabase } from "../services/supabaseStorage";
 
 interface Review {
   id: string;
@@ -52,52 +51,28 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
     );
     console.log("👤 [REVIEW_SUBMIT] Użytkownik:", user?.id);
     console.log("📝 [REVIEW_SUBMIT] Dane recenzji:", newReview);
-    console.log(
-      "🔄 [REVIEW_SUBMIT] Rozpoczęcie dodawania recenzji dla produktu:",
-      productId
-    );
-    console.log("👤 [REVIEW_SUBMIT] Użytkownik:", user?.id);
-    console.log("📝 [REVIEW_SUBMIT] Dane recenzji:", newReview);
 
     if (!user || !newReview.comment.trim()) {
-      console.warn("⚠️ [REVIEW_SUBMIT] Brak użytkownika lub komentarza");
       console.warn("⚠️ [REVIEW_SUBMIT] Brak użytkownika lub komentarza");
       return;
     }
 
     setIsSubmitting(true);
 
-    console.log(
-      "🔄 [LOAD_REVIEWS] Rozpoczęcie ładowania recenzji dla produktu:",
-      productId
-    );
     try {
-      // Add review to database using the new function
       // Add review to database using the new function
       console.log("📤 [REVIEW_SUBMIT] Wysyłanie RPC add_product_review z parametrami p_*");
       const { data, error } = await supabase.rpc("add_product_review", { 
         p_product_id: productId,
-      // Use the get_product_reviews function with correct parameter name
-      console.log("📤 [LOAD_REVIEWS] Pobieranie recenzji z parametrem p_product_id");
-      const { data, error } = await supabase.rpc("get_product_reviews", {
-        p_product_id: productId
+        p_user_id: user.id,
+        p_rating: newReview.rating,
+        p_comment: newReview.comment.trim()
       });
 
       if (error) {
-        console.error("❌ [LOAD_REVIEWS] Błąd RPC:", error);
-        // Nie rzucamy błędu, tylko ustawiamy pustą tablicę
-        console.error("❌ [REVIEW_SUBMIT] Błąd RPC:", error);
         console.error("❌ [REVIEW_SUBMIT] Błąd RPC:", error);
         throw error;
       }
-
-      console.log(
-        "✅ [REVIEW_SUBMIT] Recenzja dodana do bazy danych, review_id:",
-        data
-      );
-
-      // Sprawdźmy strukturę user obiektu
-      console.log("🔍 [DEBUG] Struktura user obiektu:", user);
 
       console.log(
         "✅ [REVIEW_SUBMIT] Recenzja dodana do bazy danych, review_id:",
@@ -125,31 +100,16 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
         "📤 [REVIEW_SUBMIT] Wywołanie onAddReview z danymi:",
         reviewData
       );
-      console.log(
-        "📤 [REVIEW_SUBMIT] Wywołanie onAddReview z danymi:",
-        reviewData
-      );
       onAddReview(reviewData);
 
-      console.log("🧹 [REVIEW_SUBMIT] Czyszczenie formularza...");
       console.log("🧹 [REVIEW_SUBMIT] Czyszczenie formularza...");
       setNewReview({ rating: 5, comment: "" });
       setShowReviewForm(false);
 
       console.log("✅ [REVIEW_SUBMIT] Recenzja została pomyślnie dodana");
-
-      console.log("✅ [REVIEW_SUBMIT] Recenzja została pomyślnie dodana");
     } catch (error) {
-        console.log("ℹ️ [LOAD_REVIEWS] Brak recenzji dla produktu");
-        console.log(
-          "📄 [LOAD_REVIEWS] Typ i zawartość data:",
-          typeof data,
-          data
-        );
-      console.error("❌ [REVIEW_SUBMIT] Błąd dodawania recenzji:", error);
       console.error("❌ [REVIEW_SUBMIT] Błąd dodawania recenzji:", error);
     } finally {
-      console.error("❌ [LOAD_REVIEWS] Błąd ładowania recenzji:", error);
       setIsSubmitting(false);
     }
   };
@@ -178,7 +138,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
         productId
       );
       try {
-        // Use the new get_product_reviews function
+        // Use the get_product_reviews function with correct parameter name
         console.log("📤 [LOAD_REVIEWS] Pobieranie recenzji z parametrem p_product_id");
         const { data, error } = await supabase.rpc("get_product_reviews", {
           p_product_id: productId
@@ -215,12 +175,6 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
     };
 
     console.log(
-        console.log(
-          "✅ [LOAD_REVIEWS] Załadowano recenzje:",
-          data.length,
-          "recenzji"
-        );
-        console.log("📄 [LOAD_REVIEWS] Szczegóły recenzji:", data);
       "🚀 [LOAD_REVIEWS] useEffect uruchomiony dla produktu:",
       productId
     );
