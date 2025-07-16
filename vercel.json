@@ -38,10 +38,5 @@
       ]
     }
   ],
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "vercel/node@20.x"
-    }
-  },
   "regions": ["iad1"]
 }
