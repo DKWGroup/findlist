@@ -9,11 +9,11 @@ import {
   User,
   X,
 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
-import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
 import { isUserAdmin } from "../utils/adminUtils";
+import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
 
 // Add loading state for auth
 interface HeaderProps {
@@ -33,12 +33,14 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   // Check admin status when user changes
   useEffect(() => {
     if (user) {
-      isUserAdmin().then(adminStatus => {
-        setIsAdmin(adminStatus);
-      }).catch(err => {
-        console.error("Error checking admin status:", err);
-        setIsAdmin(false);
-      });
+      isUserAdmin()
+        .then((adminStatus) => {
+          setIsAdmin(adminStatus);
+        })
+        .catch((err) => {
+          console.error("Error checking admin status:", err);
+          setIsAdmin(false);
+        });
     } else {
       setIsAdmin(false);
     }
@@ -128,14 +130,6 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
                     >
                       <User className="h-4 w-4" />
                       <span>Mój profil</span>
-                    </Link>
-                    <Link
-                      to="/profil?tab=wishlist"
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span>Wishlist</span>
                     </Link>
                     {isAdmin && (
                       <Link
@@ -237,14 +231,6 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
                 >
                   <User className="h-5 w-5" />
                   <span>Mój profil</span>
-                </Link>
-                <Link
-                  to="/profil?tab=wishlist"
-                  className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Heart className="h-5 w-5" />
-                  <span>Wishlist</span>
                 </Link>
                 {isAdmin && (
                   <Link
