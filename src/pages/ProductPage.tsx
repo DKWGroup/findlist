@@ -138,9 +138,9 @@ export const ProductPage: React.FC = () => {
 
   const loadProductReviews = async (productId: string) => {
     try {
-      // Use the new get_product_reviews function
-      const { data, error } = await supabase.rpc("get_product_reviews", { 
-        p_product_id: productId 
+      // Use the get_product_reviews function with correct parameter name
+      const { data, error } = await supabase.rpc("get_product_reviews", {
+        p_product_id: productId
       });
 
       if (error) throw error;
@@ -158,9 +158,9 @@ export const ProductPage: React.FC = () => {
 
     try {
       // Use the toggle_wishlist function with correct parameter names
-      const { data, error } = await supabase.rpc("toggle_wishlist", { 
-        p_product_id: productId, 
-        p_user_id: user.id 
+      const { data, error } = await supabase.rpc("toggle_wishlist", {
+        p_product_id: productId,
+        p_user_id: user.id
       });
 
       if (error) throw error;
@@ -176,11 +176,11 @@ export const ProductPage: React.FC = () => {
 
     try {
       // Use the new add_product_review function with correct parameter names
-      const { data, error } = await supabase.rpc("add_product_review", { 
-        p_product_id: productId, 
-        p_user_id: user.id, 
-        p_rating: review.rating, 
-        p_comment: review.comment 
+      const { data, error } = await supabase.rpc("add_product_review", {
+        p_product_id: productId,
+        p_user_id: user.id,
+        p_rating: review.rating,
+        p_comment: review.comment
       });
 
       if (error) throw error;

@@ -74,8 +74,8 @@ export const UserProfile: React.FC = () => {
     );
     try {
       // Use the get_user_wishlist function with correct parameter name
-      const { data, error } = await supabase.rpc("get_user_wishlist", { 
-        p_user_id: user?.id 
+      const { data, error } = await supabase.rpc("get_user_wishlist", {
+        p_user_id: user?.id
       });
 
       console.log("📊 [WISHLIST] Odpowiedź z RPC get_user_wishlist:", {
@@ -484,9 +484,9 @@ export const UserProfile: React.FC = () => {
     try {
       console.log("📤 [WISHLIST_TOGGLE] Wysyłanie RPC toggle_wishlist...");
       // Use the toggle_wishlist function with correct parameter names
-      const { data, error } = await supabase.rpc("toggle_wishlist", { 
-        p_product_id: productId, 
-        p_user_id: user.id 
+      const { data, error } = await supabase.rpc("toggle_wishlist", {
+        p_product_id: productId,
+        p_user_id: user.id
       });
 
       console.log("📊 [WISHLIST_TOGGLE] Odpowiedź z RPC toggle_wishlist:", {
