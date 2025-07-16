@@ -34,7 +34,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 5,
-    comment: ""
+    comment: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviewsState, setReviews] = useState(reviews);
@@ -61,12 +61,14 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
 
     try {
       // Add review to database using the new function
-      console.log("📤 [REVIEW_SUBMIT] Wysyłanie RPC add_product_review z parametrami p_*");
-      const { data, error } = await supabase.rpc("add_product_review", { 
+      console.log(
+        "📤 [REVIEW_SUBMIT] Wysyłanie RPC add_product_review z parametrami p_*"
+      );
+      const { data, error } = await supabase.rpc("add_product_review", {
         p_product_id: productId,
         p_user_id: user.id,
         p_rating: newReview.rating,
-        p_comment: newReview.comment.trim()
+        p_comment: newReview.comment.trim(),
       });
 
       if (error) {
@@ -139,9 +141,11 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
       );
       try {
         // Use the get_product_reviews function with correct parameter name
-        console.log("📤 [LOAD_REVIEWS] Pobieranie recenzji z parametrem p_product_id");
+        console.log(
+          "📤 [LOAD_REVIEWS] Pobieranie recenzji z parametrem p_product_id"
+        );
         const { data, error } = await supabase.rpc("get_product_reviews", {
-          p_product_id: productId
+          p_product_id: productId,
         });
 
         if (error) {
@@ -432,7 +436,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
                     {review.comment}
                   </p>
 
-                  <div className="flex items-center gap-4 text-sm">
+                  {/* <div className="flex items-center gap-4 text-sm">
                     <button className="flex items-center gap-1 text-gray-500 hover:text-green-600 transition-colors">
                       <ThumbsUp className="h-4 w-4" />
                       <span>Pomocne ({review.likes})</span>
@@ -445,7 +449,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({
                       <Flag className="h-4 w-4" />
                       <span>Zgłoś</span>
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

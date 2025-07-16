@@ -75,7 +75,7 @@ export const UserProfile: React.FC = () => {
     try {
       // Use the get_user_wishlist function with correct parameter name
       const { data, error } = await supabase.rpc("get_user_wishlist", {
-        p_user_id: user?.id
+        user_uuid: user?.id,
       });
 
       console.log("📊 [WISHLIST] Odpowiedź z RPC get_user_wishlist:", {
@@ -164,13 +164,29 @@ export const UserProfile: React.FC = () => {
               `🔄 [REVIEWS] Ładowanie produktu ${index + 1}/${
                 profile.reviews.length
               } dla recenzji:`,
-              review.productId
+              review
             );
             try {
+              const { data: reviewData, error: reviewError } = await supabase
+                .from("product_reviews")
+                .select("product_id, rating, comment, created_at")
+                .eq("id", review)
+                .single();
+
+              console.log(`📊 [REVIEWS] Recenzja ${index + 1}:`, reviewData);
+
+              if (!reviewData) {
+                console.warn(
+                  `⚠️ [REVIEWS] Nie znaleziono danych recenzji dla ID:`,
+                  review
+                );
+                return { ...review, product: null };
+              }
+
               const { data: product, error: productError } = await supabase
                 .from("products")
-                .select("id, title, images:product_images(url)")
-                .eq("id", review.productId)
+                .select("id, title, url_alias")
+                .eq("id", reviewData.product_id)
                 .single();
 
               console.log(`📊 [REVIEWS] Produkt ${index + 1}:`, {
@@ -180,18 +196,27 @@ export const UserProfile: React.FC = () => {
 
               if (productError) {
                 console.warn(
-                  `⚠️ [REVIEWS] Nie znaleziono produktu ${review.productId}:`,
+                  `⚠️ [REVIEWS] Nie znaleziono produktu ${reviewData.product_id}:`,
                   productError
                 );
               }
 
+              const { data: productImage, error: productImageError } =
+                await supabase
+                  .from("product_images")
+                  .select("url")
+                  .eq("product_id", reviewData.product_id)
+                  .single();
+
               const reviewWithProduct = {
-                ...review,
+                ...reviewData,
+                dateCreated: reviewData.created_at,
                 product: product
                   ? {
                       id: product.id,
                       title: product.title,
-                      image: product.images?.[0]?.url,
+                      image: productImage?.url || null,
+                      url: product.url_alias,
                     }
                   : null,
               };
@@ -486,7 +511,7 @@ export const UserProfile: React.FC = () => {
       // Use the toggle_wishlist function with correct parameter names
       const { data, error } = await supabase.rpc("toggle_wishlist", {
         p_product_id: productId,
-        p_user_id: user.id
+        p_user_id: user.id,
       });
 
       console.log("📊 [WISHLIST_TOGGLE] Odpowiedź z RPC toggle_wishlist:", {
@@ -1009,7 +1034,7 @@ export const UserProfile: React.FC = () => {
                                 {product?.title || "Produkt"}
                               </h4>
                               <a
-                                href={`/produkt/${product.id}`}
+                                href={`/${product.url}`}
                                 className="text-blue-600 hover:text-blue-700 text-sm"
                               >
                                 Zobacz produkt →
