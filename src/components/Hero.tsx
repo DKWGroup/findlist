@@ -77,7 +77,7 @@ export const Hero: React.FC = () => {
             </div>
 
             {/* Trending searches */}
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {/* <div className="mt-4 flex flex-wrap justify-center gap-2">
               <span className="text-sm text-gray-500 mr-2">Popularne:</span>
               {trendingSearches.map((search, index) => (
                 <button
@@ -88,7 +88,7 @@ export const Hero: React.FC = () => {
                   {search}
                 </button>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {/* CTA Buttons */}

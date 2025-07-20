@@ -155,8 +155,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <article className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden">
-        <div
-          className="relative w-full h-full cursor-pointer"
+        <Link
+          to={productUrl}
+          onClick={handleCardClick}
+          className="block relative w-full h-full"
           onMouseEnter={() =>
             product.images.length > 1 && setCurrentImageIndex(1)
           }
@@ -201,32 +203,33 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
             </div>
           )}
+        </Link>
 
-          {/* Wishlist Button */}
+        {/* Buttons outside Link to prevent nesting issues */}
+        {/* Wishlist Button */}
+        <button
+          onClick={handleWishlistToggle}
+          className="absolute bottom-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 group/heart z-10"
+          aria-label={isInWishlist ? "Usuń z wishlist" : "Dodaj do wishlist"}
+        >
+          <Heart
+            className={`h-5 w-5 transition-colors duration-200 group-hover/heart:scale-110 ${
+              isInWishlist
+                ? "fill-red-500 text-red-500"
+                : "text-gray-400 hover:text-red-500"
+            }`}
+          />
+        </button>
+
+        {/* Quick Actions */}
+        <div className="absolute bottom-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <button
-            onClick={handleWishlistToggle}
-            className="absolute bottom-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 group/heart"
-            aria-label={isInWishlist ? "Usuń z wishlist" : "Dodaj do wishlist"}
+            onClick={handleShare}
+            className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all duration-200"
+            aria-label="Udostępnij produkt"
           >
-            <Heart
-              className={`h-5 w-5 transition-colors duration-200 group-hover/heart:scale-110 ${
-                isInWishlist
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-400 hover:text-red-500"
-              }`}
-            />
+            <Share2 className="h-4 w-4 text-gray-600" />
           </button>
-
-          {/* Quick Actions */}
-          <div className="absolute bottom-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button
-              onClick={handleShare}
-              className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all duration-200"
-              aria-label="Udostępnij produkt"
-            >
-              <Share2 className="h-4 w-4 text-gray-600" />
-            </button>
-          </div>
         </div>
       </div>
 

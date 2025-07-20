@@ -49,8 +49,6 @@ function App() {
               <Route path="/o-nas" element={<AboutUsPage />} />
               <Route path="/jak-to-dziala" element={<HowItWorksPage />} />
               <Route path="/kontakt" element={<ContactPage />} />
-              <Route path="/test-products" element={<TestProductsPage />} />
-              <Route path="/test-stats" element={<TestPage />} />
               <Route path="/logowanie" element={<LoginPage />} />
               <Route path="/rejestracja" element={<RegisterPage />} />
               <Route path="/reset-hasla" element={<ResetPasswordPage />} />
