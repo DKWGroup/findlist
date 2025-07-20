@@ -26,17 +26,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Safe auth hook usage with error handling
   let user: any = null;
   let toggleWishlist = async (productId: string) => {
-    if (!user) return false;
+    if (!user?.id) {
+      console.log("No user found for wishlist toggle");
+      return false;
+    }
 
     try {
+      console.log(
+        "Toggling wishlist for product:",
+        productId,
+        "user:",
+        user.id
+      );
+
       // Use the toggle_wishlist function with correct parameter names
       const { data, error } = await supabase.rpc("toggle_wishlist", {
         p_product_id: productId,
         p_user_id: user.id,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error in toggle_wishlist RPC:", error);
+        throw error;
+      }
 
+      console.log("Wishlist toggle result:", data);
       return data;
     } catch (error) {
       console.error("Error toggling wishlist:", error);
@@ -74,10 +88,55 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Check if product is in user's wishlist
   useEffect(() => {
-    if (user && (user as any).wishlist) {
-      setIsInWishlist((user as any).wishlist.includes(product.id));
-    }
-  }, [user, product.id]);
+    const checkWishlistStatus = async () => {
+      if (user?.id) {
+        try {
+          console.log(
+            "Checking wishlist status for user:",
+            user.id,
+            "product:",
+            product.id
+          );
+
+          // Check wishlist status using the same approach as ProductStatsService
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("wishlist")
+            .eq("id", user.id)
+            .single();
+
+          if (error) {
+            console.error("Error checking wishlist:", error);
+            return;
+          }
+
+          console.log("User wishlist data:", data);
+
+          if (data?.wishlist) {
+            const wishlist = Array.isArray(data.wishlist) ? data.wishlist : [];
+            const isInWishlist = wishlist.includes(product.id);
+            console.log(
+              "Product in wishlist:",
+              isInWishlist,
+              "wishlist:",
+              wishlist
+            );
+            setIsInWishlist(isInWishlist);
+          } else {
+            console.log("No wishlist found for user");
+            setIsInWishlist(false);
+          }
+        } catch (error) {
+          console.error("Error in checkWishlistStatus:", error);
+        }
+      } else {
+        console.log("No user logged in");
+        setIsInWishlist(false);
+      }
+    };
+
+    checkWishlistStatus();
+  }, [user?.id, product.id]);
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -120,16 +179,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-  const handleWishlistToggle = (e: React.MouseEvent) => {
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (user) {
-      toggleWishlist(product.id).then((result) => {
-        if (result !== null) {
+    if (user?.id) {
+      try {
+        const result = await toggleWishlist(product.id);
+        if (result !== null && typeof result === "boolean") {
+          // Update local state based on the result
           setIsInWishlist(result);
+        } else {
+          // If result is not clear, refresh the wishlist status
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("wishlist")
+            .eq("id", user.id)
+            .single();
+
+          if (!error && data?.wishlist) {
+            const wishlist = Array.isArray(data.wishlist) ? data.wishlist : [];
+            setIsInWishlist(wishlist.includes(product.id));
+          }
         }
-      });
+      } catch (error) {
+        console.error("Error in handleWishlistToggle:", error);
+      }
     }
   };
 
