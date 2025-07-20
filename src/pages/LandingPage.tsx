@@ -1,41 +1,42 @@
-import React from 'react';
-import { Layout } from '../components/Layout';
-import { Hero } from '../components/Hero';
-import { TrendingProducts } from '../components/TrendingProducts';
-import { Categories } from '../components/Categories';
-import { Features } from '../components/Features';
-import { BlogPreview } from '../components/BlogPreview';
-import { HowItWorks } from '../components/HowItWorks';
-import { CommunitySection } from '../components/CommunitySection';
-import { Testimonials } from '../components/Testimonials';
-import { MetaTags } from '../components/SEO/MetaTags';
-import { WebsiteStructuredData } from '../components/SEO/StructuredData';
+import React from "react";
+import { BlogPreview } from "../components/BlogPreview";
+import { Categories } from "../components/Categories";
+import { CommunitySection } from "../components/CommunitySection";
+import { Features } from "../components/Features";
+import { Hero } from "../components/Hero";
+import { HowItWorks } from "../components/HowItWorks";
+import { Layout } from "../components/Layout";
+import { MetaTags } from "../components/SEO/MetaTags";
+import { WebsiteStructuredData } from "../components/SEO/StructuredData";
+import { Testimonials } from "../components/Testimonials";
+import { TrendingProducts } from "../components/TrendingProducts";
 
 export const LandingPage: React.FC = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "VIRALIST",
-    "url": "https://viralist.pl",
-    "description": "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
-    "potentialAction": {
+    name: "VIRALIST",
+    url: "https://viralist.pl",
+    description:
+      "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
+    potentialAction: {
       "@type": "SearchAction",
-      "target": "https://viralist.pl/search?q={search_term_string}",
-      "query-input": "required name=search_term_string"
+      target: "https://viralist.pl/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
     },
-    "publisher": {
+    publisher: {
       "@type": "Organization",
-      "name": "VIRALIST",
-      "url": "https://viralist.pl",
-      "logo": {
+      name: "VIRALIST",
+      url: "https://viralist.pl",
+      logo: {
         "@type": "ImageObject",
-        "url": "https://viralist.pl/viralist-logo2.png"
+        url: "https://viralist.pl/viralist-logo2.png",
       },
-      "sameAs": [
+      sameAs: [
         "https://tiktok.com/@viralist_pl",
-        "https://instagram.com/viralist.pl"
-      ]
-    }
+        "https://instagram.com/viralist.pl",
+      ],
+    },
   };
 
   return (
@@ -48,16 +49,16 @@ export const LandingPage: React.FC = () => {
         structuredData={structuredData}
       />
       <WebsiteStructuredData />
-      
+
       <Layout showFooter={true}>
         <Hero />
         <TrendingProducts />
-        <Categories />
+        {/* <Categories /> */}
         <Features />
         <BlogPreview />
         <HowItWorks />
         <CommunitySection />
-        <Testimonials />
+        {/* <Testimonials /> */}
       </Layout>
     </>
   );

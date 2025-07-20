@@ -1,4 +1,4 @@
-import { BookOpen, Facebook, Instagram, Mail, Twitter } from "lucide-react";
+import { BookOpen, Instagram, Mail } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -27,19 +27,7 @@ export const Footer: React.FC = () => {
                 href="#"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
               >
-                <Facebook className="h-6 w-6" />
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
                 <Instagram className="h-6 w-6" />
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
-                <Twitter className="h-6 w-6" />
               </a>
             </div>
           </div>
@@ -56,7 +44,7 @@ export const Footer: React.FC = () => {
                   Wszystkie produkty
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   to="/produkty?trending=true"
                   className="text-gray-400 hover:text-white transition-colors"
@@ -87,7 +75,7 @@ export const Footer: React.FC = () => {
                 >
                   Dom i ogród
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -126,14 +114,6 @@ export const Footer: React.FC = () => {
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Kontakt
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/kariera"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Kariera
                 </Link>
               </li>
             </ul>

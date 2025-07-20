@@ -90,7 +90,7 @@ export const CommunitySection: React.FC = () => {
         </div>
 
         {/* Community Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+        {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           {communityStats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
@@ -110,7 +110,7 @@ export const CommunitySection: React.FC = () => {
               </div>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Social Features */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
