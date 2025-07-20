@@ -25,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     useSimplifiedAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
@@ -57,9 +58,16 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       onSearch(query);
     } else {
       // Navigate to search page with query
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      navigate(`/szukaj?q=${encodeURIComponent(query)}`);
     }
   };
+
+  // Close mobile search when clicking outside or opening menu
+  useEffect(() => {
+    if (isMenuOpen) {
+      setIsMobileSearchOpen(false);
+    }
+  }, [isMenuOpen]);
 
   return (
     <header className="bg-white shadow-sm border-b border-blue-100 sticky top-0 z-50">
@@ -170,28 +178,58 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             )}
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100 transition-colors"
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
+          {/* Mobile Menu Button and Search */}
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Mobile Search Button */}
+            <button
+              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+              className="p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100 transition-colors"
+              aria-label="Szukaj"
+            >
+              <Search className="h-6 w-6" />
+            </button>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100 transition-colors"
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Search */}
-        <div className="md:hidden pb-4">
-          <AdvancedSearchBar
-            onSearch={handleSearch}
-            placeholder="Szukaj viralowych produktów..."
-            showFilters={false}
-            className="w-full"
-          />
-        </div>
+        {isMobileSearchOpen && (
+          <div className="md:hidden pb-4 border-t border-gray-100 bg-gray-50">
+            <div className="pt-4 px-4">
+              <div className="flex items-center space-x-2">
+                <div className="flex-1">
+                  <AdvancedSearchBar
+                    onSearch={(query, filters) => {
+                      handleSearch(query, filters);
+                      setIsMobileSearchOpen(false); // Zamknij wyszukiwanie po wyszukaniu
+                    }}
+                    placeholder="Szukaj viralowych produktów..."
+                    showFilters={false}
+                    className="w-full"
+                  />
+                </div>
+                <button
+                  onClick={() => setIsMobileSearchOpen(false)}
+                  className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-200 transition-colors"
+                  aria-label="Zamknij wyszukiwanie"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Menu */}
