@@ -140,7 +140,7 @@ export const ProductPage: React.FC = () => {
     try {
       // Use the get_product_reviews function with correct parameter name
       const { data, error } = await supabase.rpc("get_product_reviews", {
-        p_product_id: productId
+        p_product_id: productId,
       });
 
       if (error) throw error;
@@ -160,7 +160,7 @@ export const ProductPage: React.FC = () => {
       // Use the toggle_wishlist function with correct parameter names
       const { data, error } = await supabase.rpc("toggle_wishlist", {
         p_product_id: productId,
-        p_user_id: user.id
+        p_user_id: user.id,
       });
 
       if (error) throw error;
@@ -180,7 +180,7 @@ export const ProductPage: React.FC = () => {
         p_product_id: productId,
         p_user_id: user.id,
         p_rating: review.rating,
-        p_comment: review.comment
+        p_comment: review.comment,
       });
 
       if (error) throw error;
@@ -526,18 +526,6 @@ export const ProductPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <ThumbsUp className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {formatNumber(product.popularity.likes)}
-                    </p>
-                    <p className="text-sm text-gray-600">Polubień</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
                     <Star className="h-5 w-5 text-yellow-600" />
                   </div>
@@ -548,18 +536,6 @@ export const ProductPage: React.FC = () => {
                     <p className="text-sm text-gray-600">
                       {product.ratings.count} ocen
                     </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Share2 className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {formatNumber(product.popularity.shares)}
-                    </p>
-                    <p className="text-sm text-gray-600">Udostępnień</p>
                   </div>
                 </div>
               </div>
