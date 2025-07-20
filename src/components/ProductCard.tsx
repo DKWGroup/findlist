@@ -6,14 +6,17 @@ import {
   Heart,
   Share2,
   Star,
-  ThumbsUp,
 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
+import {
+  ProductStats,
+  ProductStatsService,
+} from "../services/productStatsService";
+import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
 import { LazyImage } from "./Performance/LazyImage";
-import { supabase } from "../services/supabaseStorage";
 
 interface ProductCardProps {
   product: Product;
@@ -21,19 +24,19 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Safe auth hook usage with error handling
-  let user = null;
+  let user: any = null;
   let toggleWishlist = async (productId: string) => {
     if (!user) return false;
-    
+
     try {
       // Use the toggle_wishlist function with correct parameter names
-      const { data, error } = await supabase.rpc('toggle_wishlist', { 
-        p_product_id: productId, 
-        p_user_id: user.id 
+      const { data, error } = await supabase.rpc("toggle_wishlist", {
+        p_product_id: productId,
+        p_user_id: user.id,
       });
-      
+
       if (error) throw error;
-      
+
       return data;
     } catch (error) {
       console.error("Error toggling wishlist:", error);
@@ -51,11 +54,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [productStats, setProductStats] = useState<ProductStats | null>(null);
+
+  // Load product statistics
+  useEffect(() => {
+    const loadProductStats = async () => {
+      try {
+        const stats = await ProductStatsService.getProductStats(product.id);
+        if (stats) {
+          setProductStats(stats);
+        }
+      } catch (error) {
+        console.error("Error loading product stats:", error);
+      }
+    };
+
+    loadProductStats();
+  }, [product.id, user]);
 
   // Check if product is in user's wishlist
   useEffect(() => {
-    if (user && user.wishlist) {
-      setIsInWishlist(user.wishlist.includes(product.id));
+    if (user && (user as any).wishlist) {
+      setIsInWishlist((user as any).wishlist.includes(product.id));
     }
   }, [user, product.id]);
 
@@ -103,14 +123,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (user) {
-      toggleWishlist(product.id).then(result => {
+      toggleWishlist(product.id).then((result) => {
         if (result !== null) {
           setIsInWishlist(result);
         }
       });
     }
+  };
+
+  const handleCardClick = () => {
+    // Increment views when card is clicked
+    ProductStatsService.incrementViews(product.id);
+  };
+
+  // Use real stats or fallback to product data
+  const displayStats = productStats || {
+    views: product.popularity.views,
+    likes: product.popularity.likes,
+    shares: product.popularity.shares,
+    rating_average: product.ratings.average,
+    rating_count: product.ratings.count,
   };
 
   const productUrl = product.urlAlias
@@ -199,7 +233,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Content Section */}
       <div className="p-4">
         {/* Title */}
-        <Link to={productUrl}>
+        <Link to={productUrl} onClick={handleCardClick}>
           <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-2 hover:text-blue-600 transition-colors">
             {product.title}
           </h3>
@@ -223,16 +257,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
           <div className="flex items-center gap-1">
             <Eye className="h-3 w-3" />
-            <span>{formatNumber(product.popularity.views)}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <ThumbsUp className="h-3 w-3" />
-            <span>{formatNumber(product.popularity.likes)}</span>
+            <span>{formatNumber(displayStats.views)}</span>
           </div>
           <div className="flex items-center gap-1">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span>{product.ratings.average}</span>
-            <span>({product.ratings.count})</span>
+            <span>{displayStats.rating_average.toFixed(1)}</span>
+            <span>({displayStats.rating_count})</span>
           </div>
         </div>
 
@@ -251,6 +281,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* CTA Button */}
         <Link
           to={productUrl}
+          onClick={handleCardClick}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 group/cta"
         >
           <span>Zobacz produkt</span>

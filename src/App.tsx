@@ -2,26 +2,27 @@ import { HelmetProvider } from "react-helmet-async";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SimplifiedAuthProvider } from "./contexts/SimplifiedAuthContext";
+import { AboutUsPage } from "./pages/AboutUsPage";
 import { AdminPage } from "./pages/AdminPage";
 import { AffiliateProgramPage } from "./pages/AffiliateProgramPage";
 import { BlogEditorPage } from "./pages/BlogEditorPage";
 import { BlogPage } from "./pages/BlogPage";
 import { BlogPostPage } from "./pages/BlogPostPage";
+import { ContactPage } from "./pages/ContactPage";
 import { CookiePolicyPage } from "./pages/CookiePolicyPage";
 import { HomePage } from "./pages/HomePage";
+import { HowItWorksPage } from "./pages/HowItWorksPage";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { ProductPage } from "./pages/ProductPage";
 import { ProductsPage } from "./pages/ProductsPage";
-import { AboutUsPage } from "./pages/AboutUsPage";
-import { HowItWorksPage } from "./pages/HowItWorksPage";
-import { ContactPage } from "./pages/ContactPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SearchPage } from "./pages/SearchPage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
+import TestPage from "./pages/TestPage";
 import { TestProductsPage } from "./pages/TestProductsPage";
 import { UpdatePasswordPage } from "./pages/UpdatePasswordPage";
 import { VerificationRequiredPage } from "./pages/VerificationRequiredPage";
@@ -49,6 +50,7 @@ function App() {
               <Route path="/jak-to-dziala" element={<HowItWorksPage />} />
               <Route path="/kontakt" element={<ContactPage />} />
               <Route path="/test-products" element={<TestProductsPage />} />
+              <Route path="/test-stats" element={<TestPage />} />
               <Route path="/logowanie" element={<LoginPage />} />
               <Route path="/rejestracja" element={<RegisterPage />} />
               <Route path="/reset-hasla" element={<ResetPasswordPage />} />
