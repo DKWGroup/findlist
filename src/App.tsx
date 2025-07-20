@@ -22,8 +22,6 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SearchPage } from "./pages/SearchPage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
-import TestPage from "./pages/TestPage";
-import { TestProductsPage } from "./pages/TestProductsPage";
 import { UpdatePasswordPage } from "./pages/UpdatePasswordPage";
 import { VerificationRequiredPage } from "./pages/VerificationRequiredPage";
 
