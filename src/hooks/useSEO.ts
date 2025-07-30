@@ -15,13 +15,13 @@ export const useSEO = (pageConfig?: Partial<SEOConfig>) => {
   const location = useLocation();
 
   const defaultConfig: SEOConfig = {
-    title: "VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama",
+    title: "FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama",
     description:
-      "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji.",
+      "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji.",
     keywords:
       "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping",
-    canonicalUrl: `https://viralist.pl${location.pathname}`,
-    ogImage: "https://viralist.pl/og-image.png",
+    canonicalUrl: `https://findlist.pl${location.pathname}`,
+    ogImage: "https://findlist.pl/og-image.png",
     ogType: "website",
     noIndex: false,
   };
@@ -56,7 +56,7 @@ export const useSEO = (pageConfig?: Partial<SEOConfig>) => {
         name:
           nameMapping[segment] ||
           segment.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-        url: `https://viralist.pl${currentPath}`,
+        url: `https://findlist.pl${currentPath}`,
       });
     }
 

@@ -72,10 +72,10 @@
 import SEOHead from "../components/SEO/SEOHead";
 
 <SEOHead
-  title="Tytuł strony - VIRALIST"
+  title="Tytuł strony - FINDLIST"
   description="Opis strony (max 155 znaków)"
-  canonicalUrl="https://viralist.pl/strona"
-  ogImage="https://viralist.pl/obrazek.jpg"
+  canonicalUrl="https://findlist.pl/strona"
+  ogImage="https://findlist.pl/obrazek.jpg"
   ogType="website" // lub "article", "product"
   structuredData={schemaObject}
   noIndex={false} // true dla stron które nie mają być indeksowane
@@ -143,9 +143,9 @@ import FAQ from "../components/SEO/FAQ";
 
 const faqs = [
   {
-    question: "Jak działa VIRALIST?",
+    question: "Jak działa FINDLIST?",
     answer:
-      "VIRALIST agreguje popularne produkty z mediów społecznościowych...",
+      "FINDLIST agreguje popularne produkty z mediów społecznościowych...",
   },
 ];
 
@@ -185,9 +185,9 @@ export const ProductPage = ({ product }) => {
   return (
     <>
       <SEOHead
-        title={`${product.title} - VIRALIST`}
+        title={`${product.title} - FINDLIST`}
         description={product.description}
-        canonicalUrl={`https://viralist.pl/produkt/${product.id}`}
+        canonicalUrl={`https://findlist.pl/produkt/${product.id}`}
         ogImage={product.images[0]}
         ogType="product"
         structuredData={productSchema}
@@ -219,9 +219,9 @@ export const BlogPostPage = ({ article }) => {
   return (
     <>
       <SEOHead
-        title={`${article.title} - Blog VIRALIST`}
+        title={`${article.title} - Blog FINDLIST`}
         description={article.excerpt}
-        canonicalUrl={`https://viralist.pl/blog/${article.slug}`}
+        canonicalUrl={`https://findlist.pl/blog/${article.slug}`}
         ogImage={article.featuredImage}
         ogType="article"
         structuredData={articleSchema}

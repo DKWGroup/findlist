@@ -13,8 +13,8 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <img
-                src="/viralist-logo2.png"
-                alt="VIRALIST"
+                src="/findlist-logo2.png"
+                alt="FINDLIST"
                 className="h-8 w-auto"
               />
             </Link>
@@ -214,7 +214,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
-          <p>&copy; {currentYear} VIRALIST. Wszystkie prawa zastrzeżone.</p>
+          <p>&copy; {currentYear} FINDLIST. Wszystkie prawa zastrzeżone.</p>
           <p className="mt-2 md:mt-0">Wykonane z ❤️ w Polsce</p>
         </div>
       </div>

@@ -16,6 +16,7 @@ import {
 } from "../services/productStatsService";
 import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
+import { generateProductUrls } from "../utils/productUrlUtils";
 import { LazyImage } from "./Performance/LazyImage";
 
 interface ProductCardProps {
@@ -159,9 +160,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const productUrl = product.urlAlias
-      ? `${window.location.origin}/${product.urlAlias}`
-      : `${window.location.origin}/product/${product.id}`;
+    const productUrls = product.code
+      ? generateProductUrls(product.title, product.code)
+      : null;
+
+    const productUrl = productUrls
+      ? `${window.location.origin}${productUrls.canonicalUrl}`
+      : `${window.location.origin}/produkt/${product.id}`;
 
     if (navigator.share) {
       try {
@@ -222,9 +227,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     rating_count: product.ratings.count,
   };
 
-  const productUrl = product.urlAlias
-    ? `/${product.urlAlias}`
-    : `/product/${product.id}`;
+  const productUrl = product.code
+    ? generateProductUrls(product.title, product.code).canonicalUrl
+    : `/produkt/${product.id}`;
 
   return (
     <article className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">

@@ -13,6 +13,7 @@ import { productCodeService } from "../../services/productCodeService";
 import { productService } from "../../services/productService";
 import { Product } from "../../types";
 import { CategoryMapping, TypeMapping } from "../../types/productCode";
+import { generateUrlSlugForProduct } from "../../utils/productUrlUtils";
 import { ImageUploadZone } from "../upload/ImageUploadZone";
 
 interface ProductFormProps {
@@ -212,7 +213,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       console.log("✅ Generated product code:", code);
 
-      const alias = productCodeService.generateUrlAlias(code, formData.title);
+      const alias = generateUrlSlugForProduct(formData.title || "");
 
       console.log("🔗 Generated URL alias:", alias);
 
@@ -495,10 +496,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         </button>
                       )}
                     </div>
-                    {formData.urlAlias && (
-                      <p className="text-xs text-blue-600 mt-1">
-                        Link: {window.location.origin}/{formData.urlAlias}
-                      </p>
+                    {formData.code && formData.urlAlias && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-blue-600">
+                          <strong>Link główny:</strong> {window.location.origin}
+                          /produkty/{formData.urlAlias}
+                        </p>
+                        <p className="text-xs text-green-600">
+                          <strong>Link krótki:</strong> {window.location.origin}
+                          /{formData.code}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>

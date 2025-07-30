@@ -92,10 +92,10 @@ export const HomePage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama"
-        description="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty."
+        title="FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama"
+        description="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty."
         keywords="viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping"
-        canonicalUrl="https://viralist.pl/"
+        canonicalUrl="https://findlist.pl/"
         structuredData={combinedSchema}
       />
       <div className="min-h-screen bg-gray-50">

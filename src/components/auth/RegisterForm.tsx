@@ -123,7 +123,7 @@ export const RegisterForm: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Załóż konto</h2>
-          <p className="text-gray-600">Dołącz do społeczności VIRALIST</p>
+          <p className="text-gray-600">Dołącz do społeczności FINDLIST</p>
         </div>
 
         {(error || formError) && (
