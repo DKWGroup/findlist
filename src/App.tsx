@@ -1,6 +1,7 @@
 import { HelmetProvider } from "react-helmet-async";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { ShortUrlRedirect } from "./components/ShortUrlRedirect";
 import { SimplifiedAuthProvider } from "./contexts/SimplifiedAuthContext";
 import { AboutUsPage } from "./pages/AboutUsPage";
 import { AdminPage } from "./pages/AdminPage";
@@ -24,6 +25,7 @@ import { SearchPage } from "./pages/SearchPage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { UpdatePasswordPage } from "./pages/UpdatePasswordPage";
 import { VerificationRequiredPage } from "./pages/VerificationRequiredPage";
+import { isShortProductUrl } from "./utils/productUrlUtils";
 
 function App() {
   console.log("App: Starting with simplified auth...");
@@ -38,8 +40,18 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/produkty" element={<ProductsPage />} />
+              <Route path="/produkty/:slug" element={<ProductPage />} />
               <Route path="/produkt/:id" element={<ProductPage />} />
-              <Route path="/:codeOrAlias" element={<ProductPage />} />
+              <Route
+                path="/:codeOrAlias"
+                element={(() => {
+                  const pathname = window.location.pathname;
+                  if (isShortProductUrl(pathname)) {
+                    return <ShortUrlRedirect />;
+                  }
+                  return <ProductPage />;
+                })()}
+              />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/blog-editor" element={<BlogEditorPage />} />
