@@ -2,17 +2,17 @@
 security.txt
 
 # Contact Information
-Contact: mailto:kontakt@viralist.pl
-Contact: https://viralist.pl/kontakt
+Contact: mailto:kontakt@findlist.pl
+Contact: https://findlist.pl/kontakt
 
 # Security Policy
-Policy: https://viralist.pl/security-policy
+Policy: https://findlist.pl/security-policy
 
 # Preferred Languages
 Preferred-Languages: pl, en
 
 # Canonical URL
-Canonical: https://viralist.pl/.well-known/security.txt
+Canonical: https://findlist.pl/.well-known/security.txt
 
 # Expires
 Expires: 2025-12-31T23:59:59.000Z

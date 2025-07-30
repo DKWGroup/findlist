@@ -1,6 +1,6 @@
 # Testy jednostkowe dla funkcji autoryzacji
 
-Ten folder zawiera kompleksowe testy jednostkowe dla wszystkich funkcji odpowiedzialnych za autoryzację użytkowników w aplikacji Viralist.
+Ten folder zawiera kompleksowe testy jednostkowe dla wszystkich funkcji odpowiedzialnych za autoryzację użytkowników w aplikacji Findlist.
 
 ## Struktura testów
 

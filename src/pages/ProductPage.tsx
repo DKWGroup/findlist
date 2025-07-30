@@ -299,12 +299,12 @@ export const ProductPage: React.FC = () => {
     <Layout showFooter={false}>
       {/* SEO Head */}
       <SEOHead
-        title={`${product.title} - VIRALIST`}
+        title={`${product.title} - FINDLIST`}
         description={product.description}
         canonicalUrl={
           product.urlAlias
-            ? `https://viralist.pl/${product.urlAlias}`
-            : `https://viralist.pl/produkt/${product.id}`
+            ? `https://findlist.pl/${product.urlAlias}`
+            : `https://findlist.pl/produkt/${product.id}`
         }
         ogImage={product.images[0]}
         ogType="product"

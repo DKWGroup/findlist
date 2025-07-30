@@ -80,7 +80,7 @@ export const CommunitySection: React.FC = () => {
               <Users className="h-6 w-6 text-white" />
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              Dołącz do Społeczności VIRALIST
+              Dołącz do Społeczności FINDLIST
             </h2>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -188,13 +188,13 @@ export const CommunitySection: React.FC = () => {
                     href="#"
                     className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   >
-                    @viralist_pl
+                    @findlist_pl
                   </a>
                   <a
                     href="#"
                     className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   >
-                    @viralist.pl
+                    @findlist.pl
                   </a>
                 </div>
               </div>

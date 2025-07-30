@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ResetPasswordForm } from '../components/auth/ResetPasswordForm';
+import React from "react";
+import { Link } from "react-router-dom";
+import { ResetPasswordForm } from "../components/auth/ResetPasswordForm";
 
 export const ResetPasswordPage: React.FC = () => {
   return (
@@ -9,9 +9,9 @@ export const ResetPasswordPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <img 
-              src="/viralist-logo2.png" 
-              alt="VIRALIST" 
+            <img
+              src="/findlist-logo2.png"
+              alt="FINDLIST"
               className="h-8 w-auto"
             />
           </Link>

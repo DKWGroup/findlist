@@ -15,26 +15,26 @@ export const LandingPage: React.FC = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "VIRALIST",
-    url: "https://viralist.pl",
+    name: "FINDLIST",
+    url: "https://findlist.pl",
     description:
       "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://viralist.pl/search?q={search_term_string}",
+      target: "https://findlist.pl/search?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
     publisher: {
       "@type": "Organization",
-      name: "VIRALIST",
-      url: "https://viralist.pl",
+      name: "FINDLIST",
+      url: "https://findlist.pl",
       logo: {
         "@type": "ImageObject",
-        url: "https://viralist.pl/viralist-logo2.png",
+        url: "https://findlist.pl/findlist-logo2.png",
       },
       sameAs: [
-        "https://tiktok.com/@viralist_pl",
-        "https://instagram.com/viralist.pl",
+        "https://tiktok.com/@findlist_pl",
+        "https://instagram.com/findlist.pl",
       ],
     },
   };
@@ -42,10 +42,10 @@ export const LandingPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama"
-        description="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne."
+        title="FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama"
+        description="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne."
         keywords="viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping, hity z TikToka"
-        canonical="https://viralist.pl/"
+        canonical="https://findlist.pl/"
         structuredData={structuredData}
       />
       <WebsiteStructuredData />

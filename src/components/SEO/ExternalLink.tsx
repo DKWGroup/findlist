@@ -22,7 +22,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
   title,
   ...props
 }) => {
-  const isExternal = href.startsWith("http") && !href.includes("viralist.pl");
+  const isExternal = href.startsWith("http") && !href.includes("findlist.pl");
 
   const relValues = [];
   if (isExternal || nofollow) relValues.push("nofollow");
