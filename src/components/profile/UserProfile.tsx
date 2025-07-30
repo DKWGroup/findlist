@@ -2,6 +2,7 @@ import {
   AlertCircle,
   Calendar,
   Check,
+  ChevronDown,
   Heart,
   Lock,
   Mail,
@@ -21,6 +22,7 @@ export const UserProfile: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.email?.split("@")[0] || "",
     email: user?.email || "",
@@ -551,22 +553,24 @@ export const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-12">
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
-              <User className="h-12 w-12 text-blue-600" />
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-8 py-8 sm:py-12">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center">
+              <User className="h-8 w-8 sm:h-12 sm:w-12 text-blue-600" />
             </div>
-            <div className="text-white">
-              <h1 className="text-3xl font-bold mb-2">
+            <div className="text-white text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">
                 {formData.name || user.email?.split("@")[0] || "Użytkownik"}
               </h1>
-              <p className="text-blue-100 mb-1">{user.email}</p>
-              <div className="flex items-center gap-4 text-sm text-blue-100">
+              <p className="text-blue-100 mb-1 text-sm sm:text-base">
+                {user.email}
+              </p>
+              <div className="flex items-center justify-center sm:justify-start gap-4 text-xs sm:text-sm text-blue-100">
                 <span className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                   Dołączył{" "}
                   {user.created_at
                     ? new Date(user.created_at).toLocaleDateString("pl-PL")
@@ -579,7 +583,8 @@ export const UserProfile: React.FC = () => {
 
         {/* Navigation */}
         <div className="border-b border-gray-200">
-          <nav className="flex">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex">
             {tabs.map((tab) => {
               const IconComponent = tab.icon;
               return (
@@ -598,27 +603,79 @@ export const UserProfile: React.FC = () => {
               );
             })}
           </nav>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="w-full flex items-center justify-between px-4 py-4 text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                {tabs.find((tab) => tab.id === activeTab) && (
+                  <>
+                    {React.createElement(
+                      tabs.find((tab) => tab.id === activeTab)!.icon,
+                      { className: "h-4 w-4" }
+                    )}
+                    <span className="font-medium">
+                      {tabs.find((tab) => tab.id === activeTab)!.label}
+                    </span>
+                  </>
+                )}
+              </div>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  showMobileMenu ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {showMobileMenu && (
+              <div className="border-t border-gray-200 bg-gray-50">
+                {tabs.map((tab) => {
+                  const IconComponent = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setShowMobileMenu(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
+                        activeTab === tab.id
+                          ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <IconComponent className="h-4 w-4" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {activeTab === "profile" && (
             <div className="max-w-2xl">
               <form onSubmit={handleSave}>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                     Informacje o profilu
                   </h2>
                   {!isEditing ? (
                     <button
                       type="button"
                       onClick={() => setIsEditing(true)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
                     >
                       Edytuj
                     </button>
                   ) : (
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                       <button
                         type="submit"
                         disabled={isSaving}
@@ -946,29 +1003,29 @@ export const UserProfile: React.FC = () => {
 
           {activeTab === "wishlist" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                 Moja Wishlist ({wishlistProducts.length})
               </h2>
               {wishlistProducts.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {wishlistProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors"
+                      className="bg-gray-50 rounded-xl p-3 sm:p-4 hover:bg-gray-100 transition-colors"
                     >
                       <img
                         src={product.images[0]}
                         alt={product.title}
-                        className="w-full h-48 object-cover rounded-lg mb-4"
+                        className="w-full h-40 sm:h-48 object-cover rounded-lg mb-3 sm:mb-4"
                       />
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base">
                         {product.title}
                       </h3>
-                      <p className="text-blue-600 font-bold mb-3">
+                      <p className="text-blue-600 font-bold mb-3 text-sm sm:text-base">
                         {product.price.discounted?.toFixed(2)}{" "}
                         {product.price.currency}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <a
                           href={`/produkt/${product.id}`}
                           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors text-sm"
@@ -979,7 +1036,7 @@ export const UserProfile: React.FC = () => {
                           onClick={() =>
                             user && toggleWishlist && toggleWishlist(product.id)
                           }
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors self-center sm:self-auto"
                           title="Usuń z wishlist"
                         >
                           <Heart className="h-5 w-5 fill-current" />
@@ -989,17 +1046,17 @@ export const UserProfile: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <div className="text-center py-8 sm:py-12">
+                  <Heart className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                     Pusta wishlist
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">
                     Dodaj produkty do swojej listy życzeń
                   </p>
                   <a
                     href="/produkty"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors inline-block"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors inline-block text-sm sm:text-base"
                   >
                     Przeglądaj produkty
                   </a>
@@ -1010,63 +1067,69 @@ export const UserProfile: React.FC = () => {
 
           {activeTab === "reviews" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                 Moje Recenzje ({userReviews.length})
               </h2>
               {userReviews.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {userReviews.map((review) => {
                     const product = review.product;
                     return (
                       <div
                         key={review.id}
-                        className="bg-gray-50 rounded-xl p-6"
+                        className="bg-gray-50 rounded-xl p-4 sm:p-6"
                       >
                         {product && (
-                          <div className="flex items-center gap-4 mb-4">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4">
                             <img
                               src={product.image}
                               alt={product.title}
-                              className="w-16 h-16 object-cover rounded-lg"
+                              className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-lg"
                             />
-                            <div>
-                              <h4 className="font-semibold text-gray-900">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 text-sm sm:text-base">
                                 {product?.title || "Produkt"}
                               </h4>
                               <a
                                 href={`/${product.url}`}
-                                className="text-blue-600 hover:text-blue-700 text-sm"
+                                className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm"
                               >
                                 Zobacz produkt →
                               </a>
                             </div>
                           </div>
                         )}
-                        <div className="flex items-center gap-2 mb-2">
-                          {Array.from({ length: review.rating }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className="h-5 w-5 text-yellow-400 fill-current"
-                            />
-                          ))}
-                          <span className="text-sm text-gray-600 ml-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: review.rating }).map(
+                              (_, i) => (
+                                <Star
+                                  key={i}
+                                  className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 fill-current"
+                                />
+                              )
+                            )}
+                          </div>
+                          <span className="text-xs sm:text-sm text-gray-600">
                             {new Date(review.dateCreated).toLocaleDateString(
                               "pl-PL"
                             )}
                           </span>
                         </div>
-                        <p className="text-gray-700">{review.comment}</p>
+                        <p className="text-gray-700 text-sm sm:text-base">
+                          {review.comment}
+                        </p>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <div className="text-center py-8 sm:py-12">
+                  <Star className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                     Brak recenzji
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">
                     Podziel się swoimi opiniami o produktach
                   </p>
                   <a
@@ -1084,32 +1147,32 @@ export const UserProfile: React.FC = () => {
 
           {activeTab === "settings" && (
             <div className="max-w-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                 Ustawienia konta
               </h2>
 
               {/* Success/Error messages */}
               {formSuccess && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2 text-green-800">
-                  <Check className="h-5 w-5 mt-0.5" />
+                <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2 text-green-800 text-sm sm:text-base">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5" />
                   <div>{formSuccess}</div>
                 </div>
               )}
 
               {formError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-800">
-                  <AlertCircle className="h-5 w-5 mt-0.5" />
+                <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-800 text-sm sm:text-base">
+                  <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5" />
                   <div>{formError}</div>
                 </div>
               )}
 
-              <div className="space-y-6">
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-4">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
+                  <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-base sm:text-lg">
                     Powiadomienia
                   </h3>
-                  <div className="space-y-4">
-                    <label className="flex items-center">
+                  <div className="space-y-3 sm:space-y-4">
+                    <label className="flex items-start sm:items-center">
                       <input
                         type="checkbox"
                         checked={
@@ -1122,13 +1185,13 @@ export const UserProfile: React.FC = () => {
                           )
                         }
                         disabled={isSaving}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 mt-1 sm:mt-0"
                       />
-                      <span className="ml-3 text-gray-700">
+                      <span className="ml-3 text-gray-700 text-sm sm:text-base">
                         Powiadomienia o nowych produktach
                       </span>
                     </label>
-                    <label className="flex items-center">
+                    <label className="flex items-start sm:items-center">
                       <input
                         type="checkbox"
                         checked={
@@ -1141,27 +1204,27 @@ export const UserProfile: React.FC = () => {
                           )
                         }
                         disabled={isSaving}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 mt-1 sm:mt-0"
                       />
-                      <span className="ml-3 text-gray-700">
+                      <span className="ml-3 text-gray-700 text-sm sm:text-base">
                         Newsletter z trendami
                       </span>
                     </label>
                   </div>
                 </div>
 
-                <div className="bg-red-50 rounded-xl p-6 border border-red-200">
-                  <h3 className="font-semibold text-red-900 mb-2">
+                <div className="bg-red-50 rounded-xl p-4 sm:p-6 border border-red-200">
+                  <h3 className="font-semibold text-red-900 mb-2 text-base sm:text-lg">
                     Strefa niebezpieczna
                   </h3>
-                  <p className="text-red-700 text-sm mb-4">
+                  <p className="text-red-700 text-xs sm:text-sm mb-3 sm:mb-4">
                     Usunięcie konta jest nieodwracalne i spowoduje utratę
                     wszystkich danych.
                   </p>
                   <button
                     onClick={handleDeleteAccount}
                     disabled={isSaving}
-                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto text-sm sm:text-base"
                   >
                     {isSaving ? "Przetwarzanie..." : "Usuń konto"}
                   </button>
