@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { searchService } from "../../services/searchService";
 import { SearchFilters, SearchSuggestion } from "../../types/search";
+import { generateProductLongUrl } from "../../utils/productUrlUtils";
 import { LazyImage } from "../Performance/LazyImage";
 
 interface AdvancedSearchBarProps {
@@ -129,8 +130,8 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
   const handleSuggestionClick = (suggestion: SearchSuggestion) => {
     if (suggestion.type === "product") {
       // If it's a product, redirect directly to the product page
-      if (suggestion.productId) {
-        window.location.href = `/product/${suggestion.productId}`;
+      if (suggestion.text) {
+        window.location.href = generateProductLongUrl(suggestion.text);
       } else {
         setQuery(suggestion.text);
         onSearch(suggestion.text, filters);

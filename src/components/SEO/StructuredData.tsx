@@ -1,6 +1,7 @@
 import React from "react";
 import { Product } from "../../types";
 import { BlogPost } from "../../types/blog";
+import { generateProductLongUrl } from "../../utils/productUrlUtils";
 
 interface ProductStructuredDataProps {
   product: Product;
@@ -47,8 +48,8 @@ export const ProductStructuredData: React.FC<ProductStructuredDataProps> = ({
     },
     category: product.category,
     url: product.urlAlias
-      ? `https://findlist.pl/${product.urlAlias}`
-      : `https://findlist.pl/product/${product.id}`,
+      ? `https://findlist.pl/produkty/${product.urlAlias}`
+      : `https://findlist.pl${generateProductLongUrl(product.title)}`,
   };
 
   return (

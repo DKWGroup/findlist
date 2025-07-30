@@ -160,9 +160,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const productUrl = product.urlAlias
-      ? `${window.location.origin}/${product.urlAlias}`
-      : `${window.location.origin}/product/${product.id}`;
+    const productUrls = product.code
+      ? generateProductUrls(product.title, product.code)
+      : null;
+
+    const productUrl = productUrls
+      ? `${window.location.origin}${productUrls.canonicalUrl}`
+      : `${window.location.origin}/produkt/${product.id}`;
 
     if (navigator.share) {
       try {
