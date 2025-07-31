@@ -254,13 +254,13 @@ export const ProductUrlManager: React.FC = () => {
                   Długi link (główny):
                 </p>
                 <p className="text-sm text-blue-600 font-mono">
-                  https://findlist.pl/produkty/dlugi-pasek-do-telefonu
+                  https://findlist.net/produkty/dlugi-pasek-do-telefonu
                 </p>
               </div>
               <button
                 onClick={() =>
                   copyToClipboard(
-                    "https://findlist.pl/produkty/dlugi-pasek-do-telefonu"
+                    "https://findlist.net/produkty/dlugi-pasek-do-telefonu"
                   )
                 }
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded"
@@ -276,11 +276,13 @@ export const ProductUrlManager: React.FC = () => {
                   Krótki link (alias):
                 </p>
                 <p className="text-sm text-green-600 font-mono">
-                  https://findlist.pl/EL-AC-001
+                  https://findlist.net/EL-AC-001
                 </p>
               </div>
               <button
-                onClick={() => copyToClipboard("https://findlist.pl/EL-AC-001")}
+                onClick={() =>
+                  copyToClipboard("https://findlist.net/EL-AC-001")
+                }
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded"
                 title="Kopiuj link"
               >

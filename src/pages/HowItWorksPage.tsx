@@ -24,7 +24,7 @@ export const HowItWorksPage: React.FC = () => {
       <MetaTags
         title="Jak to działa - FINDLIST | Proces weryfikacji produktów"
         description="Dowiedz się, jak działa FINDLIST - platforma agregująca viralowe produkty z TikToka i Instagrama. Poznaj nasz proces weryfikacji produktów i kryteria oceny."
-        canonical="https://findlist.pl/jak-to-dziala"
+        canonical="https://findlist.net/jak-to-dziala"
       />
 
       <Layout>
@@ -465,7 +465,7 @@ export const HowItWorksPage: React.FC = () => {
                     Tak! Zachęcamy naszych użytkowników do zgłaszania produktów,
                     które ich zdaniem powinny znaleźć się na FINDLIST. Możesz to
                     zrobić poprzez formularz kontaktowy lub wysyłając e-mail na
-                    adres kontakt@findlist.pl.
+                    adres kontakt@findlist.net.
                   </p>
                 </div>
 

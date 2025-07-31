@@ -19,7 +19,7 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
   description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji.",
   keywords = "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów",
   canonical,
-  ogImage = "https://findlist.pl/og-image.png",
+  ogImage = "https://findlist.net/og-image.png",
   ogType = "website",
   structuredData,
   noIndex = false,
@@ -35,7 +35,7 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
     canonical ||
     (typeof window !== "undefined"
       ? window.location.href
-      : "https://findlist.pl");
+      : "https://findlist.net");
 
   return (
     <Helmet>
