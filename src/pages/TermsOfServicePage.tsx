@@ -11,7 +11,7 @@ export const TermsOfServicePage: React.FC = () => {
       <MetaTags
         title="Regulamin serwisu - FINDLIST"
         description="Regulamin korzystania z serwisu FINDLIST - pierwszej w Polsce platformy agregującej viralne produkty z mediów społecznościowych."
-        canonical="https://findlist.pl/regulamin"
+        canonical="https://findlist.net/regulamin"
       />
 
       <Layout>
@@ -37,8 +37,8 @@ export const TermsOfServicePage: React.FC = () => {
               </h2>
               <p className="mb-4">
                 1. Niniejszy Regulamin określa zasady korzystania z serwisu
-                internetowego FINDLIST dostępnego pod adresem findlist.pl (zwany
-                dalej "Serwisem").
+                internetowego FINDLIST dostępnego pod adresem findlist.net
+                (zwany dalej "Serwisem").
               </p>
               <p className="mb-4">
                 2. Właścicielem i administratorem Serwisu jest [Nazwa podmiotu]
@@ -206,10 +206,10 @@ export const TermsOfServicePage: React.FC = () => {
                 W przypadku pytań dotyczących Regulaminu, prosimy o kontakt pod
                 adresem:{" "}
                 <a
-                  href="mailto:kontakt@findlist.pl"
+                  href="mailto:kontakt@findlist.net"
                   className="text-blue-600 hover:text-blue-800"
                 >
-                  kontakt@findlist.pl
+                  kontakt@findlist.net
                 </a>
               </p>
             </div>

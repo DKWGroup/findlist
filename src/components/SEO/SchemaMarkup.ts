@@ -5,9 +5,9 @@ export const generateOrganizationSchema = () => {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "FINDLIST",
-    alternateName: "Findlist.pl",
-    url: "https://findlist.pl",
-    logo: "https://findlist.pl/findlist-logo.png",
+    alternateName: "findlist.net",
+    url: "https://findlist.net",
+    logo: "https://findlist.net/findlist-logo.png",
     description:
       "Pierwsza w Polsce platforma agregująca viralne produkty z mediów społecznościowych. Odkryj trendy zanim staną się mainstream.",
     foundingDate: "2024",
@@ -41,7 +41,7 @@ export const generateWebSiteSchema = () => {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "FINDLIST",
-    url: "https://findlist.pl",
+    url: "https://findlist.net",
     description:
       "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
     publisher: {
@@ -52,13 +52,13 @@ export const generateWebSiteSchema = () => {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://findlist.pl/search?q={search_term_string}",
+        urlTemplate: "https://findlist.net/search?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
     mainEntity: {
       "@type": "WebPage",
-      "@id": "https://findlist.pl/#webpage",
+      "@id": "https://findlist.net/#webpage",
     },
   };
 };
@@ -144,7 +144,7 @@ export const generateArticleSchema = (article: any) => {
       name: "FINDLIST",
       logo: {
         "@type": "ImageObject",
-        url: "https://findlist.pl/findlist-logo.png",
+        url: "https://findlist.net/findlist-logo.png",
       },
     },
     datePublished: article.publishedAt,
@@ -182,7 +182,7 @@ export const generateLocalBusinessSchema = () => {
     "@type": "LocalBusiness",
     name: "FINDLIST",
     description: "Platforma viralowych produktów z mediów społecznościowych",
-    url: "https://findlist.pl",
+    url: "https://findlist.net",
     address: {
       "@type": "PostalAddress",
       addressCountry: "PL",

@@ -104,7 +104,7 @@ export const ProductsPage: React.FC = () => {
       <MetaTags
         title={pageTitle}
         description={pageDescription}
-        canonical="https://findlist.pl/produkty"
+        canonical="https://findlist.net/produkty"
         keywords="viralowe produkty, katalog produktów, TikTok produkty, Instagram produkty, trending, viral shopping"
       />
 

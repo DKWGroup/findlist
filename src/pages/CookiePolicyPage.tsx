@@ -11,7 +11,7 @@ export const CookiePolicyPage: React.FC = () => {
       <MetaTags
         title="Polityka cookies - FINDLIST"
         description="Polityka cookies serwisu FINDLIST - informacje o wykorzystywanych plikach cookies i technologiach śledzących."
-        canonical="https://findlist.pl/cookies"
+        canonical="https://findlist.net/cookies"
       />
 
       <Layout>
@@ -340,7 +340,7 @@ export const CookiePolicyPage: React.FC = () => {
               </p>
               <ul className="text-gray-600">
                 <li>
-                  <strong>E-mail:</strong> kontakt@findlist.pl
+                  <strong>E-mail:</strong> kontakt@findlist.net
                 </li>
                 <li>
                   <strong>Temat:</strong> "Polityka cookies"

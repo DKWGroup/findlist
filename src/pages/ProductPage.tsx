@@ -339,7 +339,7 @@ export const ProductPage: React.FC = () => {
       <SEOHead
         title={`${product.title} - FINDLIST`}
         description={product.description}
-        canonicalUrl={`https://findlist.pl${
+        canonicalUrl={`https://findlist.net${
           generateProductUrls(product.title, product.code || "").canonicalUrl
         }`}
         ogImage={product.images[0]}

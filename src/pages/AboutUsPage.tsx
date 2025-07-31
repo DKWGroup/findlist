@@ -37,7 +37,7 @@ export const AboutUsPage: React.FC = () => {
       <MetaTags
         title="O nas - FINDLIST | Poznaj nasz zespół i misję"
         description="Poznaj zespół FINDLIST - pierwszej w Polsce platformy agregującej viralowe produkty z TikToka i Instagrama. Dowiedz się więcej o naszej misji i wartościach."
-        canonical="https://findlist.pl/o-nas"
+        canonical="https://findlist.net/o-nas"
       />
 
       <Layout>

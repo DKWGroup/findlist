@@ -71,7 +71,7 @@ export const ContactPage: React.FC = () => {
       <MetaTags
         title="Kontakt - FINDLIST | Skontaktuj się z nami"
         description="Masz pytania dotyczące FINDLIST? Skontaktuj się z nami poprzez formularz kontaktowy lub bezpośrednio przez e-mail."
-        canonical="https://findlist.pl/kontakt"
+        canonical="https://findlist.net/kontakt"
       />
 
       <Layout>
@@ -275,19 +275,19 @@ export const ContactPage: React.FC = () => {
                         </h3>
                         <p className="text-gray-600 mb-1">Ogólne zapytania:</p>
                         <a
-                          href="mailto:kontakt@findlist.pl"
+                          href="mailto:kontakt@findlist.net"
                           className="text-blue-600 hover:underline"
                         >
-                          kontakt@findlist.pl
+                          kontakt@findlist.net
                         </a>
                         <p className="text-gray-600 mt-2 mb-1">
                           Współpraca biznesowa:
                         </p>
                         <a
-                          href="mailto:biznes@findlist.pl"
+                          href="mailto:biznes@findlist.net"
                           className="text-blue-600 hover:underline"
                         >
-                          biznes@findlist.pl
+                          biznes@findlist.net
                         </a>
                       </div>
                     </div>
@@ -314,7 +314,7 @@ export const ContactPage: React.FC = () => {
                         </svg>
                       </a>
                       <a
-                        href="https://instagram.com/findlist.pl"
+                        href="https://instagram.com/findlist.net"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
@@ -328,7 +328,7 @@ export const ContactPage: React.FC = () => {
                         </svg>
                       </a>
                       <a
-                        href="https://facebook.com/findlist.pl"
+                        href="https://facebook.com/findlist.net"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -404,7 +404,7 @@ export const ContactPage: React.FC = () => {
                   <p className="text-gray-600">
                     Tak, współpracujemy z influencerami, którzy pasują do
                     profilu naszej platformy. Jeśli jesteś zainteresowany
-                    współpracą, napisz do nas na adres biznes@findlist.pl lub
+                    współpracą, napisz do nas na adres biznes@findlist.net lub
                     wypełnij formularz kontaktowy, wybierając temat "Propozycja
                     współpracy".
                   </p>

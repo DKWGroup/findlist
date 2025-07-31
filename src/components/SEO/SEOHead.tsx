@@ -20,8 +20,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   title = "FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama",
   description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne.",
   keywords = "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping, hity z TikToka",
-  canonicalUrl = "https://findlist.pl/",
-  ogImage = "https://findlist.pl/og-image.png",
+  canonicalUrl = "https://findlist.net/",
+  ogImage = "https://findlist.net/og-image.png",
   ogType = "website",
   noIndex = false,
   structuredData,
@@ -88,7 +88,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="theme-color" content="#2563eb" />
       <meta name="msapplication-TileColor" content="#2563eb" />
       <meta name="apple-mobile-web-app-title" content="FINDLIST" />
-      <meta name="application-name" content="VIRALIST" />
+      <meta name="application-name" content="FINDLIST" />
 
       {/* Hreflang */}
       {hreflang.map((item, index) => (

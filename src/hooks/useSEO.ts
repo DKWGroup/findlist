@@ -20,8 +20,8 @@ export const useSEO = (pageConfig?: Partial<SEOConfig>) => {
       "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji.",
     keywords:
       "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping",
-    canonicalUrl: `https://findlist.pl${location.pathname}`,
-    ogImage: "https://findlist.pl/og-image.png",
+    canonicalUrl: `https://findlist.net${location.pathname}`,
+    ogImage: "https://findlist.net/og-image.png",
     ogType: "website",
     noIndex: false,
   };
@@ -56,7 +56,7 @@ export const useSEO = (pageConfig?: Partial<SEOConfig>) => {
         name:
           nameMapping[segment] ||
           segment.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-        url: `https://findlist.pl${currentPath}`,
+        url: `https://findlist.net${currentPath}`,
       });
     }
 

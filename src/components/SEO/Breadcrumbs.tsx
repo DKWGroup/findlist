@@ -24,7 +24,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
       "@type": "ListItem",
       position: index + 1,
       name: item.label,
-      item: item.href ? `https://findlist.pl${item.href}` : undefined,
+      item: item.href ? `https://findlist.net${item.href}` : undefined,
     })),
   };
 

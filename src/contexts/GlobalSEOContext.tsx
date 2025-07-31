@@ -13,8 +13,8 @@ interface GlobalSEOConfig {
 
 const defaultGlobalSEO: GlobalSEOConfig = {
   siteName: "FINDLIST",
-  siteUrl: "https://findlist.pl",
-  defaultImage: "https://findlist.pl/og-image.png",
+  siteUrl: "https://findlist.net",
+  defaultImage: "https://findlist.net/og-image.png",
   defaultDescription:
     "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji.",
   twitterHandle: "@findlist_pl",

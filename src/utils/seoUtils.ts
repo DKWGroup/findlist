@@ -26,7 +26,7 @@ export const generateSlug = (text: string): string => {
 };
 
 export const generateCanonicalUrl = (path: string): string => {
-  const baseUrl = "https://findlist.pl";
+  const baseUrl = "https://findlist.net";
   return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 };
 

@@ -48,8 +48,8 @@ export const ProductStructuredData: React.FC<ProductStructuredDataProps> = ({
     },
     category: product.category,
     url: product.urlAlias
-      ? `https://findlist.pl/produkty/${product.urlAlias}`
-      : `https://findlist.pl${generateProductLongUrl(product.title)}`,
+      ? `https://findlist.net/produkty/${product.urlAlias}`
+      : `https://findlist.net${generateProductLongUrl(product.title)}`,
   };
 
   return (
@@ -75,14 +75,14 @@ export const BlogStructuredData: React.FC<BlogStructuredDataProps> = ({
       name: "FINDLIST",
       logo: {
         "@type": "ImageObject",
-        url: "https://findlist.pl/logo.png",
+        url: "https://findlist.net/logo.png",
       },
     },
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://findlist.pl/blog/${post.slug}`,
+      "@id": `https://findlist.net/blog/${post.slug}`,
     },
     articleSection: post.category,
     keywords: post.tags.join(", "),
@@ -112,13 +112,13 @@ export const BlogStructuredData: React.FC<BlogStructuredDataProps> = ({
 };
 
 export const WebsiteStructuredData: React.FC<WebsiteStructuredDataProps> = ({
-  searchUrl = "https://findlist.pl/search?q={search_term_string}",
+  searchUrl = "https://findlist.net/search?q={search_term_string}",
 }) => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "FINDLIST",
-    url: "https://findlist.pl",
+    url: "https://findlist.net",
     description:
       "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
     potentialAction: {
@@ -131,12 +131,12 @@ export const WebsiteStructuredData: React.FC<WebsiteStructuredDataProps> = ({
       name: "FINDLIST",
       logo: {
         "@type": "ImageObject",
-        url: "https://findlist.pl/findlist-logo2.png",
+        url: "https://findlist.net/findlist-logo2.png",
       },
     },
     sameAs: [
       "https://tiktok.com/@findlist_pl",
-      "https://instagram.com/findlist.pl",
+      "https://instagram.com/findlist.net",
     ],
   };
 
