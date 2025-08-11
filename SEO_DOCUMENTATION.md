@@ -74,8 +74,8 @@ import SEOHead from "../components/SEO/SEOHead";
 <SEOHead
   title="Tytuł strony - FINDLIST"
   description="Opis strony (max 155 znaków)"
-  canonicalUrl="https://findlist.pl/strona"
-  ogImage="https://findlist.pl/obrazek.jpg"
+  canonicalUrl="https://findlist.net/strona"
+  ogImage="https://findlist.net/obrazek.jpg"
   ogType="website" // lub "article", "product"
   structuredData={schemaObject}
   noIndex={false} // true dla stron które nie mają być indeksowane
@@ -187,7 +187,7 @@ export const ProductPage = ({ product }) => {
       <SEOHead
         title={`${product.title} - FINDLIST`}
         description={product.description}
-        canonicalUrl={`https://findlist.pl/produkt/${product.id}`}
+        canonicalUrl={`https://findlist.net/produkt/${product.id}`}
         ogImage={product.images[0]}
         ogType="product"
         structuredData={productSchema}
@@ -221,7 +221,7 @@ export const BlogPostPage = ({ article }) => {
       <SEOHead
         title={`${article.title} - Blog FINDLIST`}
         description={article.excerpt}
-        canonicalUrl={`https://findlist.pl/blog/${article.slug}`}
+        canonicalUrl={`https://findlist.net/blog/${article.slug}`}
         ogImage={article.featuredImage}
         ogType="article"
         structuredData={articleSchema}

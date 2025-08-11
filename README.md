@@ -1,5 +1,3 @@
-# VIRALIST - Viralowe Produkty Platform
-
 # FINDLIST - Viralowe Produkty Platform
 
 Platforma agregująca najgorętsze produkty z TikToka, Instagrama i innych mediów społecznościowych. FINDLIST to miejsce, gdzie znajdziesz wszystkie trendy zakupowe w jednym miejscu.
