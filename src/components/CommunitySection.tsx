@@ -185,16 +185,20 @@ export const CommunitySection: React.FC = () => {
                 </p>
                 <div className="flex justify-center gap-3">
                   <a
-                    href="#"
+                    href="https://www.tiktok.com/@findlist.net"
                     className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    @findlist_pl
-                  </a>
-                  <a
-                    href="#"
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     @findlist.net
+                  </a>
+                  <a
+                    href="https://www.instagram.com/findlistnet"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    @findlistnet
                   </a>
                 </div>
               </div>
