@@ -336,7 +336,8 @@ export const RegisterForm: React.FC = () => {
             </label>
           </div>
 
-          <div className="flex items-start mb-6">
+          {/* Newsletter consent - Hidden for now, to be developed in the future */}
+          {/* <div className="flex items-start mb-6">
             <input
               type="checkbox"
               name="marketingConsent"
@@ -348,7 +349,7 @@ export const RegisterForm: React.FC = () => {
             <label className="ml-2 text-sm text-gray-600">
               Chcę otrzymywać newsletter z najnowszymi trendami i promocjami
             </label>
-          </div>
+          </div> */}
 
           <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg mb-6 text-xs text-blue-700">
             <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />

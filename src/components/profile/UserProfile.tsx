@@ -1191,7 +1191,8 @@ export const UserProfile: React.FC = () => {
                         Powiadomienia o nowych produktach
                       </span>
                     </label>
-                    <label className="flex items-start sm:items-center">
+                    {/* Newsletter option - Hidden for now, to be developed in the future */}
+                    {/* <label className="flex items-start sm:items-center">
                       <input
                         type="checkbox"
                         checked={
@@ -1209,7 +1210,7 @@ export const UserProfile: React.FC = () => {
                       <span className="ml-3 text-gray-700 text-sm sm:text-base">
                         Newsletter z trendami
                       </span>
-                    </label>
+                    </label> */}
                   </div>
                 </div>
 
