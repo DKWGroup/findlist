@@ -1,4 +1,4 @@
-import { BookOpen, Instagram, Mail } from "lucide-react";
+import { BookOpen, Instagram } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -24,8 +24,10 @@ export const Footer: React.FC = () => {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://www.instagram.com/findlistnet"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Instagram className="h-6 w-6" />
               </a>
@@ -159,8 +161,8 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Newsletter */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
+        {/* Newsletter - Hidden for now, to be developed in the future */}
+        {/* <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="mb-4 md:mb-0">
               <h3 className="text-lg font-semibold mb-2">
@@ -210,7 +212,7 @@ export const Footer: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Bottom */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">

@@ -24,7 +24,7 @@ import { Product } from "../types";
 import { generateProductUrls, parseProductUrl } from "../utils/productUrlUtils";
 
 export const ProductPage: React.FC = () => {
-  const { id, codeOrAlias } = useParams<{
+  const { id, codeOrAlias, slug } = useParams<{
     id?: string;
     codeOrAlias?: string;
     slug?: string;
@@ -60,85 +60,31 @@ export const ProductPage: React.FC = () => {
           foundProduct = fetchedProduct;
         }
         // Handle the other URL types: short code, long slug, or code/alias
-        else if (codeOrAlias || urlInfo.identifier) {
-          const identifier = codeOrAlias || urlInfo.identifier;
+        else if (slug || codeOrAlias || urlInfo.identifier) {
+          // Priority: slug (from /produkty/:slug), then codeOrAlias (from /:codeOrAlias), then urlInfo
+          const identifier = slug || codeOrAlias || urlInfo.identifier;
+
+          console.log("🔍 ProductPage loading product with:", {
+            slug,
+            codeOrAlias,
+            identifier,
+            urlInfo,
+            currentPath,
+          });
 
           if (!identifier) {
             throw new Error("No product identifier found");
           }
 
-          let queryField: string;
+          // Use the product service to find by code or alias
+          const productService = (await import("../services/productService"))
+            .productService;
+          foundProduct = await productService.getProductByCodeOrAlias(
+            identifier
+          );
 
-          // Determine how to query based on URL type
-          if (urlInfo.type === "short") {
-            // Short URL like /KK-TT-001
-            queryField = `code.eq.${identifier}`;
-          } else if (urlInfo.type === "long") {
-            // Long URL like /produkty/dlugi-pasek-do-telefonu
-            queryField = `url_alias.eq.${identifier}`;
-          } else {
-            // Fallback: try both code and url_alias
-            queryField = `code.eq.${identifier},url_alias.eq.${identifier}`;
-          }
-
-          // Query by the determined field
-          const { data, error } = await supabase
-            .from("products")
-            .select(
-              `
-              *,
-              product_images(url, position),
-              product_tags(tag),
-              product_affiliate_links(platform, url),
-              product_social_links(platform, url),
-              product_stats(*)
-            `
-            )
-            .or(queryField)
-            .single();
-
-          if (error) throw error;
-
-          if (data) {
-            // Transform to Product type
-            foundProduct = {
-              id: data.id,
-              title: data.title,
-              description: data.description,
-              category: data.category_id,
-              productType: data.product_type,
-              tags: data.product_tags?.map((t: any) => t.tag) || [],
-              images: data.product_images?.map((i: any) => i.url) || [],
-              price: {
-                original: data.price_original,
-                discounted: data.price_discounted,
-                currency: data.price_currency || "PLN",
-              },
-              affiliateLinks:
-                data.product_affiliate_links?.reduce((acc: any, link: any) => {
-                  acc[link.platform] = link.url;
-                  return acc;
-                }, {}) || {},
-              socialLinks:
-                data.product_social_links?.reduce((acc: any, link: any) => {
-                  acc[link.platform] = link.url;
-                  return acc;
-                }, {}) || {},
-              popularity: {
-                views: data.product_stats?.views || 0,
-                likes: data.product_stats?.likes || 0,
-                shares: data.product_stats?.shares || 0,
-              },
-              ratings: {
-                average: data.product_stats?.rating_average || 0,
-                count: data.product_stats?.rating_count || 0,
-              },
-              dateAdded: data.created_at,
-              isVerified: data.is_verified,
-              isTrending: data.is_trending,
-              code: data.code,
-              urlAlias: data.url_alias,
-            };
+          if (!foundProduct) {
+            throw new Error(`Product not found for identifier: ${identifier}`);
           }
         }
 
@@ -165,6 +111,7 @@ export const ProductPage: React.FC = () => {
     loadProduct();
   }, [
     id,
+    slug,
     codeOrAlias,
     fetchedProduct,
     isAuthenticated,
