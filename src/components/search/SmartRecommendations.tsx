@@ -229,7 +229,11 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                   {/* Image */}
                   <div className="relative aspect-square overflow-hidden">
                     <LazyImage
-                      src={product.images[0]}
+                      src={
+                        product.images && product.images[0]
+                          ? product.images[0]
+                          : "/images/placeholder-product.jpg"
+                      }
                       alt={product.title}
                       className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                       width={300}

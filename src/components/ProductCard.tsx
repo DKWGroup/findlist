@@ -240,12 +240,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           onClick={handleCardClick}
           className="block relative w-full h-full"
           onMouseEnter={() =>
-            product.images.length > 1 && setCurrentImageIndex(1)
+            product.images &&
+            product.images.length > 1 &&
+            setCurrentImageIndex(1)
           }
           onMouseLeave={() => setCurrentImageIndex(0)}
         >
           <LazyImage
-            src={product.images[currentImageIndex]}
+            src={
+              product.images && product.images[currentImageIndex]
+                ? product.images[currentImageIndex]
+                : "/images/placeholder-product.jpg"
+            }
             alt={product.title}
             className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
             width={400}
