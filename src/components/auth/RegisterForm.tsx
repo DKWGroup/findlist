@@ -28,6 +28,8 @@ export const RegisterForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState<string>("");
+  const [registrationSuccess, setRegistrationSuccess] =
+    useState<boolean>(false);
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
     uppercase: false,
@@ -68,9 +70,14 @@ export const RegisterForm: React.FC = () => {
     try {
       const result = await register(formData);
 
-      // Redirect to profile on successful registration
+      // Show success message on successful registration
       if (result.success) {
-        navigate("/profil");
+        setFormError(""); // Clear any previous errors
+        setRegistrationSuccess(true);
+        // Redirect to profile after showing success message for 3 seconds
+        setTimeout(() => {
+          navigate("/profil");
+        }, 3000);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -130,6 +137,19 @@ export const RegisterForm: React.FC = () => {
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
             <div>{error || formError}</div>
+          </div>
+        )}
+
+        {registrationSuccess && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
+            <Check className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">Dziękujemy za rejestrację!</p>
+              <p className="text-sm text-green-600 mt-1">
+                Twoje konto zostało utworzone. Za chwilę zostaniesz
+                przekierowany do profilu.
+              </p>
+            </div>
           </div>
         )}
 
@@ -361,10 +381,15 @@ export const RegisterForm: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isFormLoading}
+            disabled={isFormLoading || registrationSuccess}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            {isFormLoading ? (
+            {registrationSuccess ? (
+              <>
+                <Check className="h-5 w-5" />
+                <span>Konto utworzone pomyślnie</span>
+              </>
+            ) : isFormLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
                 <span>Tworzenie konta...</span>
