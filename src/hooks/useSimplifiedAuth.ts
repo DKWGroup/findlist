@@ -9,6 +9,7 @@ interface LoginCredentials {
 }
 
 interface RegisterCredentials {
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -91,10 +92,12 @@ export const useSimplifiedAuth = () => {
   // Simple register
   const register = useCallback(
     async (credentials: RegisterCredentials): Promise<{ success: boolean }> => {
-      console.log("SimplifiedAuth: Starting registration...");
+      console.log("SimplifiedAuth: Starting registration with credentials:", {
+        email: credentials.email,
+        name: credentials.name,
+      });
       setIsLoading(true);
       setError(null);
-
       try {
         if (credentials.password !== credentials.confirmPassword) {
           throw new Error("Hasła nie są identyczne");
@@ -103,6 +106,12 @@ export const useSimplifiedAuth = () => {
         const { error } = await supabase.auth.signUp({
           email: credentials.email.trim().toLowerCase(),
           password: credentials.password,
+          options: {
+            data: {
+              full_name: credentials.name.trim(),
+              name: credentials.name.trim(),
+            },
+          },
         });
 
         if (error) {
@@ -117,6 +126,9 @@ export const useSimplifiedAuth = () => {
             errorMessage = "Nieprawidłowy format adresu email";
           } else if (error.message.includes("Signup is disabled")) {
             errorMessage = "Rejestracja jest obecnie niedostępna";
+          } else if (error.message.includes("Email rate limit exceeded")) {
+            errorMessage =
+              "Osiągnięto limit wysyłania e-maili. Spróbuj ponownie za godzinę.";
           }
 
           throw new Error(errorMessage);
@@ -242,16 +254,18 @@ export const useSimplifiedAuth = () => {
           setUser(session?.user ?? null);
           setIsLoading(false);
           console.log("SimplifiedAuth: Initial session loaded");
-          
+
           // Check if user is admin and update role
           if (session?.user) {
-            isUserAdmin().then(isAdmin => {
-              if (isAdmin) {
-                setUserRole("admin");
-              }
-            }).catch(err => {
-              console.error("Error checking admin status:", err);
-            });
+            isUserAdmin()
+              .then((isAdmin) => {
+                if (isAdmin) {
+                  setUserRole("admin");
+                }
+              })
+              .catch((err) => {
+                console.error("Error checking admin status:", err);
+              });
           }
         }
       } catch (err) {

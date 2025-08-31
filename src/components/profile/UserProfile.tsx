@@ -256,9 +256,9 @@ export const UserProfile: React.FC = () => {
   const loadUserSettings = async () => {
     console.log("🔄 [SETTINGS] Ładowanie ustawień użytkownika:", user?.id);
     try {
-      // Get profile data
+      // Get profile data - first try to select existing
       console.log("📤 [SETTINGS] Pobieranie danych profilu...");
-      const { data: profile, error: profileError } = await supabase
+      let { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user?.id)
@@ -266,7 +266,45 @@ export const UserProfile: React.FC = () => {
 
       console.log("📊 [SETTINGS] Dane profilu:", { profile, profileError });
 
-      if (profileError) {
+      // If profile doesn't exist, create it with default values
+      if (profileError && profileError.code === "PGRST116") {
+        console.log("ℹ️ [SETTINGS] Profil nie istnieje - tworzenie nowego...");
+
+        // Use upsert to handle race conditions
+        const { data: newProfile, error: upsertError } = await supabase
+          .from("profiles")
+          .upsert(
+            {
+              id: user?.id,
+              email: user?.email,
+              full_name:
+                user?.user_metadata?.full_name ||
+                user?.user_metadata?.name ||
+                user?.email?.split("@")[0] ||
+                "",
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            {
+              onConflict: "id",
+              ignoreDuplicates: false,
+            }
+          )
+          .select()
+          .single();
+
+        console.log("📊 [SETTINGS] Upsert profilu:", {
+          newProfile,
+          upsertError,
+        });
+
+        if (upsertError) {
+          console.error("❌ [SETTINGS] Błąd upsert profilu:", upsertError);
+          throw upsertError;
+        }
+
+        profile = newProfile;
+      } else if (profileError) {
         console.error("❌ [SETTINGS] Błąd profilu:", profileError);
         throw profileError;
       }
@@ -294,7 +332,10 @@ export const UserProfile: React.FC = () => {
       }
 
       const finalFormData = {
-        name: profile?.full_name || user?.email?.split("@")[0] || "",
+        name:
+          profile?.full_name !== undefined && profile?.full_name !== null
+            ? profile.full_name
+            : user?.email?.split("@")[0] || "",
         email: user?.email || "",
         notification_preferences: settings?.notification_preferences || {
           email_notifications: true,
@@ -313,6 +354,8 @@ export const UserProfile: React.FC = () => {
       };
 
       console.log("✅ [SETTINGS] Finalne dane formularza:", finalFormData);
+      console.log("🔍 [SETTINGS] Profile full_name:", profile?.full_name);
+      console.log("🔍 [SETTINGS] Email fallback:", user?.email?.split("@")[0]);
       setFormData(finalFormData);
     } catch (error) {
       console.error(
@@ -385,6 +428,10 @@ export const UserProfile: React.FC = () => {
       console.log("✅ [SAVE] Profil został pomyślnie zaktualizowany");
       setFormSuccess("Profil został zaktualizowany pomyślnie");
       setIsEditing(false);
+
+      // Reload user settings to reflect the changes
+      console.log("🔄 [SAVE] Przeładowanie ustawień po zapisaniu...");
+      await loadUserSettings();
     } catch (error: any) {
       console.error("❌ [SAVE] Błąd aktualizacji profilu:", error);
       setFormError(
