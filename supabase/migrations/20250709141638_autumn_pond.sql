@@ -101,27 +101,18 @@ CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
   user_role_id UUID;
-  v_full_name TEXT;
 BEGIN
-  -- Extract full_name from raw_user_meta_data, fallback to email part
-  v_full_name := COALESCE(
-    NEW.raw_user_meta_data->>'full_name',
-    NEW.raw_user_meta_data->>'name',
-    SPLIT_PART(NEW.email, '@', 1)
-  );
-
   -- Insert into profiles table
   INSERT INTO profiles (id, email, full_name, created_at, updated_at)
   VALUES (
     NEW.id, 
     NEW.email, 
-    v_full_name,
+    COALESCE(NEW.raw_user_meta_data->>'name', NEW.raw_user_meta_data->>'full_name', 'User'),
     NOW(),
     NOW()
   )
   ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
-    full_name = EXCLUDED.full_name,
     updated_at = NOW();
 
   -- Insert into user_settings table

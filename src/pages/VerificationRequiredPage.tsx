@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { VerificationRequired } from "../components/auth/VerificationRequired";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { VerificationRequired } from '../components/auth/VerificationRequired';
 
 export const VerificationRequiredPage: React.FC = () => {
   return (
@@ -9,9 +9,9 @@ export const VerificationRequiredPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <img
-              src="/findlist-logo2.png"
-              alt="FINDLIST"
+            <img 
+              src="/viralist-logo2.png" 
+              alt="VIRALIST" 
               className="h-8 w-auto"
             />
           </Link>

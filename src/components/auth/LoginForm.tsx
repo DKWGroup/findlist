@@ -78,7 +78,7 @@ export const LoginForm: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Zaloguj się</h2>
-          <p className="text-gray-600">Witaj ponownie w FINDLIST</p>
+          <p className="text-gray-600">Witaj ponownie w VIRALIST</p>
         </div>
 
         {(error || formError) && (

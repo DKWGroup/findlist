@@ -114,30 +114,13 @@ export const useSessionTimeout = (options: UseSessionTimeoutOptions = {}) => {
       "click",
     ];
 
-    // Handle page visibility change to pause/resume activity tracking
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        // Reset activity timer when user returns to the tab
-        resetActivityTimer();
-        console.log("Tab became visible - resetting activity timer");
-      }
-    };
-
     // Add event listeners
     activityEvents.forEach((event) => {
       window.addEventListener(event, resetActivityTimer);
     });
 
-    // Listen for visibility changes to prevent false timeouts
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
     // Set up interval to check session
-    const interval = setInterval(() => {
-      // Don't check for timeout if tab is not visible
-      if (document.visibilityState === "visible") {
-        checkSession();
-      }
-    }, 60 * 1000); // Check every minute
+    const interval = setInterval(checkSession, 60 * 1000); // Check every minute
 
     // Initial check
     checkSession();
@@ -147,7 +130,6 @@ export const useSessionTimeout = (options: UseSessionTimeoutOptions = {}) => {
       activityEvents.forEach((event) => {
         window.removeEventListener(event, resetActivityTimer);
       });
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearInterval(interval);
     };
   }, [isAuthenticated, checkSession, resetActivityTimer]);

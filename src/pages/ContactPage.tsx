@@ -69,9 +69,9 @@ export const ContactPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Kontakt - FINDLIST | Skontaktuj się z nami"
-        description="Masz pytania dotyczące FINDLIST? Skontaktuj się z nami poprzez formularz kontaktowy lub bezpośrednio przez e-mail."
-        canonical="https://findlist.net/kontakt"
+        title="Kontakt - VIRALIST | Skontaktuj się z nami"
+        description="Masz pytania dotyczące VIRALIST? Skontaktuj się z nami poprzez formularz kontaktowy lub bezpośrednio przez e-mail."
+        canonical="https://viralist.pl/kontakt"
       />
 
       <Layout>
@@ -275,19 +275,19 @@ export const ContactPage: React.FC = () => {
                         </h3>
                         <p className="text-gray-600 mb-1">Ogólne zapytania:</p>
                         <a
-                          href="mailto:kontakt@findlist.net"
+                          href="mailto:kontakt@viralist.pl"
                           className="text-blue-600 hover:underline"
                         >
-                          kontakt@findlist.net
+                          kontakt@viralist.pl
                         </a>
                         <p className="text-gray-600 mt-2 mb-1">
                           Współpraca biznesowa:
                         </p>
                         <a
-                          href="mailto:biznes@findlist.net"
+                          href="mailto:biznes@viralist.pl"
                           className="text-blue-600 hover:underline"
                         >
-                          biznes@findlist.net
+                          biznes@viralist.pl
                         </a>
                       </div>
                     </div>
@@ -300,7 +300,7 @@ export const ContactPage: React.FC = () => {
                     </h3>
                     <div className="flex gap-4">
                       <a
-                        href="https://tiktok.com/@findlist_pl"
+                        href="https://tiktok.com/@viralist_pl"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-black text-white p-3 rounded-lg hover:bg-gray-800 transition-colors"
@@ -314,7 +314,7 @@ export const ContactPage: React.FC = () => {
                         </svg>
                       </a>
                       <a
-                        href="https://instagram.com/findlist.net"
+                        href="https://instagram.com/viralist.pl"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
@@ -328,7 +328,7 @@ export const ContactPage: React.FC = () => {
                         </svg>
                       </a>
                       <a
-                        href="https://facebook.com/findlist.net"
+                        href="https://facebook.com/viralist.pl"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -379,7 +379,7 @@ export const ContactPage: React.FC = () => {
                   </h3>
                   <p className="text-gray-600">
                     Oczywiście! Zachęcamy do przesyłania propozycji produktów,
-                    które Twoim zdaniem powinny znaleźć się na FINDLIST.
+                    które Twoim zdaniem powinny znaleźć się na VIRALIST.
                     Wystarczy wypełnić formularz kontaktowy, wybierając temat
                     "Propozycja produktu".
                   </p>
@@ -404,7 +404,7 @@ export const ContactPage: React.FC = () => {
                   <p className="text-gray-600">
                     Tak, współpracujemy z influencerami, którzy pasują do
                     profilu naszej platformy. Jeśli jesteś zainteresowany
-                    współpracą, napisz do nas na adres biznes@findlist.net lub
+                    współpracą, napisz do nas na adres biznes@viralist.pl lub
                     wypełnij formularz kontaktowy, wybierając temat "Propozycja
                     współpracy".
                   </p>

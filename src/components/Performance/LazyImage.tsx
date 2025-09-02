@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 
 interface LazyImageProps {
   src: string;
@@ -19,7 +19,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   height,
   placeholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3C/svg%3E",
   onLoad,
-  onError,
+  onError
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
@@ -36,7 +36,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       },
       {
         threshold: 0.1,
-        rootMargin: "50px",
+        rootMargin: '50px'
       }
     );
 
@@ -57,18 +57,11 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     onError?.();
   };
 
-  // Generate WebP source if supported and src is valid
-  const webpSrc =
-    src && typeof src === "string"
-      ? src.replace(/\.(jpg|jpeg|png)$/i, ".webp")
-      : src;
-  const isWebPSupported =
-    typeof window !== "undefined" &&
-    window.HTMLCanvasElement &&
-    document
-      .createElement("canvas")
-      .toDataURL("image/webp")
-      .indexOf("data:image/webp") === 0;
+  // Generate WebP source if supported
+  const webpSrc = src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+  const isWebPSupported = typeof window !== 'undefined' && 
+    window.HTMLCanvasElement && 
+    document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') === 0;
 
   return (
     <div className={`relative overflow-hidden ${className}`} ref={imgRef}>
@@ -90,7 +83,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
                 src={src}
                 alt={alt}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${
-                  isLoaded ? "opacity-100" : "opacity-0"
+                  isLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
                 width={width}
                 height={height}
@@ -105,7 +98,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
               src={src}
               alt={alt}
               className={`w-full h-full object-cover transition-opacity duration-300 ${
-                isLoaded ? "opacity-100" : "opacity-0"
+                isLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               width={width}
               height={height}
@@ -115,14 +108,14 @@ export const LazyImage: React.FC<LazyImageProps> = ({
               decoding="async"
             />
           )}
-
+          
           {/* Loading placeholder */}
           {!isLoaded && !hasError && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
-
+          
           {/* Error fallback */}
           {hasError && (
             <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">

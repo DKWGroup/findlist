@@ -28,8 +28,6 @@ export const RegisterForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState<string>("");
-  const [registrationSuccess, setRegistrationSuccess] =
-    useState<boolean>(false);
   const [passwordStrength, setPasswordStrength] = useState({
     length: false,
     uppercase: false,
@@ -70,14 +68,9 @@ export const RegisterForm: React.FC = () => {
     try {
       const result = await register(formData);
 
-      // Show success message on successful registration
+      // Redirect to profile on successful registration
       if (result.success) {
-        setFormError(""); // Clear any previous errors
-        setRegistrationSuccess(true);
-        // Redirect to profile after showing success message for 3 seconds
-        setTimeout(() => {
-          navigate("/profil");
-        }, 3000);
+        navigate("/profil");
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -130,26 +123,13 @@ export const RegisterForm: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Załóż konto</h2>
-          <p className="text-gray-600">Dołącz do społeczności FINDLIST</p>
+          <p className="text-gray-600">Dołącz do społeczności VIRALIST</p>
         </div>
 
         {(error || formError) && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
             <div>{error || formError}</div>
-          </div>
-        )}
-
-        {registrationSuccess && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-start gap-2">
-            <Check className="h-5 w-5 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium">Dziękujemy za rejestrację!</p>
-              <p className="text-sm text-green-600 mt-1">
-                Twoje konto zostało utworzone. Za chwilę zostaniesz
-                przekierowany do profilu.
-              </p>
-            </div>
           </div>
         )}
 
@@ -356,8 +336,7 @@ export const RegisterForm: React.FC = () => {
             </label>
           </div>
 
-          {/* Newsletter consent - Hidden for now, to be developed in the future */}
-          {/* <div className="flex items-start mb-6">
+          <div className="flex items-start mb-6">
             <input
               type="checkbox"
               name="marketingConsent"
@@ -369,7 +348,7 @@ export const RegisterForm: React.FC = () => {
             <label className="ml-2 text-sm text-gray-600">
               Chcę otrzymywać newsletter z najnowszymi trendami i promocjami
             </label>
-          </div> */}
+          </div>
 
           <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg mb-6 text-xs text-blue-700">
             <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -381,15 +360,10 @@ export const RegisterForm: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isFormLoading || registrationSuccess}
+            disabled={isFormLoading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            {registrationSuccess ? (
-              <>
-                <Check className="h-5 w-5" />
-                <span>Konto utworzone pomyślnie</span>
-              </>
-            ) : isFormLoading ? (
+            {isFormLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
                 <span>Tworzenie konta...</span>

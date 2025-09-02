@@ -1,18 +1,9 @@
-import {
-  ExternalLink,
-  Filter,
-  Grid,
-  Image,
-  List,
-  SortAsc,
-  Sparkles,
-} from "lucide-react";
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { SearchFilters, SearchResult } from "../../types/search";
-import { generateProductLongUrl } from "../../utils/productUrlUtils";
-import { LazyImage } from "../Performance/LazyImage";
-import { ProductCard } from "../ProductCard";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { SearchResult, SearchFilters } from '../../types/search';
+import { ProductCard } from '../ProductCard';
+import { Filter, SortAsc, Grid, List, Sparkles, Image, ExternalLink } from 'lucide-react';
+import { LazyImage } from '../Performance/LazyImage';
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -29,25 +20,25 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   isLoading = false,
   onSort,
   onFilter,
-  totalResults,
+  totalResults
 }) => {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("relevance");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState('relevance');
 
   // Track loading state for images
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
 
   const handleImageLoad = (resultId: string) => {
-    setLoadedImages((prev) => ({
+    setLoadedImages(prev => ({
       ...prev,
-      [resultId]: true,
+      [resultId]: true
     }));
   };
 
   const handleImageError = (resultId: string) => {
-    setLoadedImages((prev) => ({
+    setLoadedImages(prev => ({
       ...prev,
-      [resultId]: false,
+      [resultId]: false
     }));
   };
 
@@ -58,37 +49,37 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     }
   };
 
-  const getMatchTypeColor = (matchType: SearchResult["matchType"]) => {
+  const getMatchTypeColor = (matchType: SearchResult['matchType']) => {
     switch (matchType) {
-      case "exact":
-        return "bg-green-100 text-green-800";
-      case "semantic":
-        return "bg-blue-100 text-blue-800";
-      case "fuzzy":
-        return "bg-yellow-100 text-yellow-800";
-      case "category":
-        return "bg-purple-100 text-purple-800";
-      case "tag":
-        return "bg-orange-100 text-orange-800";
+      case 'exact':
+        return 'bg-green-100 text-green-800';
+      case 'semantic':
+        return 'bg-blue-100 text-blue-800';
+      case 'fuzzy':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'category':
+        return 'bg-purple-100 text-purple-800';
+      case 'tag':
+        return 'bg-orange-100 text-orange-800';
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getMatchTypeLabel = (matchType: SearchResult["matchType"]) => {
+  const getMatchTypeLabel = (matchType: SearchResult['matchType']) => {
     switch (matchType) {
-      case "exact":
-        return "Dokładne dopasowanie";
-      case "semantic":
-        return "Semantyczne";
-      case "fuzzy":
-        return "Podobne";
-      case "category":
-        return "Kategoria";
-      case "tag":
-        return "Tag";
+      case 'exact':
+        return 'Dokładne dopasowanie';
+      case 'semantic':
+        return 'Semantyczne';
+      case 'fuzzy':
+        return 'Podobne';
+      case 'category':
+        return 'Kategoria';
+      case 'tag':
+        return 'Tag';
       default:
-        return "Inne";
+        return 'Inne';
     }
   };
 
@@ -103,13 +94,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
           </div>
         </div>
-
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse"
-            >
+            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
               <div className="aspect-square bg-gray-200"></div>
               <div className="p-4 space-y-3">
                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -133,18 +121,13 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            {query ? `Wyniki dla "${query}"` : "Wszystkie produkty"}
+            {query ? `Wyniki dla "${query}"` : 'Wszystkie produkty'}
           </h2>
           <p className="text-gray-600">
             Znaleziono {totalResults || results.length} produktów
             {results.length > 0 && (
               <span className="ml-2 text-sm">
-                • Średnia trafność:{" "}
-                {Math.round(
-                  results.reduce((sum, r) => sum + r.relevanceScore, 0) /
-                    results.length
-                )}
-                %
+                • Średnia trafność: {Math.round(results.reduce((sum, r) => sum + r.relevanceScore, 0) / results.length)}%
               </span>
             )}
           </p>
@@ -171,22 +154,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           {/* View Mode Toggle */}
           <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
             <button
-              onClick={() => setViewMode("grid")}
-              className={`p-2 ${
-                viewMode === "grid"
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:bg-gray-50"
-              } transition-colors`}
+              onClick={() => setViewMode('grid')}
+              className={`p-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'} transition-colors`}
             >
               <Grid className="h-4 w-4" />
             </button>
             <button
-              onClick={() => setViewMode("list")}
-              className={`p-2 ${
-                viewMode === "list"
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:bg-gray-50"
-              } transition-colors`}
+              onClick={() => setViewMode('list')}
+              className={`p-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'} transition-colors`}
             >
               <List className="h-4 w-4" />
             </button>
@@ -200,38 +175,27 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <div className="flex items-start gap-3">
             <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <h3 className="font-medium text-blue-900 mb-1">
-                Inteligentne wyszukiwanie
-              </h3>
+              <h3 className="font-medium text-blue-900 mb-1">Inteligentne wyszukiwanie</h3>
               <p className="text-blue-800 text-sm">
-                Znaleźliśmy produkty pasujące do "{query}" używając
-                zaawansowanych algorytmów semantycznych.
-                {results.some((r) => r.matchType === "semantic") && (
-                  <span className="ml-1">
-                    Uwzględniliśmy również powiązane terminy i kontekst.
-                  </span>
+                Znaleźliśmy produkty pasujące do "{query}" używając zaawansowanych algorytmów semantycznych.
+                {results.some(r => r.matchType === 'semantic') && (
+                  <span className="ml-1">Uwzględniliśmy również powiązane terminy i kontekst.</span>
                 )}
               </p>
-
+              
               {/* Match Types Summary */}
               <div className="flex flex-wrap gap-2 mt-2">
-                {Array.from(new Set(results.map((r) => r.matchType))).map(
-                  (matchType) => {
-                    const count = results.filter(
-                      (r) => r.matchType === matchType
-                    ).length;
-                    return (
-                      <span
-                        key={matchType}
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getMatchTypeColor(
-                          matchType
-                        )}`}
-                      >
-                        {getMatchTypeLabel(matchType)}: {count}
-                      </span>
-                    );
-                  }
-                )}
+                {Array.from(new Set(results.map(r => r.matchType))).map(matchType => {
+                  const count = results.filter(r => r.matchType === matchType).length;
+                  return (
+                    <span
+                      key={matchType}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getMatchTypeColor(matchType)}`}
+                    >
+                      {getMatchTypeLabel(matchType)}: {count}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -240,15 +204,13 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
       {/* Results Grid/List */}
       {results.length > 0 ? (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              : "space-y-4"
-          }
-        >
-          {results.map((result) =>
-            viewMode === "grid" ? (
+        <div className={
+          viewMode === 'grid'
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            : "space-y-4"
+        }>
+          {results.map((result) => (
+            viewMode === 'grid' ? (
               <div key={result.id} className="relative">
                 {/* Enhanced ProductCard with search metadata */}
                 <div className="relative">
@@ -266,28 +228,23 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                       socialLinks: {},
                       popularity: { views: 0, likes: 0, shares: 0 },
                       ratings: { average: 0, count: 0 },
-                      dateAdded: new Date().toISOString().split("T")[0],
+                      dateAdded: new Date().toISOString().split('T')[0],
                       isVerified: false,
-                      isTrending: false,
+                      isTrending: false
                     }}
                   />
-
+                  
                   {/* Search metadata overlay */}
                   <div className="absolute top-2 left-2 flex flex-col gap-1">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getMatchTypeColor(
-                        result.matchType
-                      )}`}
-                    >
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getMatchTypeColor(result.matchType)}`}>
                       {result.relevanceScore}% trafność
                     </span>
-
+                    
                     {result.matchedTerms.length > 0 && (
                       <div className="bg-white/90 backdrop-blur-sm rounded px-2 py-1">
                         <p className="text-xs text-gray-600">
-                          Pasuje: {result.matchedTerms.slice(0, 2).join(", ")}
-                          {result.matchedTerms.length > 2 &&
-                            ` +${result.matchedTerms.length - 2}`}
+                          Pasuje: {result.matchedTerms.slice(0, 2).join(', ')}
+                          {result.matchedTerms.length > 2 && ` +${result.matchedTerms.length - 2}`}
                         </p>
                       </div>
                     )}
@@ -295,9 +252,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 </div>
               </div>
             ) : (
-              <Link
-                key={result.id}
-                to={generateProductLongUrl(result.title)}
+              <Link 
+                key={result.id} 
+                to={`/product/${result.id}`}
                 className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:shadow-md transition-all duration-200"
               >
                 {/* Thumbnail with lazy loading */}
@@ -317,65 +274,51 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                       <Image className="h-8 w-8 text-gray-400" />
                     </div>
                   )}
-
+                  
                   {/* Loading overlay */}
                   {loadedImages[result.id] === undefined && (
                     <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
                       <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   )}
-
+                  
                   {/* Error fallback */}
                   {loadedImages[result.id] === false && (
                     <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
                       <Image className="h-8 w-8 text-gray-400" />
                     </div>
                   )}
-
+                  
                   {/* Relevance badge */}
                   <div className="absolute top-1 left-1">
-                    <span
-                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${getMatchTypeColor(
-                        result.matchType
-                      )}`}
-                    >
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${getMatchTypeColor(result.matchType)}`}>
                       {result.relevanceScore}%
                     </span>
                   </div>
                 </div>
-
+                
                 {/* Product details */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">
-                    {result.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {result.description}
-                  </p>
-
+                  <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{result.title}</h3>
+                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">{result.description}</p>
+                  
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {/* Price */}
                       <span className="text-blue-600 font-semibold whitespace-nowrap">
-                        {result.price.discounted?.toFixed(2) ||
-                          result.price.original?.toFixed(2) ||
-                          "0.00"}{" "}
-                        {result.price.currency}
+                        {result.price.discounted?.toFixed(2) || result.price.original?.toFixed(2) || '0.00'} {result.price.currency}
                       </span>
-
+                      
                       {/* Tags */}
                       <div className="hidden sm:flex flex-wrap gap-1">
-                        {result.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full"
-                          >
+                        {result.tags.slice(0, 2).map(tag => (
+                          <span key={tag} className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
                             #{tag}
                           </span>
                         ))}
                       </div>
                     </div>
-
+                    
                     <span className="text-blue-600 flex items-center gap-1 text-xs whitespace-nowrap">
                       Zobacz <ExternalLink className="h-3 w-3" />
                     </span>
@@ -383,7 +326,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 </div>
               </Link>
             )
-          )}
+          ))}
         </div>
       ) : (
         <div className="text-center py-16">
@@ -392,11 +335,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             Brak wyników
           </h3>
           <p className="text-gray-600 max-w-md mx-auto mb-6">
-            {query
+            {query 
               ? `Nie znaleźliśmy produktów dla "${query}". Spróbuj użyć innych słów kluczowych lub sprawdź pisownię.`
-              : "Nie znaleziono produktów spełniających kryteria wyszukiwania."}
+              : 'Nie znaleziono produktów spełniających kryteria wyszukiwania.'
+            }
           </p>
-
+          
           {query && (
             <div className="bg-gray-50 rounded-lg p-4 max-w-md mx-auto">
               <h4 className="font-medium text-gray-900 mb-2">Sugestie:</h4>

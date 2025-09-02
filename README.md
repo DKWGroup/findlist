@@ -1,6 +1,6 @@
-# FINDLIST - Viralowe Produkty Platform
+# VIRALIST - Viralowe Produkty Platform
 
-Platforma agregująca najgorętsze produkty z TikToka, Instagrama i innych mediów społecznościowych. FINDLIST to miejsce, gdzie znajdziesz wszystkie trendy zakupowe w jednym miejscu.
+Platforma agregująca najlepsze viralowe produkty z TikToka i Instagrama z funkcją przesyłania i optymalizacji obrazów.
 
 ## 🔐 Uwierzytelnianie
 
@@ -26,33 +26,28 @@ Platforma obsługuje następujące metody logowania:
 ## 🛠️ Instalacja
 
 1. **Klonowanie repozytorium**
-
 ```bash
 git clone <repository-url>
-cd findlist
+cd viralist
 ```
 
 2. **Instalacja zależności**
-
 ```bash
 npm install
 ```
 
 3. **Konfiguracja Supabase**
-
 ```bash
 cp .env.example .env
 ```
 
 Uzupełnij plik `.env` danymi z Supabase:
-
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 4. **Uruchomienie aplikacji**
-
 ```bash
 npm run dev
 ```
@@ -62,7 +57,6 @@ npm run dev
 ### 1. Utworzenie Bucket'a
 
 W Supabase Dashboard:
-
 1. Przejdź do Storage
 2. Utwórz nowy bucket o nazwie `images`
 3. Ustaw jako publiczny
@@ -72,21 +66,18 @@ W Supabase Dashboard:
 Dodaj następujące polityki RLS:
 
 **Policy 1: Public read access**
-
 ```sql
 CREATE POLICY "Public read access" ON storage.objects
 FOR SELECT USING (bucket_id = 'images');
 ```
 
 **Policy 2: Authenticated upload**
-
 ```sql
 CREATE POLICY "Authenticated upload" ON storage.objects
 FOR INSERT WITH CHECK (bucket_id = 'images' AND auth.role() = 'authenticated');
 ```
 
 **Policy 3: Authenticated delete**
-
 ```sql
 CREATE POLICY "Authenticated delete" ON storage.objects
 FOR DELETE USING (bucket_id = 'images' AND auth.role() = 'authenticated');
@@ -95,7 +86,6 @@ FOR DELETE USING (bucket_id = 'images' AND auth.role() = 'authenticated');
 ### 3. Ograniczenia Bucket'a
 
 W ustawieniach bucket'a ustaw:
-
 - **File size limit**: 2MB
 - **Allowed MIME types**: `image/jpeg`, `image/png`, `image/webp`
 
@@ -132,8 +122,8 @@ Główny komponent do przesyłania obrazów:
 
 ```tsx
 <ImageUploadZone
-  onUploadComplete={(urls) => console.log("Uploaded:", urls)}
-  onUploadError={(error) => console.error("Error:", error)}
+  onUploadComplete={(urls) => console.log('Uploaded:', urls)}
+  onUploadError={(error) => console.error('Error:', error)}
   maxFiles={5}
   folder="products"
   disabled={false}
@@ -141,7 +131,6 @@ Główny komponent do przesyłania obrazów:
 ```
 
 **Props:**
-
 - `onUploadComplete`: Callback po pomyślnym upload'ie
 - `onUploadError`: Callback w przypadku błędu
 - `maxFiles`: Maksymalna liczba plików (domyślnie 5)
@@ -151,7 +140,6 @@ Główny komponent do przesyłania obrazów:
 ### Integracja z Formularzami
 
 Komponent jest zintegrowany z:
-
 - **ProductForm**: Dodawanie zdjęć produktów
 - **BlogEditor**: Zdjęcie główne wpisu blogowego
 
@@ -160,7 +148,6 @@ Komponent jest zintegrowany z:
 ### imageUtils.ts
 
 Funkcje do przetwarzania obrazów:
-
 - `processImage()`: Optymalizacja obrazu
 - `isValidImageFile()`: Walidacja typu pliku
 - `formatFileSize()`: Formatowanie rozmiaru pliku
@@ -169,7 +156,6 @@ Funkcje do przetwarzania obrazów:
 ### supabaseStorage.ts
 
 Funkcje do obsługi Supabase Storage:
-
 - `uploadToSupabase()`: Upload z progress tracking
 - `deleteFromSupabase()`: Usuwanie plików
 - `initializeStorageBucket()`: Inicjalizacja bucket'a
@@ -179,19 +165,16 @@ Funkcje do obsługi Supabase Storage:
 ### Przygotowanie do produkcji
 
 1. **Build aplikacji**
-
 ```bash
 npm run build
 ```
 
 2. **Konfiguracja zmiennych środowiskowych**
-   Ustaw zmienne w środowisku produkcyjnym:
-
+Ustaw zmienne w środowisku produkcyjnym:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
 3. **Deploy na Netlify/Vercel**
-
 ```bash
 # Netlify
 npm run build && netlify deploy --prod --dir=dist
@@ -203,7 +186,6 @@ vercel --prod
 ## 📱 Responsywność
 
 Aplikacja jest w pełni responsywna z breakpointami:
-
 - **Mobile**: < 768px
 - **Tablet**: 768px - 1024px
 - **Desktop**: > 1024px
@@ -236,11 +218,11 @@ Aplikacja jest w pełni responsywna z breakpointami:
 
 ```javascript
 // Przykład logowania
-console.log("Image processed:", {
-  originalSize: "5MB",
-  compressedSize: "1.2MB",
-  dimensions: "1920x1080",
-  format: "webp",
+console.log('Image processed:', {
+  originalSize: '5MB',
+  compressedSize: '1.2MB',
+  dimensions: '1920x1080',
+  format: 'webp'
 });
 ```
 
@@ -249,12 +231,10 @@ console.log("Image processed:", {
 ### Częste Problemy
 
 1. **Błąd CORS**
-
    - Sprawdź konfigurację Supabase
    - Upewnij się, że domena jest dodana do allowed origins
 
 2. **Upload nie działa**
-
    - Sprawdź zmienne środowiskowe
    - Zweryfikuj RLS policies
    - Sprawdź limity bucket'a
@@ -266,9 +246,8 @@ console.log("Image processed:", {
 ### Debug Mode
 
 Włącz tryb debug w konsoli:
-
 ```javascript
-localStorage.setItem("debug", "true");
+localStorage.setItem('debug', 'true');
 ```
 
 ## 📄 Licencja
@@ -286,7 +265,6 @@ MIT License - zobacz plik LICENSE dla szczegółów.
 ## 📞 Wsparcie
 
 W przypadku problemów:
-
 1. Sprawdź dokumentację
 2. Przeszukaj Issues na GitHub
 3. Utwórz nowy Issue z opisem problemu

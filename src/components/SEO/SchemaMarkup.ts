@@ -4,17 +4,17 @@ export const generateOrganizationSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "FINDLIST",
-    alternateName: "findlist.net",
-    url: "https://findlist.net",
-    logo: "https://findlist.net/findlist-logo.png",
+    name: "VIRALIST",
+    alternateName: "Viralist.pl",
+    url: "https://viralist.pl",
+    logo: "https://viralist.pl/viralist-logo.png",
     description:
       "Pierwsza w Polsce platforma agregująca viralne produkty z mediów społecznościowych. Odkryj trendy zanim staną się mainstream.",
     foundingDate: "2024",
     founders: [
       {
         "@type": "Person",
-        name: "FINDLIST Team",
+        name: "VIRALIST Team",
       },
     ],
     contactPoint: {
@@ -24,9 +24,9 @@ export const generateOrganizationSchema = () => {
       availableLanguage: "Polish",
     },
     sameAs: [
-      "https://www.facebook.com/findlist",
-      "https://www.instagram.com/findlist",
-      "https://twitter.com/findlist_pl",
+      "https://www.facebook.com/viralist",
+      "https://www.instagram.com/viralist",
+      "https://twitter.com/viralist_pl",
     ],
     address: {
       "@type": "PostalAddress",
@@ -40,25 +40,25 @@ export const generateWebSiteSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "FINDLIST",
-    url: "https://findlist.net",
+    name: "VIRALIST",
+    url: "https://viralist.pl",
     description:
       "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
     publisher: {
       "@type": "Organization",
-      name: "FINDLIST",
+      name: "VIRALIST",
     },
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://findlist.net/search?q={search_term_string}",
+        urlTemplate: "https://viralist.pl/search?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
     mainEntity: {
       "@type": "WebPage",
-      "@id": "https://findlist.net/#webpage",
+      "@id": "https://viralist.pl/#webpage",
     },
   };
 };
@@ -96,7 +96,7 @@ export const generateProductSchema = (product: any) => {
       availability: "https://schema.org/InStock",
       seller: {
         "@type": "Organization",
-        name: "FINDLIST",
+        name: "VIRALIST",
       },
       url: product.affiliateUrl,
     },
@@ -137,14 +137,14 @@ export const generateArticleSchema = (article: any) => {
     image: article.featuredImage,
     author: {
       "@type": "Person",
-      name: article.author || "FINDLIST Team",
+      name: article.author || "VIRALIST Team",
     },
     publisher: {
       "@type": "Organization",
-      name: "FINDLIST",
+      name: "VIRALIST",
       logo: {
         "@type": "ImageObject",
-        url: "https://findlist.net/findlist-logo.png",
+        url: "https://viralist.pl/viralist-logo.png",
       },
     },
     datePublished: article.publishedAt,
@@ -180,9 +180,9 @@ export const generateLocalBusinessSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    name: "FINDLIST",
+    name: "VIRALIST",
     description: "Platforma viralowych produktów z mediów społecznościowych",
-    url: "https://findlist.net",
+    url: "https://viralist.pl",
     address: {
       "@type": "PostalAddress",
       addressCountry: "PL",

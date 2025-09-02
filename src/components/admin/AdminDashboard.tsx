@@ -5,7 +5,6 @@ import {
   Eye,
   Filter,
   Hash,
-  Link,
   MessageSquare,
   Package,
   Plus,
@@ -23,7 +22,6 @@ import { Product } from "../../types";
 import { BlogManagement } from "./BlogManagement";
 import { ProductCodeManager } from "./ProductCodeManager";
 import { ProductForm } from "./ProductForm";
-import { ProductUrlManager } from "./ProductUrlManager";
 import { UserRoleManagement } from "./UserRoleManagement";
 
 export const AdminDashboard: React.FC = () => {
@@ -65,7 +63,6 @@ export const AdminDashboard: React.FC = () => {
     { id: "overview", label: "Przegląd", icon: BarChart3 },
     { id: "products", label: "Produkty", icon: Package },
     { id: "product-codes", label: "Kody produktów", icon: Hash },
-    { id: "product-urls", label: "Zarządzanie URL", icon: Link },
     { id: "blog", label: "Blog", icon: BookOpen },
     { id: "users", label: "Role użytkowników", icon: Users },
     { id: "reviews", label: "Recenzje", icon: MessageSquare },
@@ -494,19 +491,13 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {activeTab === "product-codes" && <ProductCodeManager />}
-          {activeTab === "product-urls" && <ProductUrlManager />}
           {activeTab === "blog" && <BlogManagement />}
           {activeTab === "users" && <UserRoleManagement />}
 
           {/* Other tabs content would go here */}
-          {![
-            "overview",
-            "products",
-            "product-codes",
-            "product-urls",
-            "blog",
-            "users",
-          ].includes(activeTab) && (
+          {!["overview", "products", "product-codes", "blog", "users"].includes(
+            activeTab
+          ) && (
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 {tabs.find((t) => t.id === activeTab)?.label}

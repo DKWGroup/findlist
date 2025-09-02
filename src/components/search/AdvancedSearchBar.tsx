@@ -1,18 +1,8 @@
-import {
-  Clock,
-  Filter,
-  Image,
-  Package,
-  Search,
-  Tag,
-  TrendingUp,
-  X,
-} from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { searchService } from "../../services/searchService";
-import { SearchFilters, SearchSuggestion } from "../../types/search";
-import { generateProductLongUrl } from "../../utils/productUrlUtils";
-import { LazyImage } from "../Performance/LazyImage";
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Filter, X, TrendingUp, Clock, Package, Tag, Image } from 'lucide-react';
+import { SearchSuggestion, SearchFilters } from '../../types/search';
+import { searchService } from '../../services/searchService';
+import { LazyImage } from '../Performance/LazyImage';
 
 interface AdvancedSearchBarProps {
   onSearch: (query: string, filters?: Partial<SearchFilters>) => void;
@@ -27,9 +17,9 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
   onSuggestionSelect,
   placeholder = "Szukaj viralnych produktów...",
   showFilters = true,
-  className = "",
+  className = ""
 }) => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
@@ -37,23 +27,20 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
   const [filters, setFilters] = useState<Partial<SearchFilters>>({});
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
-
+  
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
         setShowFiltersPanel(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -68,13 +55,13 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
           setSuggestions(newSuggestions);
           setShowSuggestions(true);
         } catch (error) {
-          console.error("Error fetching suggestions:", error);
+          console.error('Error fetching suggestions:', error);
         } finally {
           setIsLoading(false);
         }
       } else if (query.length === 0 && hasUserInteracted) {
         // Show default suggestions only after user interaction
-        const defaultSuggestions = await searchService.getSuggestions("", 6);
+        const defaultSuggestions = await searchService.getSuggestions('', 6);
         setSuggestions(defaultSuggestions);
         setShowSuggestions(true);
       } else {
@@ -94,9 +81,24 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-    setHasUserInteracted(true);
+  const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+    if (suggestion.type === 'product') {
+      // If it's a product, redirect directly to the product page
+      if (suggestion.productId) {
+        window.location.href = `/product/${suggestion.productId}`;
+      } else {
+        setQuery(suggestion.text);
+        onSearch(suggestion.text, filters);
+      }
+    } else {
+      setQuery(suggestion.text);
+      inputRef.current?.focus();
+    }
+    
+    if (onSuggestionSelect) {
+      onSuggestionSelect(suggestion);
+    }
+    setShowSuggestions(false);
   };
 
   const handleInputFocus = () => {
@@ -117,63 +119,48 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+    setHasUserInteracted(true);
+  };
+
   const fetchDefaultSuggestions = async () => {
     try {
-      const defaultSuggestions = await searchService.getSuggestions("", 6);
+      const defaultSuggestions = await searchService.getSuggestions('', 6);
       setSuggestions(defaultSuggestions);
       setShowSuggestions(true);
     } catch (error) {
-      console.error("Error fetching default suggestions:", error);
+      console.error('Error fetching default suggestions:', error);
     }
-  };
-
-  const handleSuggestionClick = (suggestion: SearchSuggestion) => {
-    if (suggestion.type === "product") {
-      // If it's a product, redirect directly to the product page
-      if (suggestion.text) {
-        window.location.href = generateProductLongUrl(suggestion.text);
-      } else {
-        setQuery(suggestion.text);
-        onSearch(suggestion.text, filters);
-      }
-    } else {
-      setQuery(suggestion.text);
-      inputRef.current?.focus();
-    }
-
-    if (onSuggestionSelect) {
-      onSuggestionSelect(suggestion);
-    }
-    setShowSuggestions(false);
   };
 
   const clearQuery = () => {
-    setQuery("");
+    setQuery('');
     setShowSuggestions(false);
     inputRef.current?.focus();
   };
 
   const handleImageLoad = (suggestionId: string) => {
-    setLoadedImages((prev) => ({
+    setLoadedImages(prev => ({
       ...prev,
-      [suggestionId]: true,
+      [suggestionId]: true
     }));
   };
 
   const handleImageError = (suggestionId: string) => {
-    setLoadedImages((prev) => ({
+    setLoadedImages(prev => ({
       ...prev,
-      [suggestionId]: false,
+      [suggestionId]: false
     }));
   };
 
   const getSuggestionIcon = (type: string) => {
     switch (type) {
-      case "trending":
+      case 'trending':
         return <TrendingUp className="h-4 w-4 text-red-500" />;
-      case "category":
+      case 'category':
         return <Tag className="h-4 w-4 text-blue-500" />;
-      case "product":
+      case 'product':
         return <Package className="h-4 w-4 text-green-500" />;
       default:
         return <Clock className="h-4 w-4 text-gray-400" />;
@@ -182,21 +169,20 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
 
   const getSuggestionLabel = (type: string) => {
     switch (type) {
-      case "trending":
-        return "Trending";
-      case "category":
-        return "Kategoria";
-      case "product":
-        return "Produkt";
+      case 'trending':
+        return 'Trending';
+      case 'category':
+        return 'Kategoria';
+      case 'product':
+        return 'Produkt';
       default:
-        return "Zapytanie";
+        return 'Zapytanie';
     }
   };
 
-  const activeFiltersCount = Object.values(filters).filter((value) => {
+  const activeFiltersCount = Object.values(filters).filter(value => {
     if (Array.isArray(value)) return value.length > 0;
-    if (typeof value === "object" && value !== null)
-      return Object.keys(value).length > 0;
+    if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
     return value !== undefined && value !== null;
   }).length;
 
@@ -233,9 +219,9 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
               type="button"
               onClick={() => setShowFiltersPanel(!showFiltersPanel)}
               className={`px-4 py-3 border-t border-b border-gray-300 transition-colors relative ${
-                showFiltersPanel
-                  ? "bg-blue-50 text-blue-600 border-blue-300"
-                  : "bg-white text-gray-600 hover:bg-gray-50"
+                showFiltersPanel 
+                  ? 'bg-blue-50 text-blue-600 border-blue-300' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
               <Filter className="h-5 w-5" />
@@ -267,7 +253,7 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                 onClick={() => handleSuggestionClick(suggestion)}
                 className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors group relative cursor-pointer"
               >
-                {suggestion.type === "product" && suggestion.imageUrl ? (
+                {suggestion.type === 'product' && suggestion.imageUrl ? (
                   <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                     <LazyImage
                       src={suggestion.imageUrl}
@@ -295,9 +281,7 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {suggestion.text.length > 40
-                        ? `${suggestion.text.substring(0, 40)}...`
-                        : suggestion.text}
+                      {suggestion.text.length > 40 ? `${suggestion.text.substring(0, 40)}...` : suggestion.text}
                     </span>
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                       {getSuggestionLabel(suggestion.type)}
@@ -330,9 +314,7 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
       {showFiltersPanel && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-40 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Filtry wyszukiwania
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900">Filtry wyszukiwania</h3>
             <button
               onClick={() => setShowFiltersPanel(false)}
               className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
@@ -352,29 +334,25 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                   type="number"
                   placeholder="Od"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      priceRange: {
-                        min: parseFloat(e.target.value) || 0,
-                        max: prev.priceRange?.max || 1000,
-                      },
-                    }))
-                  }
+                  onChange={(e) => setFilters(prev => ({
+                    ...prev,
+                    priceRange: {
+                      ...prev.priceRange,
+                      min: parseFloat(e.target.value) || 0
+                    }
+                  }))}
                 />
                 <input
                   type="number"
                   placeholder="Do"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      priceRange: {
-                        min: prev.priceRange?.min || 0,
-                        max: parseFloat(e.target.value) || 1000,
-                      },
-                    }))
-                  }
+                  onChange={(e) => setFilters(prev => ({
+                    ...prev,
+                    priceRange: {
+                      ...prev.priceRange,
+                      max: parseFloat(e.target.value) || 1000
+                    }
+                  }))}
                 />
               </div>
             </div>
@@ -386,14 +364,10 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
               </label>
               <select
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    rating: e.target.value
-                      ? { min: parseFloat(e.target.value), max: 5 }
-                      : undefined,
-                  }))
-                }
+                onChange={(e) => setFilters(prev => ({
+                  ...prev,
+                  rating: e.target.value ? { min: parseFloat(e.target.value), max: 5 } : undefined
+                }))}
               >
                 <option value="">Wszystkie oceny</option>
                 <option value="4">4+ gwiazdek</option>
@@ -412,42 +386,32 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
                   <input
                     type="checkbox"
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        isTrending: e.target.checked ? true : undefined,
-                      }))
-                    }
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      isTrending: e.target.checked ? true : undefined
+                    }))}
                   />
-                  <span className="ml-2 text-sm text-gray-700">
-                    Tylko trendy
-                  </span>
+                  <span className="ml-2 text-sm text-gray-700">Tylko trendy</span>
                 </label>
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        isVerified: e.target.checked ? true : undefined,
-                      }))
-                    }
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      isVerified: e.target.checked ? true : undefined
+                    }))}
                   />
-                  <span className="ml-2 text-sm text-gray-700">
-                    Zweryfikowane
-                  </span>
+                  <span className="ml-2 text-sm text-gray-700">Zweryfikowane</span>
                 </label>
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        hasDiscount: e.target.checked ? true : undefined,
-                      }))
-                    }
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      hasDiscount: e.target.checked ? true : undefined
+                    }))}
                   />
                   <span className="ml-2 text-sm text-gray-700">Z promocją</span>
                 </label>

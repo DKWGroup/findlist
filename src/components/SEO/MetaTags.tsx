@@ -15,11 +15,11 @@ interface MetaTagsProps {
 }
 
 export const MetaTags: React.FC<MetaTagsProps> = ({
-  title = "FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama",
-  description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji.",
+  title = "VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama",
+  description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji.",
   keywords = "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów",
   canonical,
-  ogImage = "https://findlist.net/og-image.png",
+  ogImage = "https://viralist.pl/og-image.png",
   ogType = "website",
   structuredData,
   noIndex = false,
@@ -35,7 +35,7 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
     canonical ||
     (typeof window !== "undefined"
       ? window.location.href
-      : "https://findlist.net");
+      : "https://viralist.pl");
 
   return (
     <Helmet>
@@ -70,18 +70,18 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:locale" content="pl_PL" />
-      <meta property="og:site_name" content="FINDLIST" />
+      <meta property="og:site_name" content="VIRALIST" />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={fullDescription} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:site" content="@findlist_pl" />
+      <meta name="twitter:site" content="@viralist_pl" />
 
       {/* Additional SEO */}
-      <meta name="author" content="FINDLIST" />
-      <meta name="publisher" content="FINDLIST" />
+      <meta name="author" content="VIRALIST" />
+      <meta name="publisher" content="VIRALIST" />
       <meta name="language" content="pl" />
       <meta name="geo.region" content="PL" />
       <meta name="geo.country" content="Poland" />

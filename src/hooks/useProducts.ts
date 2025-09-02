@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { productService } from "../services/productService";
-import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
+import { supabase } from "../services/supabaseStorage";
 
 interface UseProductsOptions {
   page?: number;
@@ -115,14 +115,14 @@ export const useProduct = (productId: string | null) => {
 
     try {
       // Get product with all related data
-      const { data, error } = await supabase.rpc("get_product_complete", {
-        p_product_id: id,
+      const { data, error } = await supabase.rpc('get_product_complete', {
+        p_product_id: id
       });
-
+      
       if (error) throw error;
-
+      
       if (data) {
-        // Transform to Product type - handle the structure returned by get_product_complete
+        // Transform to Product type
         const productData: Product = {
           id: data.id,
           title: data.title,
@@ -132,29 +132,28 @@ export const useProduct = (productId: string | null) => {
           tags: data.tags || [],
           images: data.images || [],
           price: {
-            original: data.price?.original || data.price_original,
-            discounted: data.price?.discounted || data.price_discounted,
-            currency: data.price?.currency || data.price_currency || "PLN",
+            original: data.price_original,
+            discounted: data.price_discounted,
+            currency: data.price_currency || 'PLN'
           },
           affiliateLinks: data.affiliate_links || {},
           socialLinks: data.social_links || {},
           popularity: data.popularity || {
             views: 0,
             likes: 0,
-            shares: 0,
+            shares: 0
           },
           ratings: {
-            average:
-              data.popularity?.ratings?.average || data.ratings?.average || 0,
-            count: data.popularity?.ratings?.count || data.ratings?.count || 0,
+            average: data.ratings?.average || 0,
+            count: data.ratings?.count || 0
           },
           dateAdded: data.created_at,
           isVerified: data.is_verified,
           isTrending: data.is_trending,
           code: data.code,
-          urlAlias: data.url_alias,
+          urlAlias: data.url_alias
         };
-
+        
         console.log("✅ Product loaded successfully:", productData);
         setProduct(productData);
       }

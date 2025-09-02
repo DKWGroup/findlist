@@ -4,7 +4,7 @@
 
   <!-- Główna strona produktów -->
   <url>
-    <loc>https://findlist.net/produkty</loc>
+    <loc>https://viralist.pl/produkty</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -12,42 +12,42 @@
 
   <!-- Kategorie produktów -->
   <url>
-    <loc>https://findlist.net/kategoria/elektronika</loc>
+    <loc>https://viralist.pl/kategoria/elektronika</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://findlist.net/kategoria/dom-ogrod</loc>
+    <loc>https://viralist.pl/kategoria/dom-ogrod</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://findlist.net/kategoria/moda-uroda</loc>
+    <loc>https://viralist.pl/kategoria/moda-uroda</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://findlist.net/kategoria/sport-rekreacja</loc>
+    <loc>https://viralist.pl/kategoria/sport-rekreacja</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://findlist.net/kategoria/zabawki-gry</loc>
+    <loc>https://viralist.pl/kategoria/zabawki-gry</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://findlist.net/kategoria/zdrowie-wellness</loc>
+    <loc>https://viralist.pl/kategoria/zdrowie-wellness</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -55,24 +55,24 @@
 
   <!-- Przykładowe produkty -->
   <url>
-    <loc>https://findlist.net/produkt/smart-gadget-x1</loc>
+    <loc>https://viralist.pl/produkt/smart-gadget-x1</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <image:image>
-      <image:loc>https://findlist.net/images/products/smart-gadget-x1.jpg</image:loc>
+      <image:loc>https://viralist.pl/images/products/smart-gadget-x1.jpg</image:loc>
       <image:title>Smart Gadget X1 - Innowacyjny gadżet z TikToka</image:title>
       <image:caption>Viralowy smart gadget, który podbił TikToka</image:caption>
     </image:image>
   </url>
 
   <url>
-    <loc>https://findlist.net/produkt/viral-kitchen-tool</loc>
+    <loc>https://viralist.pl/produkt/viral-kitchen-tool</loc>
     <lastmod>2025-01-14T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <image:image>
-      <image:loc>https://findlist.net/images/products/viral-kitchen-tool.jpg</image:loc>
+      <image:loc>https://viralist.pl/images/products/viral-kitchen-tool.jpg</image:loc>
       <image:title>Viral Kitchen Tool - Narzędzie kuchenne z Instagrama</image:title>
       <image:caption>Popularne narzędzie kuchenne z Instagrama</image:caption>
     </image:image>

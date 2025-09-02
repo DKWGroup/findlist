@@ -9,9 +9,9 @@ export const PrivacyPolicyPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Polityka prywatności - FINDLIST"
-        description="Polityka prywatności serwisu FINDLIST - dowiedz się jak przetwarzamy i chronimy Twoje dane osobowe."
-        canonical="https://findlist.net/polityka-prywatnosci"
+        title="Polityka prywatności - VIRALIST"
+        description="Polityka prywatności serwisu VIRALIST - dowiedz się jak przetwarzamy i chronimy Twoje dane osobowe."
+        canonical="https://viralist.pl/polityka-prywatnosci"
       />
 
       <Layout>
@@ -38,11 +38,11 @@ export const PrivacyPolicyPage: React.FC = () => {
               <p className="mb-4">
                 Niniejsza Polityka prywatności określa zasady przetwarzania i
                 ochrony danych osobowych przekazanych przez Użytkowników w
-                związku z korzystaniem z serwisu FINDLIST.
+                związku z korzystaniem z serwisu VIRALIST.
               </p>
               <p className="mb-4">
                 Administratorem danych osobowych jest [Nazwa podmiotu] z
-                siedzibą w [Adres], e-mail: kontakt@findlist.net.
+                siedzibą w [Adres], e-mail: kontakt@viralist.pl.
               </p>
             </section>
 
@@ -82,7 +82,7 @@ export const PrivacyPolicyPage: React.FC = () => {
                 Przetwarzamy dane osobowe w następujących celach:
               </p>
               <ul className="list-disc pl-6 mb-4">
-                <li>Świadczenie usług w ramach serwisu FINDLIST</li>
+                <li>Świadczenie usług w ramach serwisu VIRALIST</li>
                 <li>Utworzenie i zarządzanie kontem użytkownika</li>
                 <li>Personalizacja treści i rekomendacji</li>
                 <li>Komunikacja z użytkownikami</li>
@@ -194,7 +194,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               </ul>
               <p className="mb-4">
                 Aby skorzystać ze swoich praw, skontaktuj się z nami pod
-                adresem: kontakt@findlist.net
+                adresem: kontakt@viralist.pl
               </p>
             </section>
 
@@ -255,7 +255,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               </p>
               <ul className="list-disc pl-6 mb-4">
                 <li>
-                  <strong>E-mail:</strong> kontakt@findlist.net
+                  <strong>E-mail:</strong> kontakt@viralist.pl
                 </li>
                 <li>
                   <strong>Adres pocztowy:</strong> [Adres siedziby]

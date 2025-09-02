@@ -13,7 +13,6 @@ import { productCodeService } from "../../services/productCodeService";
 import { productService } from "../../services/productService";
 import { Product } from "../../types";
 import { CategoryMapping, TypeMapping } from "../../types/productCode";
-import { generateUrlSlugForProduct } from "../../utils/productUrlUtils";
 import { ImageUploadZone } from "../upload/ImageUploadZone";
 
 interface ProductFormProps {
@@ -66,51 +65,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
-  // Load form data from localStorage if available
-  const loadSavedFormData = () => {
-    try {
-      const saved = localStorage.getItem("admin-product-form-draft");
-      if (saved) {
-        const parsedData = JSON.parse(saved);
-        // Only load if it's for a new product (no ID) and we're creating a new product
-        if (!parsedData.id && !product) {
-          return parsedData;
-        }
-      }
-    } catch (error) {
-      console.error("Error loading saved form data:", error);
-    }
-    return null;
-  };
-
-  // Save form data to localStorage
-  const saveFormData = (data: Partial<Product>) => {
-    try {
-      // Only save drafts for new products (not editing existing ones)
-      if (!product && data.title) {
-        localStorage.setItem("admin-product-form-draft", JSON.stringify(data));
-      }
-    } catch (error) {
-      console.error("Error saving form data:", error);
-    }
-  };
-
-  // Clear saved form data
-  const clearSavedFormData = () => {
-    try {
-      localStorage.removeItem("admin-product-form-draft");
-    } catch (error) {
-      console.error("Error clearing saved form data:", error);
-    }
-  };
-
   useEffect(() => {
     // Załaduj dostępne kategorie i typy
     const cats = productCodeService.getCategories();
     setAvailableCategories(cats);
 
     if (product) {
-      // Editing existing product
       setFormData({
         ...product,
         images: product.images.length > 0 ? product.images : [],
@@ -122,126 +82,37 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         const types = productCodeService.getTypesForCategory(product.category);
         setAvailableTypes(types);
       }
-      // Clear any saved draft when editing existing product
-      clearSavedFormData();
-    } else if (isOpen) {
-      // Creating new product - try to load saved data first
-      const savedData = loadSavedFormData();
-
-      if (savedData) {
-        setFormData(savedData);
-        setUploadedImages(savedData.images || []);
-        if (savedData.category) {
-          const types = productCodeService.getTypesForCategory(
-            savedData.category
-          );
-          setAvailableTypes(types);
-        }
-      } else {
-        // Reset form for new product
-        setFormData({
-          title: "",
-          description: "",
-          images: [],
-          category: "",
-          productType: "",
-          tags: [],
-          price: {
-            original: 0,
-            discounted: 0,
-            currency: "PLN",
-          },
-          affiliateLinks: {
-            temu: "",
-            aliexpress: "",
-            amazon: "",
-          },
-          socialLinks: {
-            tiktok: "",
-            instagram: "",
-          },
-          isVerified: false,
-          isTrending: false,
-          code: "",
-          urlAlias: "",
-        });
-        setAvailableTypes([]);
-      }
+    } else {
+      // Reset form for new product
+      setFormData({
+        title: "",
+        description: "",
+        images: [],
+        category: "",
+        productType: "",
+        tags: [],
+        price: {
+          original: 0,
+          discounted: 0,
+          currency: "PLN",
+        },
+        affiliateLinks: {
+          temu: "",
+          aliexpress: "",
+          amazon: "",
+        },
+        socialLinks: {
+          tiktok: "",
+          instagram: "",
+        },
+        isVerified: false,
+        isTrending: false,
+        code: "",
+        urlAlias: "",
+      });
+      setAvailableTypes([]);
     }
   }, [product, isOpen]);
-
-  // Clear saved form data and reset form
-  const clearSavedFormDataAndReset = () => {
-    clearSavedFormData();
-    setFormData({
-      title: "",
-      description: "",
-      images: [],
-      category: "",
-      productType: "",
-      tags: [],
-      price: {
-        original: 0,
-        discounted: 0,
-        currency: "PLN",
-      },
-      affiliateLinks: {
-        temu: "",
-        aliexpress: "",
-        amazon: "",
-      },
-      socialLinks: {
-        tiktok: "",
-        instagram: "",
-      },
-      isVerified: false,
-      isTrending: false,
-      code: "",
-      urlAlias: "",
-    });
-    setUploadedImages([]);
-    setAvailableTypes([]);
-  };
-
-  // Auto-save form data when it changes
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!product && formData.title) {
-        saveFormData(formData);
-      }
-    }, 1000); // Auto-save after 1 second of inactivity
-
-    return () => clearTimeout(timeoutId);
-  }, [formData, product]);
-
-  // Handle page visibility change to prevent data loss
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden" && !product && formData.title) {
-        // Save form data when tab becomes hidden
-        saveFormData(formData);
-      }
-    };
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!product && formData.title && formData.title.trim() !== "") {
-        // Save data and warn user about unsaved changes
-        saveFormData(formData);
-        e.preventDefault();
-        e.returnValue =
-          "Masz niezapisane zmiany. Czy na pewno chcesz opuścić stronę?";
-        return e.returnValue;
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [formData, product]);
 
   const handleImageUpload = (urls: string[]) => {
     const newImages = [...uploadedImages, ...urls];
@@ -341,7 +212,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       console.log("✅ Generated product code:", code);
 
-      const alias = generateUrlSlugForProduct(formData.title || "");
+      const alias = productCodeService.generateUrlAlias(code, formData.title);
 
       console.log("🔗 Generated URL alias:", alias);
 
@@ -497,12 +368,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       // Call the onSave callback to update UI
       console.log("🔄 Calling onSave callback with data:", productData);
       onSave(productData);
-
-      // Clear saved form data after successful save
-      if (!product) {
-        clearSavedFormData();
-      }
-
       console.log("🎉 Product save process completed successfully");
     } catch (error) {
       console.error("❌ Error saving product:", error);
@@ -517,25 +382,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         }`
       );
     }
-  };
-
-  // Handle close with unsaved changes check
-  const handleClose = () => {
-    // Check if there are unsaved changes for new products
-    if (!product && formData.title && formData.title.trim() !== "") {
-      const confirmClose = window.confirm(
-        "Masz niezapisane zmiany. Czy na pewno chcesz zamknąć formularz? Twój postęp zostanie zapisany i będziesz mógł wrócić do niego później."
-      );
-
-      if (!confirmClose) {
-        return; // Don't close if user cancels
-      }
-
-      // Save the current progress before closing
-      saveFormData(formData);
-    }
-
-    onClose();
   };
 
   const addTag = () => {
@@ -566,7 +412,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             {product ? "Edytuj produkt" : "Dodaj nowy produkt"}
           </h2>
           <button
-            onClick={handleClose}
+            onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <X className="h-6 w-6 text-gray-500" />
@@ -575,40 +421,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          {/* Draft notification */}
-          {!product &&
-            (() => {
-              try {
-                const saved = localStorage.getItem("admin-product-form-draft");
-                if (saved) {
-                  const parsedData = JSON.parse(saved);
-                  if (parsedData.title) {
-                    return (
-                      <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                        <div className="flex items-center gap-2 text-amber-800">
-                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                          <span className="text-sm font-medium">
-                            Przywrócono zapisany postęp dla produktu: "
-                            {parsedData.title}"
-                          </span>
-                          <button
-                            type="button"
-                            onClick={clearSavedFormDataAndReset}
-                            className="ml-auto text-amber-600 hover:text-amber-700 text-xs underline"
-                          >
-                            Zacznij od nowa
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  }
-                }
-              } catch (error) {
-                // Ignore errors in draft detection
-              }
-              return null;
-            })()}
-
           <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
             <div className="p-6 space-y-6">
               {/* Kod produktu i alias URL */}
@@ -683,17 +495,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         </button>
                       )}
                     </div>
-                    {formData.code && formData.urlAlias && (
-                      <div className="mt-2 space-y-1">
-                        <p className="text-xs text-blue-600">
-                          <strong>Link główny:</strong> {window.location.origin}
-                          /produkty/{formData.urlAlias}
-                        </p>
-                        <p className="text-xs text-green-600">
-                          <strong>Link krótki:</strong> {window.location.origin}
-                          /{formData.code}
-                        </p>
-                      </div>
+                    {formData.urlAlias && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        Link: {window.location.origin}/{formData.urlAlias}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -1104,7 +909,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           <div className="flex items-center justify-end gap-4 p-6 border-t border-gray-200 bg-gray-50">
             <button
               type="button"
-              onClick={handleClose}
+              onClick={onClose}
               className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Anuluj

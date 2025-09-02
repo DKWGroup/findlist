@@ -1,6 +1,6 @@
 {
-  "name": "FINDLIST - Viralowe Produkty",
-  "short_name": "FINDLIST",
+  "name": "VIRALIST - Viralowe Produkty",
+  "short_name": "VIRALIST",
   "description": "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama",
   "start_url": "/",
   "display": "standalone",

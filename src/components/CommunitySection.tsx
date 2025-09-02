@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Heart,
   Instagram,
+  MessageSquare,
   Music,
   Star,
   TrendingUp,
@@ -11,33 +12,32 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 export const CommunitySection: React.FC = () => {
-  // Community stats - currently unused as the section is commented out
-  // const communityStats = [
-  //   {
-  //     icon: Users,
-  //     label: "Aktywnych użytkowników",
-  //     value: "10,000+",
-  //     color: "bg-blue-100 text-blue-600",
-  //   },
-  //   {
-  //     icon: Heart,
-  //     label: "Produktów w wishlistach",
-  //     value: "50,000+",
-  //     color: "bg-red-100 text-red-600",
-  //   },
-  //   {
-  //     icon: Star,
-  //     label: "Wystawionych ocen",
-  //     value: "25,000+",
-  //     color: "bg-yellow-100 text-yellow-600",
-  //   },
-  //   {
-  //     icon: MessageSquare,
-  //     label: "Recenzji społeczności",
-  //     value: "15,000+",
-  //     color: "bg-green-100 text-green-600",
-  //   },
-  // ];
+  const communityStats = [
+    {
+      icon: Users,
+      label: "Aktywnych użytkowników",
+      value: "10,000+",
+      color: "bg-blue-100 text-blue-600",
+    },
+    {
+      icon: Heart,
+      label: "Produktów w wishlistach",
+      value: "50,000+",
+      color: "bg-red-100 text-red-600",
+    },
+    {
+      icon: Star,
+      label: "Wystawionych ocen",
+      value: "25,000+",
+      color: "bg-yellow-100 text-yellow-600",
+    },
+    {
+      icon: MessageSquare,
+      label: "Recenzji społeczności",
+      value: "15,000+",
+      color: "bg-green-100 text-green-600",
+    },
+  ];
 
   const socialFeatures = [
     {
@@ -80,7 +80,7 @@ export const CommunitySection: React.FC = () => {
               <Users className="h-6 w-6 text-white" />
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              Dołącz do Społeczności FINDLIST
+              Dołącz do Społeczności VIRALIST
             </h2>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -185,20 +185,16 @@ export const CommunitySection: React.FC = () => {
                 </p>
                 <div className="flex justify-center gap-3">
                   <a
-                    href="https://www.tiktok.com/@findlist.net"
+                    href="#"
                     className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
-                    @findlist.net
+                    @viralist_pl
                   </a>
                   <a
-                    href="https://www.instagram.com/findlistnet"
+                    href="#"
                     className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
-                    @findlistnet
+                    @viralist.pl
                   </a>
                 </div>
               </div>
@@ -206,8 +202,8 @@ export const CommunitySection: React.FC = () => {
           </div>
         </div>
 
-        {/* Newsletter Signup - Hidden for now, to be developed in the future */}
-        {/* <div className="mt-12 bg-gradient-to-r from-gray-900 to-blue-900 rounded-2xl p-8 text-center text-white">
+        {/* Newsletter Signup */}
+        <div className="mt-12 bg-gradient-to-r from-gray-900 to-blue-900 rounded-2xl p-8 text-center text-white">
           <h3 className="text-2xl font-bold mb-4">
             📧 Newsletter z najgorętszymi trendami
           </h3>
@@ -257,7 +253,7 @@ export const CommunitySection: React.FC = () => {
           <p className="text-xs text-blue-200 mt-3">
             Bez spamu. Możesz się wypisać w każdej chwili.
           </p>
-        </div> */}
+        </div>
       </div>
     </section>
   );

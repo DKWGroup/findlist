@@ -4,7 +4,7 @@
 
   <!-- Główna strona bloga -->
   <url>
-    <loc>https://findlist.net/blog</loc>
+    <loc>https://viralist.pl/blog</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -12,21 +12,21 @@
 
   <!-- Kategorie bloga -->
   <url>
-    <loc>https://findlist.net/blog/kategoria/recenzje</loc>
+    <loc>https://viralist.pl/blog/kategoria/recenzje</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://findlist.net/blog/kategoria/trendy</loc>
+    <loc>https://viralist.pl/blog/kategoria/trendy</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://findlist.net/blog/kategoria/poradniki</loc>
+    <loc>https://viralist.pl/blog/kategoria/poradniki</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -34,13 +34,13 @@
 
   <!-- Przykładowe posty na blogu -->
   <url>
-    <loc>https://findlist.net/blog/jak-rozpoznac-viral-scam</loc>
+    <loc>https://viralist.pl/blog/jak-rozpoznac-viral-scam</loc>
     <lastmod>2025-01-15T10:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <news:news>
       <news:publication>
-        <news:name>FINDLIST Blog</news:name>
+        <news:name>VIRALIST Blog</news:name>
         <news:language>pl</news:language>
       </news:publication>
       <news:publication_date>2025-01-15T10:00:00+00:00</news:publication_date>
@@ -50,13 +50,13 @@
   </url>
 
   <url>
-    <loc>https://findlist.net/blog/najlepsze-produkty-z-tiktoka-2025</loc>
+    <loc>https://viralist.pl/blog/najlepsze-produkty-z-tiktoka-2025</loc>
     <lastmod>2025-01-14T10:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <news:news>
       <news:publication>
-        <news:name>FINDLIST Blog</news:name>
+        <news:name>VIRALIST Blog</news:name>
         <news:language>pl</news:language>
       </news:publication>
       <news:publication_date>2025-01-14T10:00:00+00:00</news:publication_date>

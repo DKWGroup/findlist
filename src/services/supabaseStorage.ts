@@ -15,7 +15,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storageKey: "findlist-auth-storage",
+    storageKey: "viralist-auth-storage",
     flowType: "pkce",
   },
 });

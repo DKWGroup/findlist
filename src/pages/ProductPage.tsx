@@ -9,27 +9,28 @@ import {
   Heart,
   Share2,
   Star,
+  ThumbsUp,
   TrendingUp,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
+import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
 import { generateProductSchema } from "../components/SEO/SchemaMarkup";
 import SEOHead from "../components/SEO/SEOHead";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { useProduct } from "../hooks/useProducts";
+import { useSEO } from "../hooks/useSEO";
+import { productCodeService } from "../services/productCodeService";
 import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
-import { generateProductUrls, parseProductUrl } from "../utils/productUrlUtils";
 
 export const ProductPage: React.FC = () => {
-  const { id, codeOrAlias, slug } = useParams<{
+  const { id, codeOrAlias } = useParams<{
     id?: string;
     codeOrAlias?: string;
-    slug?: string;
   }>();
-  const location = useLocation();
   const { user, isAuthenticated } = useSimplifiedAuthContext();
   const [product, setProduct] = useState<Product | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -42,7 +43,7 @@ export const ProductPage: React.FC = () => {
     product: fetchedProduct,
     loading: productLoading,
     error: productError,
-  } = useProduct(id || null);
+  } = useProduct(id);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -50,41 +51,66 @@ export const ProductPage: React.FC = () => {
       try {
         let foundProduct = fetchedProduct;
 
-        // Parse the current URL to determine what type of URL we're dealing with
-        const currentPath = location.pathname;
-        const urlInfo = parseProductUrl(currentPath);
+        // If we have a code or alias but no direct ID
+        if (!id && codeOrAlias) {
+          // Query by code or alias
+          const { data, error } = await supabase
+            .from("products")
+            .select(
+              `
+              *,
+              product_images(url, position),
+              product_tags(tag),
+              product_affiliate_links(platform, url),
+              product_social_links(platform, url),
+              product_stats(*)
+            `
+            )
+            .or(`code.eq.${codeOrAlias},url_alias.eq.${codeOrAlias}`)
+            .single();
 
-        // If we have a direct ID (from /produkt/:id route)
-        if (id) {
-          // Use the fetched product from useProduct hook
-          foundProduct = fetchedProduct;
-        }
-        // Handle the other URL types: short code, long slug, or code/alias
-        else if (slug || codeOrAlias || urlInfo.identifier) {
-          // Priority: slug (from /produkty/:slug), then codeOrAlias (from /:codeOrAlias), then urlInfo
-          const identifier = slug || codeOrAlias || urlInfo.identifier;
+          if (error) throw error;
 
-          console.log("🔍 ProductPage loading product with:", {
-            slug,
-            codeOrAlias,
-            identifier,
-            urlInfo,
-            currentPath,
-          });
-
-          if (!identifier) {
-            throw new Error("No product identifier found");
-          }
-
-          // Use the product service to find by code or alias
-          const productService = (await import("../services/productService"))
-            .productService;
-          foundProduct = await productService.getProductByCodeOrAlias(
-            identifier
-          );
-
-          if (!foundProduct) {
-            throw new Error(`Product not found for identifier: ${identifier}`);
+          if (data) {
+            // Transform to Product type
+            foundProduct = {
+              id: data.id,
+              title: data.title,
+              description: data.description,
+              category: data.category_id,
+              productType: data.product_type,
+              tags: data.product_tags?.map((t: any) => t.tag) || [],
+              images: data.product_images?.map((i: any) => i.url) || [],
+              price: {
+                original: data.price_original,
+                discounted: data.price_discounted,
+                currency: data.price_currency || "PLN",
+              },
+              affiliateLinks:
+                data.product_affiliate_links?.reduce((acc: any, link: any) => {
+                  acc[link.platform] = link.url;
+                  return acc;
+                }, {}) || {},
+              socialLinks:
+                data.product_social_links?.reduce((acc: any, link: any) => {
+                  acc[link.platform] = link.url;
+                  return acc;
+                }, {}) || {},
+              popularity: {
+                views: data.product_stats?.views || 0,
+                likes: data.product_stats?.likes || 0,
+                shares: data.product_stats?.shares || 0,
+              },
+              ratings: {
+                average: data.product_stats?.rating_average || 0,
+                count: data.product_stats?.rating_count || 0,
+              },
+              dateAdded: data.created_at,
+              isVerified: data.is_verified,
+              isTrending: data.is_trending,
+              code: data.code,
+              urlAlias: data.url_alias,
+            };
           }
         }
 
@@ -92,9 +118,8 @@ export const ProductPage: React.FC = () => {
 
         // Check if product is in user's wishlist
         if (isAuthenticated && user && foundProduct) {
-          // Note: We'll need to fix the wishlist property access later
-          // const isInList = user.wishlist?.includes(foundProduct.id) || false;
-          // setIsInWishlist(isInList);
+          const isInList = user.wishlist?.includes(foundProduct.id) || false;
+          setIsInWishlist(isInList);
         }
 
         // Load reviews for the product
@@ -109,15 +134,7 @@ export const ProductPage: React.FC = () => {
     };
 
     loadProduct();
-  }, [
-    id,
-    slug,
-    codeOrAlias,
-    fetchedProduct,
-    isAuthenticated,
-    user,
-    location.pathname,
-  ]);
+  }, [id, codeOrAlias, fetchedProduct, isAuthenticated, user]);
 
   const loadProductReviews = async (productId: string) => {
     try {
@@ -159,7 +176,7 @@ export const ProductPage: React.FC = () => {
 
     try {
       // Use the new add_product_review function with correct parameter names
-      const { error } = await supabase.rpc("add_product_review", {
+      const { data, error } = await supabase.rpc("add_product_review", {
         p_product_id: productId,
         p_user_id: user.id,
         p_rating: review.rating,
@@ -227,11 +244,9 @@ export const ProductPage: React.FC = () => {
   };
 
   const handleShare = async () => {
-    if (!product) return;
-
-    // Generate the canonical URL (długi link)
-    const urls = generateProductUrls(product.title, product.code || "");
-    const shareUrl = `${window.location.origin}${urls.canonicalUrl}`;
+    const shareUrl = product.urlAlias
+      ? `${window.location.origin}/${product.urlAlias}`
+      : window.location.href;
 
     if (navigator.share) {
       try {
@@ -284,11 +299,13 @@ export const ProductPage: React.FC = () => {
     <Layout showFooter={false}>
       {/* SEO Head */}
       <SEOHead
-        title={`${product.title} - FINDLIST`}
+        title={`${product.title} - VIRALIST`}
         description={product.description}
-        canonicalUrl={`https://findlist.net${
-          generateProductUrls(product.title, product.code || "").canonicalUrl
-        }`}
+        canonicalUrl={
+          product.urlAlias
+            ? `https://viralist.pl/${product.urlAlias}`
+            : `https://viralist.pl/produkt/${product.id}`
+        }
         ogImage={product.images[0]}
         ogType="product"
         structuredData={generateProductSchema(product)}
@@ -423,28 +440,12 @@ export const ProductPage: React.FC = () => {
                     <Copy className="h-4 w-4" />
                   </button>
                 </div>
-                {product.code && (
-                  <div className="mt-2 space-y-2">
-                    <div className="text-sm text-blue-700">
-                      <span className="font-medium">Link główny:</span>{" "}
-                      <span className="font-mono">
-                        {window.location.origin}
-                        {
-                          generateProductUrls(product.title, product.code)
-                            .canonicalUrl
-                        }
-                      </span>
-                    </div>
-                    <div className="text-sm text-green-700">
-                      <span className="font-medium">Link krótki:</span>{" "}
-                      <span className="font-mono">
-                        {window.location.origin}
-                        {
-                          generateProductUrls(product.title, product.code)
-                            .shortUrl
-                        }
-                      </span>
-                    </div>
+                {product.urlAlias && (
+                  <div className="mt-2 text-sm text-blue-700">
+                    <span className="font-medium">Link bezpośredni:</span>{" "}
+                    <span className="font-mono">
+                      {window.location.origin}/{product.urlAlias}
+                    </span>
                   </div>
                 )}
               </div>

@@ -9,9 +9,9 @@ export const CookiePolicyPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Polityka cookies - FINDLIST"
-        description="Polityka cookies serwisu FINDLIST - informacje o wykorzystywanych plikach cookies i technologiach śledzących."
-        canonical="https://findlist.net/cookies"
+        title="Polityka cookies - VIRALIST"
+        description="Polityka cookies serwisu VIRALIST - informacje o wykorzystywanych plikach cookies i technologiach śledzących."
+        canonical="https://viralist.pl/cookies"
       />
 
       <Layout>
@@ -57,7 +57,7 @@ export const CookiePolicyPage: React.FC = () => {
                 2. Jak wykorzystujemy cookies?
               </h2>
               <p className="mb-4">
-                W serwisie FINDLIST wykorzystujemy pliki cookies w celu:
+                W serwisie VIRALIST wykorzystujemy pliki cookies w celu:
               </p>
               <ul className="list-disc pl-6 mb-4">
                 <li>Zapewnienia prawidłowego funkcjonowania serwisu</li>
@@ -340,7 +340,7 @@ export const CookiePolicyPage: React.FC = () => {
               </p>
               <ul className="text-gray-600">
                 <li>
-                  <strong>E-mail:</strong> kontakt@findlist.net
+                  <strong>E-mail:</strong> kontakt@viralist.pl
                 </li>
                 <li>
                   <strong>Temat:</strong> "Polityka cookies"

@@ -92,8 +92,8 @@ export const ProductsPage: React.FC = () => {
   const breadcrumbItems = [{ label: "Produkty", current: true }];
 
   const pageTitle = showTrendingOnly
-    ? "Trending Produkty - Najgorętsze viralowe hity z TikToka | FINDLIST"
-    : "Wszystkie Produkty - Katalog viralowych produktów z social mediów | FINDLIST";
+    ? "Trending Produkty - Najgorętsze viralowe hity z TikToka | VIRALIST"
+    : "Wszystkie Produkty - Katalog viralowych produktów z social mediów | VIRALIST";
 
   const pageDescription = showTrendingOnly
     ? "Odkryj najgorętsze trending produkty z TikToka i Instagrama. Sprawdzone viralowe hity, które podbijają social media."
@@ -104,7 +104,7 @@ export const ProductsPage: React.FC = () => {
       <MetaTags
         title={pageTitle}
         description={pageDescription}
-        canonical="https://findlist.net/produkty"
+        canonical="https://viralist.pl/produkty"
         keywords="viralowe produkty, katalog produktów, TikTok produkty, Instagram produkty, trending, viral shopping"
       />
 

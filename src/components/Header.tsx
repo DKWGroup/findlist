@@ -76,8 +76,8 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <img
-              src="/findlist-logo2.png"
-              alt="FINDLIST"
+              src="/viralist-logo2.png"
+              alt="VIRALIST"
               className="h-8 w-auto"
             />
           </Link>
