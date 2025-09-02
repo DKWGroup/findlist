@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <img
-                src="/viralist-logo2.png"
+                src="/findlist-logo2.png"
                 alt="VIRALIST"
                 className="h-8 w-auto"
               />

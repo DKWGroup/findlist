@@ -514,9 +514,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       {formData.urlAlias && (
                         <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">Główny link produktu:</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              Główny link produktu:
+                            </p>
                             <p className="text-sm text-blue-600 font-mono">
-                              {window.location.origin}/produkty/{formData.urlAlias}
+                              {window.location.origin}/produkty/
+                              {formData.urlAlias}
                             </p>
                           </div>
                           <button
@@ -536,7 +539,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       {formData.code && (
                         <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">Krótki link (kod):</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              Krótki link (kod):
+                            </p>
                             <p className="text-sm text-blue-600 font-mono">
                               {window.location.origin}/{formData.code}
                             </p>
@@ -557,7 +562,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       )}
                     </div>
                     <p className="text-xs text-gray-600 mt-2">
-                      💡 Oba linki prowadzą do tej samej strony produktu. Krótki link jest łatwiejszy do udostępniania.
+                      💡 Oba linki prowadzą do tej samej strony produktu. Krótki
+                      link jest łatwiejszy do udostępniania.
                     </p>
                   </div>
                 )}

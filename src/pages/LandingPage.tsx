@@ -16,25 +16,25 @@ export const LandingPage: React.FC = () => {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "VIRALIST",
-    url: "https://viralist.pl",
+    url: "https://findlist.net",
     description:
       "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://viralist.pl/search?q={search_term_string}",
+      target: "https://findlist.net/search?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
     publisher: {
       "@type": "Organization",
       name: "VIRALIST",
-      url: "https://viralist.pl",
+      url: "https://findlist.net",
       logo: {
         "@type": "ImageObject",
-        url: "https://viralist.pl/viralist-logo2.png",
+        url: "https://findlist.net/findlist-logo2.png",
       },
       sameAs: [
-        "https://tiktok.com/@viralist_pl",
-        "https://instagram.com/viralist.pl",
+        "https://tiktok.com/@findlist_pl",
+        "https://instagram.com/findlist.net",
       ],
     },
   };
@@ -45,7 +45,7 @@ export const LandingPage: React.FC = () => {
         title="VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama"
         description="Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne."
         keywords="viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping, hity z TikToka"
-        canonical="https://viralist.pl/"
+        canonical="https://findlist.net/"
         structuredData={structuredData}
       />
       <WebsiteStructuredData />

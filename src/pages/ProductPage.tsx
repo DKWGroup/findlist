@@ -122,7 +122,8 @@ export const ProductPage: React.FC = () => {
 
         // Check if product is in user's wishlist
         if (isAuthenticated && user && foundProduct) {
-          const isInList = (user as any).wishlist?.includes(foundProduct.id) || false;
+          const isInList =
+            (user as any).wishlist?.includes(foundProduct.id) || false;
           setIsInWishlist(isInList);
         }
 
@@ -307,8 +308,8 @@ export const ProductPage: React.FC = () => {
         description={product.description}
         canonicalUrl={
           product.urlAlias
-            ? `https://viralist.pl/${product.urlAlias}`
-            : `https://viralist.pl/produkt/${product.id}`
+            ? `https://findlist.net/${product.urlAlias}`
+            : `https://findlist.net/produkt/${product.id}`
         }
         ogImage={product.images[0]}
         ogType="product"

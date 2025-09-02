@@ -27,7 +27,7 @@ export const LoginPage: React.FC = () => {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 mb-6">
             <img
-              src="/viralist-logo2.png"
+              src="/findlist-logo2.png"
               alt="VIRALIST"
               className="h-8 w-auto"
             />

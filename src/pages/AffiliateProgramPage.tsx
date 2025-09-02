@@ -11,7 +11,7 @@ export const AffiliateProgramPage: React.FC = () => {
       <MetaTags
         title="Program afiliacyjny - VIRALIST"
         description="Program partnerski VIRALIST - zarabiaj na polecaniu viralnych produktów. Transparentne zasady współpracy afiliacyjnej."
-        canonical="https://viralist.pl/afiliacja"
+        canonical="https://findlist.net/afiliacja"
       />
 
       <Layout>
@@ -45,7 +45,7 @@ export const AffiliateProgramPage: React.FC = () => {
                 <strong>Administrator:</strong> [Nazwa podmiotu], NIP: [Numer
                 NIP]
                 <br />
-                <strong>Kontakt:</strong> afiliacja@viralist.pl
+                <strong>Kontakt:</strong> afiliacja@findlist.net
               </p>
             </section>
 
@@ -285,7 +285,7 @@ export const AffiliateProgramPage: React.FC = () => {
                   <li>Transparentne rozliczenia</li>
                 </ul>
                 <p className="mt-4 text-green-800">
-                  <strong>Kontakt:</strong> partnerzy@viralist.pl
+                  <strong>Kontakt:</strong> partnerzy@findlist.net
                 </p>
               </div>
             </section>
@@ -320,13 +320,13 @@ export const AffiliateProgramPage: React.FC = () => {
               </p>
               <ul className="text-gray-600">
                 <li>
-                  <strong>E-mail ogólny:</strong> afiliacja@viralist.pl
+                  <strong>E-mail ogólny:</strong> afiliacja@findlist.net
                 </li>
                 <li>
-                  <strong>Dla partnerów:</strong> partnerzy@viralist.pl
+                  <strong>Dla partnerów:</strong> partnerzy@findlist.net
                 </li>
                 <li>
-                  <strong>Dla użytkowników:</strong> kontakt@viralist.pl
+                  <strong>Dla użytkowników:</strong> kontakt@findlist.net
                 </li>
               </ul>
             </div>

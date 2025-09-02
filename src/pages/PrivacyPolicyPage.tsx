@@ -11,7 +11,7 @@ export const PrivacyPolicyPage: React.FC = () => {
       <MetaTags
         title="Polityka prywatności - VIRALIST"
         description="Polityka prywatności serwisu VIRALIST - dowiedz się jak przetwarzamy i chronimy Twoje dane osobowe."
-        canonical="https://viralist.pl/polityka-prywatnosci"
+        canonical="https://findlist.net/polityka-prywatnosci"
       />
 
       <Layout>
@@ -42,7 +42,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               </p>
               <p className="mb-4">
                 Administratorem danych osobowych jest [Nazwa podmiotu] z
-                siedzibą w [Adres], e-mail: kontakt@viralist.pl.
+                siedzibą w [Adres], e-mail: kontakt@findlist.net.
               </p>
             </section>
 
@@ -194,7 +194,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               </ul>
               <p className="mb-4">
                 Aby skorzystać ze swoich praw, skontaktuj się z nami pod
-                adresem: kontakt@viralist.pl
+                adresem: kontakt@findlist.net
               </p>
             </section>
 
@@ -255,7 +255,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               </p>
               <ul className="list-disc pl-6 mb-4">
                 <li>
-                  <strong>E-mail:</strong> kontakt@viralist.pl
+                  <strong>E-mail:</strong> kontakt@findlist.net
                 </li>
                 <li>
                   <strong>Adres pocztowy:</strong> [Adres siedziby]

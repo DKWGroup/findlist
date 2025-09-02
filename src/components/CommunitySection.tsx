@@ -188,13 +188,13 @@ export const CommunitySection: React.FC = () => {
                     href="#"
                     className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   >
-                    @viralist_pl
+                    @findlist_pl
                   </a>
                   <a
                     href="#"
                     className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   >
-                    @viralist.pl
+                    @findlist.net
                   </a>
                 </div>
               </div>

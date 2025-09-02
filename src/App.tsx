@@ -72,7 +72,7 @@ function App() {
               />
               <Route path="/cookies" element={<CookiePolicyPage />} />
               <Route path="/afiliacja" element={<AffiliateProgramPage />} />
-              
+
               {/* Krótki link produktu - MUSI BYĆ NA KOŃCU */}
               <Route path="/:codeOrAlias" element={<ProductPage />} />
             </Routes>

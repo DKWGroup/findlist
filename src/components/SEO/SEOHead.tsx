@@ -20,8 +20,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   title = "VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama",
   description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne.",
   keywords = "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping, hity z TikToka",
-  canonicalUrl = "https://viralist.pl/",
-  ogImage = "https://viralist.pl/og-image.png",
+  canonicalUrl = "https://findlist.net/",
+  ogImage = "https://findlist.net/og-image.png",
   ogType = "website",
   noIndex = false,
   structuredData,
@@ -81,8 +81,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="twitter:image" content={ogImage} />
       <meta name="twitter:image:alt" content={truncatedTitle} />
       <meta name="twitter:url" content={canonicalUrl} />
-      <meta name="twitter:site" content="@viralist_pl" />
-      <meta name="twitter:creator" content="@viralist_pl" />
+      <meta name="twitter:site" content="@findlist_pl" />
+      <meta name="twitter:creator" content="@findlist_pl" />
 
       {/* Additional Meta Tags */}
       <meta name="theme-color" content="#2563eb" />

@@ -37,7 +37,7 @@ export const AboutUsPage: React.FC = () => {
       <MetaTags
         title="O nas - VIRALIST | Poznaj nasz zespół i misję"
         description="Poznaj zespół VIRALIST - pierwszej w Polsce platformy agregującej viralowe produkty z TikToka i Instagrama. Dowiedz się więcej o naszej misji i wartościach."
-        canonical="https://viralist.pl/o-nas"
+        canonical="https://findlist.net/o-nas"
       />
 
       <Layout>

@@ -13,11 +13,11 @@ interface GlobalSEOConfig {
 
 const defaultGlobalSEO: GlobalSEOConfig = {
   siteName: "VIRALIST",
-  siteUrl: "https://viralist.pl",
-  defaultImage: "https://viralist.pl/og-image.png",
+  siteUrl: "https://findlist.net",
+  defaultImage: "https://findlist.net/og-image.png",
   defaultDescription:
     "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji.",
-  twitterHandle: "@viralist_pl",
+  twitterHandle: "@findlist_pl",
   facebookAppId: undefined,
   googleAnalyticsId: undefined,
   googleTagManagerId: undefined,

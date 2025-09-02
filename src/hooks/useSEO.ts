@@ -20,8 +20,8 @@ export const useSEO = (pageConfig?: Partial<SEOConfig>) => {
       "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji.",
     keywords:
       "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping",
-    canonicalUrl: `https://viralist.pl${location.pathname}`,
-    ogImage: "https://viralist.pl/og-image.png",
+    canonicalUrl: `https://findlist.net${location.pathname}`,
+    ogImage: "https://findlist.net/og-image.png",
     ogType: "website",
     noIndex: false,
   };
@@ -56,7 +56,7 @@ export const useSEO = (pageConfig?: Partial<SEOConfig>) => {
         name:
           nameMapping[segment] ||
           segment.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-        url: `https://viralist.pl${currentPath}`,
+        url: `https://findlist.net${currentPath}`,
       });
     }
 

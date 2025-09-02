@@ -19,7 +19,7 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
   description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji.",
   keywords = "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów",
   canonical,
-  ogImage = "https://viralist.pl/og-image.png",
+  ogImage = "https://findlist.net/og-image.png",
   ogType = "website",
   structuredData,
   noIndex = false,
@@ -35,7 +35,7 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
     canonical ||
     (typeof window !== "undefined"
       ? window.location.href
-      : "https://viralist.pl");
+      : "https://findlist.net");
 
   return (
     <Helmet>
@@ -77,7 +77,7 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={fullDescription} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:site" content="@viralist_pl" />
+      <meta name="twitter:site" content="@findlist_pl" />
 
       {/* Additional SEO */}
       <meta name="author" content="VIRALIST" />

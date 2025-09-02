@@ -8,7 +8,7 @@ import {
 
 // Constants for token management
 const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes in milliseconds
-const SESSION_STORAGE_KEY = "viralist-session";
+const SESSION_STORAGE_KEY = "findlist-session";
 const AUTH_ERROR_EVENTS = ["SIGNED_OUT", "USER_DELETED", "TOKEN_REFRESHED"];
 
 // Mutex to prevent concurrent token refresh calls
@@ -287,13 +287,13 @@ export const clearSessionData = (): void => {
 
     // Clear only custom auth-related data, not Supabase storage
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("viralist-") && !key.includes("supabase.auth.token")) {
+      if (key.startsWith("findlist-") && !key.includes("supabase.auth.token")) {
         localStorage.removeItem(key);
       }
     });
 
     Object.keys(sessionStorage).forEach((key) => {
-      if (key.startsWith("viralist-") && !key.includes("supabase.auth.token")) {
+      if (key.startsWith("findlist-") && !key.includes("supabase.auth.token")) {
         sessionStorage.removeItem(key);
       }
     });
