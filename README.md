@@ -1,4 +1,4 @@
-# VIRALIST - Viralowe Produkty Platform
+# FINDLIST - Viralowe Produkty Platform
 
 Platforma agregująca najlepsze viralowe produkty z TikToka i Instagrama z funkcją przesyłania i optymalizacji obrazów.
 

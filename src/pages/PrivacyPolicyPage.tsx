@@ -9,8 +9,8 @@ export const PrivacyPolicyPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Polityka prywatności - VIRALIST"
-        description="Polityka prywatności serwisu VIRALIST - dowiedz się jak przetwarzamy i chronimy Twoje dane osobowe."
+        title="Polityka prywatności - FINDLIST"
+        description="Polityka prywatności serwisu FINDLIST - dowiedz się jak przetwarzamy i chronimy Twoje dane osobowe."
         canonical="https://findlist.net/polityka-prywatnosci"
       />
 
@@ -38,7 +38,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               <p className="mb-4">
                 Niniejsza Polityka prywatności określa zasady przetwarzania i
                 ochrony danych osobowych przekazanych przez Użytkowników w
-                związku z korzystaniem z serwisu VIRALIST.
+                związku z korzystaniem z serwisu FINDLIST.
               </p>
               <p className="mb-4">
                 Administratorem danych osobowych jest [Nazwa podmiotu] z
@@ -82,7 +82,7 @@ export const PrivacyPolicyPage: React.FC = () => {
                 Przetwarzamy dane osobowe w następujących celach:
               </p>
               <ul className="list-disc pl-6 mb-4">
-                <li>Świadczenie usług w ramach serwisu VIRALIST</li>
+                <li>Świadczenie usług w ramach serwisu FINDLIST</li>
                 <li>Utworzenie i zarządzanie kontem użytkownika</li>
                 <li>Personalizacja treści i rekomendacji</li>
                 <li>Komunikacja z użytkownikami</li>

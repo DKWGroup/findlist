@@ -9,8 +9,8 @@ export const AffiliateProgramPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Program afiliacyjny - VIRALIST"
-        description="Program partnerski VIRALIST - zarabiaj na polecaniu viralnych produktów. Transparentne zasady współpracy afiliacyjnej."
+        title="Program afiliacyjny - FINDLIST"
+        description="Program partnerski FINDLIST - zarabiaj na polecaniu viralnych produktów. Transparentne zasady współpracy afiliacyjnej."
         canonical="https://findlist.net/afiliacja"
       />
 
@@ -36,7 +36,7 @@ export const AffiliateProgramPage: React.FC = () => {
                 1. Informacje ogólne
               </h2>
               <p className="mb-4">
-                VIRALIST współpracuje z programami afiliacyjnymi w celu
+                FINDLIST współpracuje z programami afiliacyjnymi w celu
                 zapewnienia użytkownikom najlepszych ofert produktów viralowych.
                 Niniejszy dokument wyjaśnia zasady funkcjonowania programu
                 partnerskiego i sposób wykorzystywania linków afiliacyjnych.
@@ -56,7 +56,7 @@ export const AffiliateProgramPage: React.FC = () => {
               <p className="mb-4">
                 Linki afiliacyjne to specjalne adresy URL, które zawierają
                 unikalny identyfikator partnera. Gdy użytkownik dokona zakupu za
-                pośrednictwem takiego linku, VIRALIST może otrzymać prowizję od
+                pośrednictwem takiego linku, FINDLIST może otrzymać prowizję od
                 sprzedawcy.
               </p>
               <div className="bg-blue-50 p-6 rounded-lg">
@@ -86,7 +86,7 @@ export const AffiliateProgramPage: React.FC = () => {
                 3. Partnerzy afiliacyjni
               </h2>
               <p className="mb-4">
-                VIRALIST współpracuje z następującymi programami partnerskimi:
+                FINDLIST współpracuje z następującymi programami partnerskimi:
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -177,7 +177,7 @@ export const AffiliateProgramPage: React.FC = () => {
               <div className="bg-gray-50 p-6 rounded-lg mb-4">
                 <h4 className="font-semibold mb-4">Proces krok po kroku:</h4>
                 <ol className="list-decimal pl-6 space-y-2">
-                  <li>Użytkownik klika w link afiliacyjny na VIRALIST</li>
+                  <li>Użytkownik klika w link afiliacyjny na FINDLIST</li>
                   <li>
                     Zostaje przekierowany do sklepu partnera z naszym
                     identyfikatorem
@@ -186,7 +186,7 @@ export const AffiliateProgramPage: React.FC = () => {
                     Sklep zapisuje informację o źródle ruchu (cookie/tracking)
                   </li>
                   <li>Użytkownik dokonuje zakupu w określonym czasie</li>
-                  <li>Sklep nalicza prowizję dla VIRALIST</li>
+                  <li>Sklep nalicza prowizję dla FINDLIST</li>
                   <li>Prowizja jest wypłacana zgodnie z umową partnerską</li>
                 </ol>
               </div>
@@ -197,7 +197,7 @@ export const AffiliateProgramPage: React.FC = () => {
                 6. Polityka rekomendacji
               </h2>
               <p className="mb-4">
-                VIRALIST stosuje się do następujących zasad przy rekomendowaniu
+                FINDLIST stosuje się do następujących zasad przy rekomendowaniu
                 produktów:
               </p>
               <ul className="list-disc pl-6 mb-4">
@@ -271,7 +271,7 @@ export const AffiliateProgramPage: React.FC = () => {
               </h2>
               <p className="mb-4">
                 Jesteś właścicielem sklepu internetowego lub platformy
-                e-commerce? Rozważ współpracę z VIRALIST:
+                e-commerce? Rozważ współpracę z FINDLIST:
               </p>
               <div className="bg-green-50 p-6 rounded-lg">
                 <h4 className="font-semibold text-green-900 mb-2">
@@ -295,7 +295,7 @@ export const AffiliateProgramPage: React.FC = () => {
                 10. Zmiany w programie
               </h2>
               <p className="mb-4">
-                VIRALIST zastrzega sobie prawo do wprowadzania zmian w programie
+                FINDLIST zastrzega sobie prawo do wprowadzania zmian w programie
                 afiliacyjnym, w tym:
               </p>
               <ul className="list-disc pl-6 mb-4">

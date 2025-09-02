@@ -15,8 +15,8 @@ interface MetaTagsProps {
 }
 
 export const MetaTags: React.FC<MetaTagsProps> = ({
-  title = "VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama",
-  description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji.",
+  title = "FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama",
+  description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji.",
   keywords = "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów",
   canonical,
   ogImage = "https://findlist.net/og-image.png",
@@ -70,7 +70,7 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:locale" content="pl_PL" />
-      <meta property="og:site_name" content="VIRALIST" />
+      <meta property="og:site_name" content="FINDLIST" />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -80,8 +80,8 @@ export const MetaTags: React.FC<MetaTagsProps> = ({
       <meta name="twitter:site" content="@findlist_pl" />
 
       {/* Additional SEO */}
-      <meta name="author" content="VIRALIST" />
-      <meta name="publisher" content="VIRALIST" />
+      <meta name="author" content="FINDLIST" />
+      <meta name="publisher" content="FINDLIST" />
       <meta name="language" content="pl" />
       <meta name="geo.region" content="PL" />
       <meta name="geo.country" content="Poland" />

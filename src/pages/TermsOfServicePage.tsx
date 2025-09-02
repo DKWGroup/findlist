@@ -9,8 +9,8 @@ export const TermsOfServicePage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Regulamin serwisu - VIRALIST"
-        description="Regulamin korzystania z serwisu VIRALIST - pierwszej w Polsce platformy agregującej viralne produkty z mediów społecznościowych."
+        title="Regulamin serwisu - FINDLIST"
+        description="Regulamin korzystania z serwisu FINDLIST - pierwszej w Polsce platformy agregującej viralne produkty z mediów społecznościowych."
         canonical="https://findlist.net/regulamin"
       />
 
@@ -24,7 +24,7 @@ export const TermsOfServicePage: React.FC = () => {
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="prose prose-lg max-w-none">
             <h1 className="text-4xl font-bold text-gray-900 mb-8">
-              Regulamin serwisu VIRALIST
+              Regulamin serwisu FINDLIST
             </h1>
 
             <p className="text-gray-600 mb-8">
@@ -37,7 +37,7 @@ export const TermsOfServicePage: React.FC = () => {
               </h2>
               <p className="mb-4">
                 1. Niniejszy Regulamin określa zasady korzystania z serwisu
-                internetowego VIRALIST dostępnego pod adresem findlist.net
+                internetowego FINDLIST dostępnego pod adresem findlist.net
                 (zwany dalej "Serwisem").
               </p>
               <p className="mb-4">

@@ -182,7 +182,7 @@ Polecam szczególnie młodym osobom, które chcą dodać trochę koloru i techno
       "https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg",
     author: {
       id: "1",
-      name: "Redakcja VIRALIST",
+      name: "Redakcja FINDLIST",
       avatar:
         "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg",
     },
@@ -195,7 +195,7 @@ Polecam szczególnie młodym osobom, które chcą dodać trochę koloru i techno
     labels: ["warte-pieniedzy", "hit-tiktoka"],
     seo: {
       metaTitle:
-        "Inteligentna Lampa LED z Bluetooth - Szczegółowa Recenzja | VIRALIST",
+        "Inteligentna Lampa LED z Bluetooth - Szczegółowa Recenzja | FINDLIST",
       metaDescription:
         "Sprawdź naszą szczegółową recenzję viralnej lampy LED z Bluetooth. Czy hit TikToka wart jest swojej ceny? Plusy, minusy i ostateczna ocena.",
       keywords: [

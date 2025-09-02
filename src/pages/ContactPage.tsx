@@ -69,8 +69,8 @@ export const ContactPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Kontakt - VIRALIST | Skontaktuj się z nami"
-        description="Masz pytania dotyczące VIRALIST? Skontaktuj się z nami poprzez formularz kontaktowy lub bezpośrednio przez e-mail."
+        title="Kontakt - FINDLIST | Skontaktuj się z nami"
+        description="Masz pytania dotyczące FINDLIST? Skontaktuj się z nami poprzez formularz kontaktowy lub bezpośrednio przez e-mail."
         canonical="https://findlist.net/kontakt"
       />
 
@@ -379,7 +379,7 @@ export const ContactPage: React.FC = () => {
                   </h3>
                   <p className="text-gray-600">
                     Oczywiście! Zachęcamy do przesyłania propozycji produktów,
-                    które Twoim zdaniem powinny znaleźć się na VIRALIST.
+                    które Twoim zdaniem powinny znaleźć się na FINDLIST.
                     Wystarczy wypełnić formularz kontaktowy, wybierając temat
                     "Propozycja produktu".
                   </p>

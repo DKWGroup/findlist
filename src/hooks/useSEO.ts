@@ -15,9 +15,9 @@ export const useSEO = (pageConfig?: Partial<SEOConfig>) => {
   const location = useLocation();
 
   const defaultConfig: SEOConfig = {
-    title: "VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama",
+    title: "FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama",
     description:
-      "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji.",
+      "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji.",
     keywords:
       "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping",
     canonicalUrl: `https://findlist.net${location.pathname}`,

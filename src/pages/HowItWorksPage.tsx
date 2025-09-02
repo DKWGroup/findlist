@@ -22,8 +22,8 @@ export const HowItWorksPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="Jak to działa - VIRALIST | Proces weryfikacji produktów"
-        description="Dowiedz się, jak działa VIRALIST - platforma agregująca viralowe produkty z TikToka i Instagrama. Poznaj nasz proces weryfikacji produktów i kryteria oceny."
+        title="Jak to działa - FINDLIST | Proces weryfikacji produktów"
+        description="Dowiedz się, jak działa FINDLIST - platforma agregująca viralowe produkty z TikToka i Instagrama. Poznaj nasz proces weryfikacji produktów i kryteria oceny."
         canonical="https://findlist.net/jak-to-dziala"
       />
 
@@ -40,7 +40,7 @@ export const HowItWorksPage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-3xl mx-auto">
                 <h1 className="text-4xl font-bold text-gray-900 mb-6">
-                  Jak działa VIRALIST?
+                  Jak działa FINDLIST?
                 </h1>
                 <p className="text-xl text-gray-600 mb-8">
                   Odkryj, w jaki sposób wybieramy, weryfikujemy i prezentujemy
@@ -59,7 +59,7 @@ export const HowItWorksPage: React.FC = () => {
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                   Od odkrycia trendu do bezpiecznego zakupu - tak wygląda droga
-                  każdego produktu na VIRALIST.
+                  każdego produktu na FINDLIST.
                 </p>
               </div>
 
@@ -286,7 +286,7 @@ export const HowItWorksPage: React.FC = () => {
                   Kategorie produktów
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  Na VIRALIST znajdziesz viralowe produkty z różnych kategorii,
+                  Na FINDLIST znajdziesz viralowe produkty z różnych kategorii,
                   starannie wyselekcjonowane i zorganizowane.
                 </p>
               </div>
@@ -415,7 +415,7 @@ export const HowItWorksPage: React.FC = () => {
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                   Odpowiedzi na najczęściej zadawane pytania dotyczące działania
-                  VIRALIST.
+                  FINDLIST.
                 </p>
               </div>
 
@@ -438,7 +438,7 @@ export const HowItWorksPage: React.FC = () => {
                     Jak zarabiacie na platformie?
                   </h3>
                   <p className="text-gray-600">
-                    VIRALIST zarabia głównie na prowizjach z programów
+                    FINDLIST zarabia głównie na prowizjach z programów
                     afiliacyjnych. Gdy klikniesz w link afiliacyjny i dokonasz
                     zakupu, otrzymujemy małą prowizję od sprzedawcy. Nie wpływa
                     to na cenę produktu dla Ciebie. Wszystkie linki afiliacyjne
@@ -463,7 +463,7 @@ export const HowItWorksPage: React.FC = () => {
                   </h3>
                   <p className="text-gray-600">
                     Tak! Zachęcamy naszych użytkowników do zgłaszania produktów,
-                    które ich zdaniem powinny znaleźć się na VIRALIST. Możesz to
+                    które ich zdaniem powinny znaleźć się na FINDLIST. Możesz to
                     zrobić poprzez formularz kontaktowy lub wysyłając e-mail na
                     adres kontakt@findlist.net.
                   </p>
@@ -490,7 +490,7 @@ export const HowItWorksPage: React.FC = () => {
                 Gotowy na odkrywanie najgorętszych trendów?
               </h2>
               <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Dołącz do społeczności VIRALIST i bądź na bieżąco z najnowszymi
+                Dołącz do społeczności FINDLIST i bądź na bieżąco z najnowszymi
                 viralowymi produktami.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

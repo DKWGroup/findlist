@@ -88,7 +88,7 @@ export const generateStructuredDataForProduct = (product: any) => {
     sku: product.code || product.id,
     brand: {
       "@type": "Brand",
-      name: "VIRALIST",
+      name: "FINDLIST",
     },
     offers: {
       "@type": "Offer",

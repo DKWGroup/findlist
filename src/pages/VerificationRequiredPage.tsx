@@ -11,7 +11,7 @@ export const VerificationRequiredPage: React.FC = () => {
           <Link to="/" className="inline-flex items-center space-x-2 mb-6">
             <img
               src="/findlist-logo2.png"
-              alt="VIRALIST"
+              alt="FINDLIST"
               className="h-8 w-auto"
             />
           </Link>

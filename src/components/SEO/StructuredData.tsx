@@ -26,7 +26,7 @@ export const ProductStructuredData: React.FC<ProductStructuredDataProps> = ({
     sku: product.code || product.id,
     brand: {
       "@type": "Brand",
-      name: "VIRALIST",
+      name: "FINDLIST",
     },
     offers: {
       "@type": "Offer",
@@ -35,7 +35,7 @@ export const ProductStructuredData: React.FC<ProductStructuredDataProps> = ({
       availability: "https://schema.org/InStock",
       seller: {
         "@type": "Organization",
-        name: "VIRALIST",
+        name: "FINDLIST",
       },
     },
     aggregateRating: {
@@ -71,7 +71,7 @@ export const BlogStructuredData: React.FC<BlogStructuredDataProps> = ({
     },
     publisher: {
       "@type": "Organization",
-      name: "VIRALIST",
+      name: "FINDLIST",
       logo: {
         "@type": "ImageObject",
         url: "https://findlist.net/logo.png",
@@ -116,7 +116,7 @@ export const WebsiteStructuredData: React.FC<WebsiteStructuredDataProps> = ({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "VIRALIST",
+    name: "FINDLIST",
     url: "https://findlist.net",
     description:
       "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
@@ -127,7 +127,7 @@ export const WebsiteStructuredData: React.FC<WebsiteStructuredDataProps> = ({
     },
     publisher: {
       "@type": "Organization",
-      name: "VIRALIST",
+      name: "FINDLIST",
       logo: {
         "@type": "ImageObject",
         url: "https://findlist.net/findlist-logo2.png",

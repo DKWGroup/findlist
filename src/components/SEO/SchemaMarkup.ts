@@ -4,7 +4,7 @@ export const generateOrganizationSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "VIRALIST",
+    name: "FINDLIST",
     alternateName: "Findlist.net",
     url: "https://findlist.net",
     logo: "https://findlist.net/findlist-logo.png",
@@ -14,7 +14,7 @@ export const generateOrganizationSchema = () => {
     founders: [
       {
         "@type": "Person",
-        name: "VIRALIST Team",
+        name: "FINDLIST Team",
       },
     ],
     contactPoint: {
@@ -40,13 +40,13 @@ export const generateWebSiteSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "VIRALIST",
+    name: "FINDLIST",
     url: "https://findlist.net",
     description:
       "Katalog najlepszych viralowych produktów z TikToka i Instagrama",
     publisher: {
       "@type": "Organization",
-      name: "VIRALIST",
+      name: "FINDLIST",
     },
     potentialAction: {
       "@type": "SearchAction",
@@ -96,7 +96,7 @@ export const generateProductSchema = (product: any) => {
       availability: "https://schema.org/InStock",
       seller: {
         "@type": "Organization",
-        name: "VIRALIST",
+        name: "FINDLIST",
       },
       url: product.affiliateUrl,
     },
@@ -137,11 +137,11 @@ export const generateArticleSchema = (article: any) => {
     image: article.featuredImage,
     author: {
       "@type": "Person",
-      name: article.author || "VIRALIST Team",
+      name: article.author || "FINDLIST Team",
     },
     publisher: {
       "@type": "Organization",
-      name: "VIRALIST",
+      name: "FINDLIST",
       logo: {
         "@type": "ImageObject",
         url: "https://findlist.net/findlist-logo.png",
@@ -180,7 +180,7 @@ export const generateLocalBusinessSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    name: "VIRALIST",
+    name: "FINDLIST",
     description: "Platforma viralowych produktów z mediów społecznościowych",
     url: "https://findlist.net",
     address: {

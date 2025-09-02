@@ -2,6 +2,18 @@ import { BookOpen, Instagram, Mail } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
+// TikTok icon component (lucide doesn't have TikTok, so we'll create a simple SVG)
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M19.321 5.562a5.124 5.124 0 0 1-.443-.258 6.228 6.228 0 0 1-1.137-.966c-.849-.849-1.321-1.99-1.321-3.197V.859h-3.295v13.309c0 2.091-1.703 3.794-3.794 3.794s-3.794-1.703-3.794-3.794 1.703-3.794 3.794-3.794c.395 0 .775.061 1.133.174V6.292c-.358-.054-.725-.083-1.098-.083-3.466 0-6.281 2.815-6.281 6.281s2.815 6.281 6.281 6.281 6.281-2.815 6.281-6.281V8.023a9.547 9.547 0 0 0 5.576 1.774V6.502a6.226 6.226 0 0 1-1.902-.94z" />
+  </svg>
+);
+
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
@@ -14,7 +26,7 @@ export const Footer: React.FC = () => {
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <img
                 src="/findlist-logo2.png"
-                alt="VIRALIST"
+                alt="FINDLIST"
                 className="h-8 w-auto"
               />
             </Link>
@@ -24,10 +36,22 @@ export const Footer: React.FC = () => {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
+                href="https://www.instagram.com/findlist_pl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-pink-400 transition-colors"
+                title="Obserwuj nas na Instagram"
               >
                 <Instagram className="h-6 w-6" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@findlist_pl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-purple-400 transition-colors"
+                title="Obserwuj nas na TikTok"
+              >
+                <TikTokIcon className="h-6 w-6" />
               </a>
             </div>
           </div>
@@ -160,7 +184,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Newsletter */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
+        {/* <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="mb-4 md:mb-0">
               <h3 className="text-lg font-semibold mb-2">
@@ -210,11 +234,11 @@ export const Footer: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Bottom */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
-          <p>&copy; {currentYear} VIRALIST. Wszystkie prawa zastrzeżone.</p>
+          <p>&copy; {currentYear} FINDLIST. Wszystkie prawa zastrzeżone.</p>
           <p className="mt-2 md:mt-0">Wykonane z ❤️ w Polsce</p>
         </div>
       </div>

@@ -84,7 +84,7 @@ export const Features: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Dlaczego VIRALIST to najlepszy wybór?
+            Dlaczego FINDLIST to najlepszy wybór?
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Nasza platforma łączy w sobie najlepsze funkcje social commerce z
@@ -146,7 +146,7 @@ export const Features: React.FC = () => {
         <div className="mt-16 max-w-4xl mx-auto">
           <div className="bg-gray-50 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-              Jak działamy? Proces weryfikacji produktów VIRALIST
+              Jak działamy? Proces weryfikacji produktów FINDLIST
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>

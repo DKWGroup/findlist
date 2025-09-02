@@ -72,7 +72,7 @@
 import SEOHead from "../components/SEO/SEOHead";
 
 <SEOHead
-  title="Tytuł strony - VIRALIST"
+  title="Tytuł strony - FINDLIST"
   description="Opis strony (max 155 znaków)"
   canonicalUrl="https://findlist.net/strona"
   ogImage="https://findlist.net/obrazek.jpg"
@@ -143,9 +143,9 @@ import FAQ from "../components/SEO/FAQ";
 
 const faqs = [
   {
-    question: "Jak działa VIRALIST?",
+    question: "Jak działa FINDLIST?",
     answer:
-      "VIRALIST agreguje popularne produkty z mediów społecznościowych...",
+      "FINDLIST agreguje popularne produkty z mediów społecznościowych...",
   },
 ];
 
@@ -185,7 +185,7 @@ export const ProductPage = ({ product }) => {
   return (
     <>
       <SEOHead
-        title={`${product.title} - VIRALIST`}
+        title={`${product.title} - FINDLIST`}
         description={product.description}
         canonicalUrl={`https://findlist.net/produkt/${product.id}`}
         ogImage={product.images[0]}
@@ -219,7 +219,7 @@ export const BlogPostPage = ({ article }) => {
   return (
     <>
       <SEOHead
-        title={`${article.title} - Blog VIRALIST`}
+        title={`${article.title} - Blog FINDLIST`}
         description={article.excerpt}
         canonicalUrl={`https://findlist.net/blog/${article.slug}`}
         ogImage={article.featuredImage}

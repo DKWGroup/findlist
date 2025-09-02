@@ -304,7 +304,7 @@ export const ProductPage: React.FC = () => {
     <Layout showFooter={false}>
       {/* SEO Head */}
       <SEOHead
-        title={`${product.title} - VIRALIST`}
+        title={`${product.title} - FINDLIST`}
         description={product.description}
         canonicalUrl={
           product.urlAlias

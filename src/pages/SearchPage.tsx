@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Layout } from '../components/Layout';
-import { AdvancedSearchBar } from '../components/search/AdvancedSearchBar';
-import { SearchResults } from '../components/search/SearchResults';
-import { SmartRecommendations } from '../components/search/SmartRecommendations';
-import { MetaTags } from '../components/SEO/MetaTags';
-import { useAdvancedSearch } from '../hooks/useAdvancedSearch';
-import { SearchContext } from '../types/search';
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Layout } from "../components/Layout";
+import { AdvancedSearchBar } from "../components/search/AdvancedSearchBar";
+import { SearchResults } from "../components/search/SearchResults";
+import { SmartRecommendations } from "../components/search/SmartRecommendations";
+import { MetaTags } from "../components/SEO/MetaTags";
+import { useAdvancedSearch } from "../hooks/useAdvancedSearch";
+import { SearchContext } from "../types/search";
 
 export const SearchPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
-  const initialCategory = searchParams.get('category') || '';
-  
+  const initialQuery = searchParams.get("q") || "";
+  const initialCategory = searchParams.get("category") || "";
+
   const [searchContext, setSearchContext] = useState<Partial<SearchContext>>({
     season: getCurrentSeason(),
-    timeOfDay: getCurrentTimeOfDay()
+    timeOfDay: getCurrentTimeOfDay(),
   });
 
   const {
@@ -32,20 +32,21 @@ export const SearchPage: React.FC = () => {
     updateQuery,
     updateFilters,
     sortResults,
-    getAnalytics
+    getAnalytics,
   } = useAdvancedSearch({
     initialQuery,
     initialFilters: initialCategory ? { categories: [initialCategory] } : {},
     initialContext: searchContext,
     autoSearch: false,
-    debounceMs: 300
+    debounceMs: 300,
   });
 
   // Update URL when search changes
   useEffect(() => {
     const params = new URLSearchParams();
-    if (query) params.set('q', query);
-    if (filters.categories?.length) params.set('category', filters.categories[0]);
+    if (query) params.set("q", query);
+    if (filters.categories?.length)
+      params.set("category", filters.categories[0]);
     setSearchParams(params);
   }, [query, filters.categories, setSearchParams]);
 
@@ -73,11 +74,21 @@ export const SearchPage: React.FC = () => {
   return (
     <Layout>
       <MetaTags
-        title={query ? `Wyniki wyszukiwania dla "${query}" | VIRALIST` : "Wyszukiwanie produktów | VIRALIST"}
-        description={query ? `Przeglądaj wyniki wyszukiwania dla "${query}". Znajdź najlepsze viralowe produkty z TikToka i Instagrama.` : "Wyszukaj najlepsze viralowe produkty z TikToka i Instagrama. Zaawansowane wyszukiwanie z filtrowaniem i sugestiami."}
-        keywords={`wyszukiwanie produktów, ${query || 'viralowe produkty'}, tiktok, instagram, trendy zakupowe`}
+        title={
+          query
+            ? `Wyniki wyszukiwania dla "${query}" | FINDLIST`
+            : "Wyszukiwanie produktów | FINDLIST"
+        }
+        description={
+          query
+            ? `Przeglądaj wyniki wyszukiwania dla "${query}". Znajdź najlepsze viralowe produkty z TikToka i Instagrama.`
+            : "Wyszukaj najlepsze viralowe produkty z TikToka i Instagrama. Zaawansowane wyszukiwanie z filtrowaniem i sugestiami."
+        }
+        keywords={`wyszukiwanie produktów, ${
+          query || "viralowe produkty"
+        }, tiktok, instagram, trendy zakupowe`}
       />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Header */}
         <div className="mb-8">
@@ -85,13 +96,14 @@ export const SearchPage: React.FC = () => {
             Inteligentne wyszukiwanie produktów
           </h1>
           <p className="text-gray-600 mb-6">
-            Znajdź dokładnie to, czego szukasz dzięki zaawansowanemu wyszukiwaniu semantycznemu
+            Znajdź dokładnie to, czego szukasz dzięki zaawansowanemu
+            wyszukiwaniu semantycznemu
           </p>
-          
+
           <AdvancedSearchBar
             onSearch={handleSearch}
             onSuggestionSelect={(suggestion) => {
-              if (suggestion.type === 'product') {
+              if (suggestion.type === "product") {
                 handleSearch(suggestion.text);
               }
             }}
@@ -101,11 +113,15 @@ export const SearchPage: React.FC = () => {
         </div>
 
         {/* Search Analytics (for development/debugging) */}
-        {process.env.NODE_ENV === 'development' && analytics.hasResults && (
+        {process.env.NODE_ENV === "development" && analytics.hasResults && (
           <div className="mb-6 p-4 bg-gray-100 rounded-lg text-sm text-gray-600">
-            <strong>Analytics:</strong> {analytics.totalResults} wyników w {analytics.searchTime.toFixed(0)}ms
+            <strong>Analytics:</strong> {analytics.totalResults} wyników w{" "}
+            {analytics.searchTime.toFixed(0)}ms
             {analytics.averageRelevance > 0 && (
-              <span> • Średnia trafność: {analytics.averageRelevance.toFixed(1)}%</span>
+              <span>
+                {" "}
+                • Średnia trafność: {analytics.averageRelevance.toFixed(1)}%
+              </span>
             )}
             {analytics.contextDetected && <span> • Kontekst wykryty</span>}
           </div>
@@ -138,10 +154,7 @@ export const SearchPage: React.FC = () => {
 
         {/* Smart Recommendations */}
         {!isLoading && (
-          <SmartRecommendations
-            context={searchContext}
-            className="mb-8"
-          />
+          <SmartRecommendations context={searchContext} className="mb-8" />
         )}
 
         {/* Search Tips */}
@@ -176,18 +189,18 @@ export const SearchPage: React.FC = () => {
 };
 
 // Helper functions
-function getCurrentSeason(): 'spring' | 'summer' | 'autumn' | 'winter' {
+function getCurrentSeason(): "spring" | "summer" | "autumn" | "winter" {
   const month = new Date().getMonth();
-  if (month >= 2 && month <= 4) return 'spring';
-  if (month >= 5 && month <= 7) return 'summer';
-  if (month >= 8 && month <= 10) return 'autumn';
-  return 'winter';
+  if (month >= 2 && month <= 4) return "spring";
+  if (month >= 5 && month <= 7) return "summer";
+  if (month >= 8 && month <= 10) return "autumn";
+  return "winter";
 }
 
-function getCurrentTimeOfDay(): 'morning' | 'afternoon' | 'evening' | 'night' {
+function getCurrentTimeOfDay(): "morning" | "afternoon" | "evening" | "night" {
   const hour = new Date().getHours();
-  if (hour >= 6 && hour < 12) return 'morning';
-  if (hour >= 12 && hour < 18) return 'afternoon';
-  if (hour >= 18 && hour < 22) return 'evening';
-  return 'night';
+  if (hour >= 6 && hour < 12) return "morning";
+  if (hour >= 12 && hour < 18) return "afternoon";
+  if (hour >= 18 && hour < 22) return "evening";
+  return "night";
 }
