@@ -18,6 +18,7 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { usePageState } from "../../hooks/usePageState";
 import { useProducts } from "../../hooks/useProducts";
 import { Product } from "../../types";
 import { BlogManagement } from "./BlogManagement";
@@ -33,6 +34,9 @@ export const AdminDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+
+  // Zarządzanie stanem strony
+  const pageState = usePageState();
 
   // Use products hook
   const {
@@ -86,11 +90,13 @@ export const AdminDashboard: React.FC = () => {
   const handleAddProduct = () => {
     setSelectedProduct(null);
     setIsProductFormOpen(true);
+    pageState.markAsModified(); // Oznacz jako zmodyfikowane gdy otwieramy formularz
   };
 
   const handleEditProduct = (product: Product) => {
     setSelectedProduct(product);
     setIsProductFormOpen(true);
+    pageState.markAsModified(); // Oznacz jako zmodyfikowane gdy otwieramy formularz
   };
 
   const handleDeleteProduct = async (productId: string) => {
@@ -98,8 +104,10 @@ export const AdminDashboard: React.FC = () => {
       setIsLoading(true);
       try {
         // Here you would call productService.deleteProduct(productId)
+        console.log("Deleting product:", productId);
         // For now, just refresh the products list
         await refreshProducts();
+        pageState.markAsSaved(); // Oznacz jako zapisane po udanym usunięciu
       } catch (error) {
         console.error("Error deleting product:", error);
         alert("Błąd podczas usuwania produktu");
@@ -114,10 +122,12 @@ export const AdminDashboard: React.FC = () => {
 
     try {
       // Product saving is handled in ProductForm component
+      console.log("Saving product:", productData);
       // Just refresh the products list and close the form
       await refreshProducts();
       setIsProductFormOpen(false);
       setSelectedProduct(null);
+      pageState.markAsSaved(); // Oznacz jako zapisane po udanym zapisie
     } catch (error) {
       console.error("Error in product save callback:", error);
       alert("Wystąpił błąd podczas zapisywania produktu");
