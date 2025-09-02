@@ -27,9 +27,10 @@ import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
 
 export const ProductPage: React.FC = () => {
-  const { id, codeOrAlias } = useParams<{
+  const { id, codeOrAlias, urlAlias } = useParams<{
     id?: string;
     codeOrAlias?: string;
+    urlAlias?: string;
   }>();
   const { user, isAuthenticated } = useSimplifiedAuthContext();
   const [product, setProduct] = useState<Product | null>(null);
@@ -43,7 +44,7 @@ export const ProductPage: React.FC = () => {
     product: fetchedProduct,
     loading: productLoading,
     error: productError,
-  } = useProduct(id);
+  } = useProduct(id || null);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -51,8 +52,11 @@ export const ProductPage: React.FC = () => {
       try {
         let foundProduct = fetchedProduct;
 
-        // If we have a code or alias but no direct ID
-        if (!id && codeOrAlias) {
+        // Determine which parameter to use for search
+        const searchParam = urlAlias || codeOrAlias;
+
+        // If we have a urlAlias or codeOrAlias but no direct ID
+        if (!id && searchParam) {
           // Query by code or alias
           const { data, error } = await supabase
             .from("products")
@@ -66,7 +70,7 @@ export const ProductPage: React.FC = () => {
               product_stats(*)
             `
             )
-            .or(`code.eq.${codeOrAlias},url_alias.eq.${codeOrAlias}`)
+            .or(`code.eq.${searchParam},url_alias.eq.${searchParam}`)
             .single();
 
           if (error) throw error;
@@ -118,7 +122,7 @@ export const ProductPage: React.FC = () => {
 
         // Check if product is in user's wishlist
         if (isAuthenticated && user && foundProduct) {
-          const isInList = user.wishlist?.includes(foundProduct.id) || false;
+          const isInList = (user as any).wishlist?.includes(foundProduct.id) || false;
           setIsInWishlist(isInList);
         }
 
@@ -134,7 +138,7 @@ export const ProductPage: React.FC = () => {
     };
 
     loadProduct();
-  }, [id, codeOrAlias, fetchedProduct, isAuthenticated, user]);
+  }, [id, codeOrAlias, urlAlias, fetchedProduct, isAuthenticated, user]);
 
   const loadProductReviews = async (productId: string) => {
     try {
@@ -176,7 +180,7 @@ export const ProductPage: React.FC = () => {
 
     try {
       // Use the new add_product_review function with correct parameter names
-      const { data, error } = await supabase.rpc("add_product_review", {
+      const { error } = await supabase.rpc("add_product_review", {
         p_product_id: productId,
         p_user_id: user.id,
         p_rating: review.rating,

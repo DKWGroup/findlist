@@ -45,7 +45,7 @@ function App() {
               <Route path="/home" element={<HomePage />} />
               <Route path="/produkty" element={<ProductsPage />} />
               <Route path="/produkt/:id" element={<ProductPage />} />
-              <Route path="/:codeOrAlias" element={<ProductPage />} />
+              <Route path="/produkty/:urlAlias" element={<ProductPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/blog-editor" element={<BlogEditorPage />} />
@@ -72,6 +72,9 @@ function App() {
               />
               <Route path="/cookies" element={<CookiePolicyPage />} />
               <Route path="/afiliacja" element={<AffiliateProgramPage />} />
+              
+              {/* Krótki link produktu - MUSI BYĆ NA KOŃCU */}
+              <Route path="/:codeOrAlias" element={<ProductPage />} />
             </Routes>
           </div>
         </Router>

@@ -502,6 +502,65 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     )}
                   </div>
                 </div>
+
+                {/* Podsumowanie linków - pokaż oba URL jeśli produkty zostały wygenerowane */}
+                {(formData.code || formData.urlAlias) && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4" />
+                      Linki do produktu
+                    </h4>
+                    <div className="space-y-2">
+                      {formData.urlAlias && (
+                        <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Główny link produktu:</p>
+                            <p className="text-sm text-blue-600 font-mono">
+                              {window.location.origin}/produkty/{formData.urlAlias}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              copyToClipboard(
+                                `${window.location.origin}/produkty/${formData.urlAlias}`
+                              )
+                            }
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Kopiuj główny link"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                      {formData.code && (
+                        <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Krótki link (kod):</p>
+                            <p className="text-sm text-blue-600 font-mono">
+                              {window.location.origin}/{formData.code}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              copyToClipboard(
+                                `${window.location.origin}/${formData.code}`
+                              )
+                            }
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Kopiuj krótki link"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      💡 Oba linki prowadzą do tej samej strony produktu. Krótki link jest łatwiejszy do udostępniania.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Basic Info */}
