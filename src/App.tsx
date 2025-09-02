@@ -2,6 +2,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SimplifiedAuthProvider } from "./contexts/SimplifiedAuthContext";
+import { usePreventPageRefresh } from "./hooks/usePreventPageRefresh";
 import { AboutUsPage } from "./pages/AboutUsPage";
 import { AdminPage } from "./pages/AdminPage";
 import { AffiliateProgramPage } from "./pages/AffiliateProgramPage";
@@ -29,6 +30,9 @@ import { VerificationRequiredPage } from "./pages/VerificationRequiredPage";
 
 function App() {
   console.log("App: Starting with simplified auth...");
+
+  // Zapobiegaj przypadkowemu odświeżeniu stron przy zmianie karty
+  usePreventPageRefresh();
 
   return (
     <HelmetProvider>

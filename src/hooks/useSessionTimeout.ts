@@ -23,6 +23,7 @@ export const useSessionTimeout = (options: UseSessionTimeoutOptions = {}) => {
   const [showWarning, setShowWarning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [lastActivity, setLastActivity] = useState(Date.now());
+  const [isTabVisible, setIsTabVisible] = useState(true);
 
   // Reset activity timer on user interaction
   const resetActivityTimer = useCallback(() => {
@@ -32,7 +33,7 @@ export const useSessionTimeout = (options: UseSessionTimeoutOptions = {}) => {
 
   // Check session status and handle timeout
   const checkSession = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isTabVisible) return;
 
     try {
       // Check if session is expired
@@ -57,27 +58,30 @@ export const useSessionTimeout = (options: UseSessionTimeoutOptions = {}) => {
         return;
       }
 
-      // Check inactivity timeout
-      const inactiveTime = (Date.now() - lastActivity) / (60 * 1000); // in minutes
+      // Only check inactivity timeout if tab is visible
+      if (isTabVisible) {
+        // Check inactivity timeout
+        const inactiveTime = (Date.now() - lastActivity) / (60 * 1000); // in minutes
 
-      if (inactiveTime >= timeoutMinutes) {
-        // User inactive for too long, log out
-        setShowWarning(false);
-        onTimeout?.();
-        await logout();
-      } else if (inactiveTime >= timeoutMinutes - warningMinutes) {
-        // Show warning before timeout
-        if (!showWarning) {
-          setShowWarning(true);
-          onWarning?.();
+        if (inactiveTime >= timeoutMinutes) {
+          // User inactive for too long, log out
+          setShowWarning(false);
+          onTimeout?.();
+          await logout();
+        } else if (inactiveTime >= timeoutMinutes - warningMinutes) {
+          // Show warning before timeout
+          if (!showWarning) {
+            setShowWarning(true);
+            onWarning?.();
+          }
+
+          // Calculate time remaining
+          const remaining = Math.max(0, timeoutMinutes - inactiveTime);
+          setTimeRemaining(Math.round(remaining));
+        } else {
+          setShowWarning(false);
+          setTimeRemaining(null);
         }
-
-        // Calculate time remaining
-        const remaining = Math.max(0, timeoutMinutes - inactiveTime);
-        setTimeRemaining(Math.round(remaining));
-      } else {
-        setShowWarning(false);
-        setTimeRemaining(null);
       }
 
       // Refresh token if needed - DISABLED FOR DEBUGGING
@@ -92,6 +96,7 @@ export const useSessionTimeout = (options: UseSessionTimeoutOptions = {}) => {
     }
   }, [
     isAuthenticated,
+    isTabVisible,
     lastActivity,
     logout,
     onTimeout,
