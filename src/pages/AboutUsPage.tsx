@@ -35,9 +35,9 @@ export const AboutUsPage: React.FC = () => {
   return (
     <>
       <MetaTags
-        title="O nas - VIRALIST | Poznaj nasz zespół i misję"
-        description="Poznaj zespół VIRALIST - pierwszej w Polsce platformy agregującej viralowe produkty z TikToka i Instagrama. Dowiedz się więcej o naszej misji i wartościach."
-        canonical="https://viralist.pl/o-nas"
+        title="O nas - FINDLIST | Poznaj nasz zespół i misję"
+        description="Poznaj zespół FINDLIST - pierwszej w Polsce platformy agregującej viralowe produkty z TikToka i Instagrama. Dowiedz się więcej o naszej misji i wartościach."
+        canonical="https://findlist.net/o-nas"
       />
 
       <Layout>
@@ -53,7 +53,7 @@ export const AboutUsPage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-3xl mx-auto">
                 <h1 className="text-4xl font-bold text-gray-900 mb-6">
-                  Poznaj zespół VIRALIST
+                  Poznaj zespół FINDLIST
                 </h1>
                 <p className="text-xl text-gray-600 mb-8">
                   Jesteśmy grupą pasjonatów social mediów, e-commerce i nowych
@@ -74,7 +74,7 @@ export const AboutUsPage: React.FC = () => {
                     Nasza misja
                   </h2>
                   <p className="text-lg text-gray-600 mb-6">
-                    W VIRALIST wierzymy, że odkrywanie najnowszych trendów i
+                    W FINDLIST wierzymy, że odkrywanie najnowszych trendów i
                     produktów powinno być łatwe, przyjemne i bezpieczne. Naszą
                     misją jest:
                   </p>
@@ -126,7 +126,7 @@ export const AboutUsPage: React.FC = () => {
                 <div className="relative">
                   <img
                     src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800"
-                    alt="Zespół VIRALIST podczas pracy"
+                    alt="Zespół FINDLIST podczas pracy"
                     className="rounded-xl shadow-lg"
                   />
                   <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
@@ -146,7 +146,7 @@ export const AboutUsPage: React.FC = () => {
                   Poznaj nasz zespół
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  Za VIRALIST stoi zespół pasjonatów, którzy codziennie pracują
+                  Za FINDLIST stoi zespół pasjonatów, którzy codziennie pracują
                   nad tym, aby dostarczać Ci najlepsze viralowe produkty i
                   treści.
                 </p>
@@ -186,7 +186,7 @@ export const AboutUsPage: React.FC = () => {
                   Nasze wartości
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  W VIRALIST kierujemy się wartościami, które pomagają nam
+                  W FINDLIST kierujemy się wartościami, które pomagają nam
                   tworzyć platformę godną zaufania naszych użytkowników.
                 </p>
               </div>
@@ -241,7 +241,7 @@ export const AboutUsPage: React.FC = () => {
           <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <h2 className="text-3xl font-bold mb-6">
-                Dołącz do społeczności VIRALIST
+                Dołącz do społeczności FINDLIST
               </h2>
               <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
                 Odkrywaj najnowsze trendy, dziel się opiniami i bądź na bieżąco

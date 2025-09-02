@@ -17,11 +17,11 @@ interface SEOHeadProps {
 }
 
 const SEOHead: React.FC<SEOHeadProps> = ({
-  title = "VIRALIST – Najlepsze viralowe produkty z TikToka i Instagrama",
-  description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! VIRALIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne.",
+  title = "FINDLIST – Najlepsze viralowe produkty z TikToka i Instagrama",
+  description = "Odkryj najgorętsze trendy zakupowe z TikToka i Instagrama! FINDLIST to katalog viralowych produktów, recenzji i inspiracji. Przeglądaj, oceniaj, twórz wishlisty i kupuj przez sprawdzone linki afiliacyjne.",
   keywords = "viralowe produkty, TikTok, Instagram, trendy zakupowe, gadżety, prezenty, recenzje produktów, wishlist, social media shopping, viral shopping, hity z TikToka",
-  canonicalUrl = "https://viralist.pl/",
-  ogImage = "https://viralist.pl/og-image.png",
+  canonicalUrl = "https://findlist.net/",
+  ogImage = "https://findlist.net/og-image.png",
   ogType = "website",
   noIndex = false,
   structuredData,
@@ -55,8 +55,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       />
 
       {/* Author */}
-      <meta name="author" content="VIRALIST" />
-      <meta name="publisher" content="VIRALIST" />
+      <meta name="author" content="FINDLIST" />
+      <meta name="publisher" content="FINDLIST" />
 
       {/* Language */}
       <meta httpEquiv="content-language" content="pl" />
@@ -71,7 +71,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/png" />
       <meta property="og:image:alt" content={truncatedTitle} />
-      <meta property="og:site_name" content="VIRALIST" />
+      <meta property="og:site_name" content="FINDLIST" />
       <meta property="og:locale" content="pl_PL" />
 
       {/* Twitter Card */}
@@ -81,14 +81,14 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="twitter:image" content={ogImage} />
       <meta name="twitter:image:alt" content={truncatedTitle} />
       <meta name="twitter:url" content={canonicalUrl} />
-      <meta name="twitter:site" content="@viralist_pl" />
-      <meta name="twitter:creator" content="@viralist_pl" />
+      <meta name="twitter:site" content="@findlist_pl" />
+      <meta name="twitter:creator" content="@findlist_pl" />
 
       {/* Additional Meta Tags */}
       <meta name="theme-color" content="#2563eb" />
       <meta name="msapplication-TileColor" content="#2563eb" />
-      <meta name="apple-mobile-web-app-title" content="VIRALIST" />
-      <meta name="application-name" content="VIRALIST" />
+      <meta name="apple-mobile-web-app-title" content="FINDLIST" />
+      <meta name="application-name" content="FINDLIST" />
 
       {/* Hreflang */}
       {hreflang.map((item, index) => (

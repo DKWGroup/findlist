@@ -79,9 +79,9 @@ export const BlogPage: React.FC = () => {
   return (
     <Layout>
       <SEOHead
-        title="Blog - VIRALIST"
+        title="Blog - FINDLIST"
         description="Recenzje, porady i ostrzeżenia o viralnych produktach. Odkryj najlepsze i najgorsze produkty z TikToka i Instagrama."
-        canonicalUrl="https://viralist.pl/blog"
+        canonicalUrl="https://findlist.net/blog"
         structuredData={websiteSchema}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -94,7 +94,7 @@ export const BlogPage: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Blog VIRALIST
+              Blog FINDLIST
             </h1>
             <p className="text-gray-600">
               Recenzje, porady i ostrzeżenia o viralnych produktach

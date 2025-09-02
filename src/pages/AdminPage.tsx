@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { AdminDashboard } from "../components/admin/AdminDashboard";
 import { Layout } from "../components/Layout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { SupabaseSetup } from "../components/upload/SupabaseSetup";
+import { usePreventAdminRefresh } from "../hooks/usePreventAdminRefresh";
 import { productService } from "../services/productService";
 import { debugSession } from "../services/supabaseStorage";
 import { isUserAdmin } from "../utils/adminUtils";
@@ -10,7 +11,9 @@ import { isUserAdmin } from "../utils/adminUtils";
 // Add debug logging
 export const AdminPage: React.FC = () => {
   console.log("Rendering AdminPage");
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Zapobiegaj odświeżaniu przy zmianie kart
+  usePreventAdminRefresh();
 
   // Debug session state when admin page loads
   React.useEffect(() => {

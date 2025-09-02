@@ -2,9 +2,9 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://viralist.pl/sitemap.xml
-Sitemap: https://viralist.pl/sitemap-products.xml
-Sitemap: https://viralist.pl/sitemap-blog.xml
+Sitemap: https://findlist.net/sitemap.xml
+Sitemap: https://findlist.net/sitemap-products.xml
+Sitemap: https://findlist.net/sitemap-blog.xml
 
 # Disallow admin and private areas
 Disallow: /admin/

@@ -13,9 +13,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    autoRefreshToken: true,
+    autoRefreshToken: false, // TYMCZASOWO WYŁĄCZONY - może powodować refresh przy zmianie kart
     detectSessionInUrl: true,
-    storageKey: "viralist-auth-storage",
+    storageKey: "findlist-auth-storage",
     flowType: "pkce",
   },
 });
