@@ -1,7 +1,7 @@
 import { ArrowRight, Clock, Heart, Sparkles, TrendingUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { searchService } from "../../services/searchService";
+import searchService from "../../services/searchService";
 import { Product } from "../../types";
 import { SearchContext } from "../../types/search";
 import { LazyImage } from "../Performance/LazyImage";
