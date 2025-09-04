@@ -22,6 +22,7 @@ class SearchService {
           `
           id,
           title,
+          url_alias,
           category_id
         `
         )
@@ -88,7 +89,7 @@ class SearchService {
           text: product.title,
           type: "product",
           imageUrl: imageMap[product.id] || undefined,
-          url: `/produkty/${product.id}`,
+          url: `/produkty/${product.url_alias}`,
         })
       );
 

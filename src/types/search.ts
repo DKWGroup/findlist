@@ -11,16 +11,17 @@ export interface SearchResult {
   };
   images: string[];
   relevanceScore: number;
-  matchType: 'exact' | 'fuzzy' | 'semantic' | 'category' | 'tag';
+  matchType: "exact" | "fuzzy" | "semantic" | "category" | "tag";
   matchedTerms: string[];
 }
 
 export interface SearchSuggestion {
   id: string;
   text: string;
-  type: 'query' | 'category' | 'product' | 'trending';
+  type: "query" | "category" | "product" | "trending";
   imageUrl?: string;
   productId?: string;
+  url?: string;
   count?: number;
   icon?: string;
 }
@@ -42,11 +43,11 @@ export interface SearchFilters {
 }
 
 export interface SearchContext {
-  season?: 'spring' | 'summer' | 'autumn' | 'winter';
+  season?: "spring" | "summer" | "autumn" | "winter";
   occasion?: string;
   userPreferences?: string[];
   location?: string;
-  timeOfDay?: 'morning' | 'afternoon' | 'evening' | 'night';
+  timeOfDay?: "morning" | "afternoon" | "evening" | "night";
 }
 
 export interface ProductAssociation {

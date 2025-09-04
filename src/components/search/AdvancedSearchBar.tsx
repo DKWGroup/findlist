@@ -63,7 +63,7 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
       if (query.length >= 2) {
         setIsLoading(true);
         try {
-          const newSuggestions = await searchService.getSuggestions(query, 8);
+          const newSuggestions = await searchService.getSuggestions(query);
           setSuggestions(newSuggestions);
           setShowSuggestions(true);
         } catch (error) {
@@ -73,7 +73,7 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
         }
       } else if (query.length === 0 && hasUserInteracted) {
         // Show default suggestions only after user interaction
-        const defaultSuggestions = await searchService.getSuggestions("", 6);
+        const defaultSuggestions = await searchService.getSuggestions("");
         setSuggestions(defaultSuggestions);
         setShowSuggestions(true);
       } else {
@@ -94,17 +94,17 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
   };
 
   const handleSuggestionClick = (suggestion: SearchSuggestion) => {
-    if (suggestion.type === "product") {
-      // If it's a product, redirect directly to the product page
-      if (suggestion.productId) {
-        window.location.href = `/product/${suggestion.productId}`;
-      } else {
-        setQuery(suggestion.text);
-        onSearch(suggestion.text, filters);
-      }
+    // Ignoruj kliknięcie na element "Brak pasujących produktów"
+    if (suggestion.id === "no-results") {
+      return;
+    }
+
+    if (suggestion.url) {
+      // Przekierowanie do strony produktu lub kategorii używając URL z sugestii
+      window.location.href = suggestion.url;
     } else {
       setQuery(suggestion.text);
-      inputRef.current?.focus();
+      onSearch(suggestion.text, filters);
     }
 
     if (onSuggestionSelect) {
@@ -260,57 +260,73 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
       {showSuggestions && hasUserInteracted && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
           <div className="p-2">
-            {suggestions.map((suggestion) => (
-              <button
-                key={suggestion.id}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors group relative cursor-pointer"
-              >
-                {suggestion.type === "product" && suggestion.imageUrl ? (
-                  <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
-                    <LazyImage
-                      src={suggestion.imageUrl}
-                      alt={suggestion.text}
-                      className="w-full h-full object-cover"
-                      width={40}
-                      height={40}
-                      onLoad={() => handleImageLoad(suggestion.id)}
-                      onError={() => handleImageError(suggestion.id)}
-                    />
-                    {loadedImages[suggestion.id] === undefined && (
-                      <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
-                    )}
-                    {loadedImages[suggestion.id] === false && (
-                      <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-                        <Image className="h-4 w-4 text-gray-400" />
+            {suggestions.map((suggestion) =>
+              suggestion.id === "no-results" ? (
+                <div
+                  key={suggestion.id}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg text-gray-500 bg-gray-50 cursor-default"
+                >
+                  <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center flex-shrink-0">
+                    <Search className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">{suggestion.text}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  key={suggestion.id}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors group relative cursor-pointer"
+                >
+                  {suggestion.type === "product" && suggestion.imageUrl ? (
+                    <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
+                      <LazyImage
+                        src={suggestion.imageUrl}
+                        alt={suggestion.text}
+                        className="w-full h-full object-cover"
+                        width={40}
+                        height={40}
+                        onLoad={() => handleImageLoad(suggestion.id)}
+                        onError={() => handleImageError(suggestion.id)}
+                      />
+                      {loadedImages[suggestion.id] === undefined && (
+                        <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+                      )}
+                      {loadedImages[suggestion.id] === false && (
+                        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+                          <Image className="h-4 w-4 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded flex items-center justify-center bg-gray-100 flex-shrink-0">
+                      {getSuggestionIcon(suggestion.type)}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {suggestion.text.length > 40
+                          ? `${suggestion.text.substring(0, 40)}...`
+                          : suggestion.text}
+                      </span>
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                        {getSuggestionLabel(suggestion.type)}
+                      </span>
+                    </div>
+                    {suggestion.count && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {suggestion.count.toLocaleString()} wyszukiwań
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div className="w-10 h-10 rounded flex items-center justify-center bg-gray-100 flex-shrink-0">
-                    {getSuggestionIcon(suggestion.type)}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {suggestion.text.length > 40
-                        ? `${suggestion.text.substring(0, 40)}...`
-                        : suggestion.text}
-                    </span>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                      {getSuggestionLabel(suggestion.type)}
-                    </span>
-                  </div>
-                  {suggestion.count && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {suggestion.count.toLocaleString()} wyszukiwań
-                    </div>
-                  )}
-                </div>
-                <Search className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors" />
-              </button>
-            ))}
+                  <Search className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors" />
+                </button>
+              )
+            )}
           </div>
         </div>
       )}
