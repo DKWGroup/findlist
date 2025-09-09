@@ -1,12 +1,15 @@
 import {
   BookOpen,
   Heart,
+  LogIn,
   LogOut,
   Menu,
+  Package,
   Search,
   Settings,
   Shield,
   User,
+  UserPlus,
   X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -261,9 +264,10 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
           <div className="px-4 py-4 space-y-4">
             <Link
               to="/produkty"
-              className="block text-gray-600 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
+              <Package className="h-4 w-4" />
               Produkty
             </Link>
             <Link
@@ -318,16 +322,18 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
               <>
                 <Link
                   to="/logowanie"
-                  className="block text-gray-600 hover:text-blue-600 transition-colors"
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  <LogIn className="h-4 w-4" />
                   Logowanie
                 </Link>
                 <Link
                   to="/rejestracja"
-                  className="block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  <UserPlus className="h-4 w-4" />
                   Rejestracja
                 </Link>
               </>
