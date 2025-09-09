@@ -66,7 +66,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.warn("AuthProvider not ready in ProductCard, using defaults");
   }
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [productStats, setProductStats] = useState<ProductStats | null>(null);
 
@@ -234,14 +233,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           to={productUrl}
           onClick={handleCardClick}
           className="block relative w-full h-full"
-          onMouseEnter={() =>
-            product.images?.length > 1 && setCurrentImageIndex(1)
-          }
-          onMouseLeave={() => setCurrentImageIndex(0)}
         >
           <LazyImage
             src={
-              product.images?.[currentImageIndex] ||
               product.images?.[0] ||
               "/images/placeholder-product.jpg"
             }

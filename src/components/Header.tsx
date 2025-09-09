@@ -1,12 +1,10 @@
 import {
   BookOpen,
-  Heart,
   LogIn,
   LogOut,
   Menu,
   Package,
   Search,
-  Settings,
   Shield,
   User,
   UserPlus,
