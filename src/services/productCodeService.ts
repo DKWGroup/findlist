@@ -1,5 +1,14 @@
-import { ProductCode, CategoryMapping, TypeMapping, ProductCodeStats } from '../types/productCode';
-import { categoryMappings, typeMappings, legacyCategoryMapping } from '../data/productCodeMappings';
+import {
+  categoryMappings,
+  legacyCategoryMapping,
+  typeMappings,
+} from "../data/productCodeMappings";
+import {
+  CategoryMapping,
+  ProductCode,
+  ProductCodeStats,
+  TypeMapping,
+} from "../types/productCode";
 
 class ProductCodeService {
   private productCodes: ProductCode[] = [];
@@ -11,9 +20,11 @@ class ProductCodeService {
 
   // Inicjalizacja sekwencji dla istniejących kombinacji
   private initializeSequences(): void {
-    categoryMappings.forEach(category => {
-      const categoryTypes = typeMappings.filter(type => type.categoryId === category.id);
-      categoryTypes.forEach(type => {
+    categoryMappings.forEach((category) => {
+      const categoryTypes = typeMappings.filter(
+        (type) => type.categoryId === category.id
+      );
+      categoryTypes.forEach((type) => {
         const key = `${category.code}-${type.code}`;
         this.codeSequences.set(key, 0);
       });
@@ -22,15 +33,17 @@ class ProductCodeService {
 
   // Generowanie nowego kodu produktu
   async generateCode(categoryId: string, typeId?: string): Promise<string> {
-    const category = categoryMappings.find(c => c.id === categoryId);
+    const category = categoryMappings.find((c) => c.id === categoryId);
     if (!category) {
       throw new Error(`Nieznana kategoria: ${categoryId}`);
     }
 
     let type: TypeMapping | undefined;
-    
+
     if (typeId) {
-      type = typeMappings.find(t => t.id === typeId && t.categoryId === categoryId);
+      type = typeMappings.find(
+        (t) => t.id === typeId && t.categoryId === categoryId
+      );
       if (!type) {
         throw new Error(`Nieznany typ: ${typeId} dla kategorii: ${categoryId}`);
       }
@@ -38,12 +51,14 @@ class ProductCodeService {
       // Użyj domyślnego typu dla kategorii
       const legacy = legacyCategoryMapping[categoryId];
       if (legacy) {
-        type = typeMappings.find(t => t.code === legacy.typeCode && t.categoryId === categoryId);
+        type = typeMappings.find(
+          (t) => t.code === legacy.typeCode && t.categoryId === categoryId
+        );
       }
-      
+
       if (!type) {
         // Weź pierwszy dostępny typ dla kategorii
-        type = typeMappings.find(t => t.categoryId === categoryId);
+        type = typeMappings.find((t) => t.categoryId === categoryId);
       }
     }
 
@@ -51,11 +66,20 @@ class ProductCodeService {
       throw new Error(`Brak dostępnych typów dla kategorii: ${categoryId}`);
     }
 
-    const sequenceNumber = await this.getNextSequenceNumber(category.code, type.code);
-    const code = `${category.code}-${type.code}-${sequenceNumber.toString().padStart(3, '0')}`;
+    const sequenceNumber = await this.getNextSequenceNumber(
+      category.code,
+      type.code
+    );
+    const code = `${category.code}-${type.code}-${sequenceNumber
+      .toString()
+      .padStart(3, "0")}`;
 
-    // Sprawdź unikalność
-    if (this.productCodes.some(pc => pc.code === code)) {
+    // Sprawdź unikalność (case-insensitive)
+    if (
+      this.productCodes.some(
+        (pc) => pc.code.toLowerCase() === code.toLowerCase()
+      )
+    ) {
       throw new Error(`Kod ${code} już istnieje`);
     }
 
@@ -63,20 +87,27 @@ class ProductCodeService {
   }
 
   // Pobieranie następnego numeru sekwencyjnego
-  async getNextSequenceNumber(categoryCode: string, typeCode: string): Promise<number> {
+  async getNextSequenceNumber(
+    categoryCode: string,
+    typeCode: string
+  ): Promise<number> {
     const key = `${categoryCode}-${typeCode}`;
     const currentSequence = this.codeSequences.get(key) || 0;
     const nextSequence = currentSequence + 1;
-    
+
     this.codeSequences.set(key, nextSequence);
     return nextSequence;
   }
 
   // Rejestracja nowego kodu produktu
-  async registerProductCode(productId: string, categoryId: string, typeId?: string): Promise<ProductCode> {
+  async registerProductCode(
+    productId: string,
+    categoryId: string,
+    typeId?: string
+  ): Promise<ProductCode> {
     const code = await this.generateCode(categoryId, typeId);
     const parsedCode = this.parseCode(code);
-    
+
     if (!parsedCode) {
       throw new Error(`Nieprawidłowy format kodu: ${code}`);
     }
@@ -89,7 +120,7 @@ class ProductCodeService {
       sequenceNumber: parsedCode.sequenceNumber,
       productId,
       createdAt: new Date().toISOString(),
-      isActive: true
+      isActive: true,
     };
 
     this.productCodes.push(productCode);
@@ -103,75 +134,93 @@ class ProductCodeService {
   }
 
   // Parsowanie kodu na komponenty
-  parseCode(code: string): { categoryCode: string; typeCode: string; sequenceNumber: number } | null {
+  parseCode(
+    code: string
+  ): { categoryCode: string; typeCode: string; sequenceNumber: number } | null {
     if (!this.validateCode(code)) {
       return null;
     }
 
-    const parts = code.split('-');
+    const parts = code.split("-");
     return {
       categoryCode: parts[0],
       typeCode: parts[1],
-      sequenceNumber: parseInt(parts[2], 10)
+      sequenceNumber: parseInt(parts[2], 10),
     };
   }
 
   // Wyszukiwanie produktu po kodzie
   findProductByCode(code: string): ProductCode | null {
-    return this.productCodes.find(pc => pc.code === code && pc.isActive) || null;
+    return (
+      this.productCodes.find(
+        (pc) => pc.code.toLowerCase() === code.toLowerCase() && pc.isActive
+      ) || null
+    );
   }
 
   // Wyszukiwanie kodów po kategorii
   findCodesByCategory(categoryCode: string): ProductCode[] {
-    return this.productCodes.filter(pc => pc.categoryCode === categoryCode && pc.isActive);
+    return this.productCodes.filter(
+      (pc) => pc.categoryCode === categoryCode && pc.isActive
+    );
   }
 
   // Wyszukiwanie kodów po typie
   findCodesByType(categoryCode: string, typeCode: string): ProductCode[] {
-    return this.productCodes.filter(pc => 
-      pc.categoryCode === categoryCode && 
-      pc.typeCode === typeCode && 
-      pc.isActive
+    return this.productCodes.filter(
+      (pc) =>
+        pc.categoryCode === categoryCode &&
+        pc.typeCode === typeCode &&
+        pc.isActive
     );
   }
 
   // Generowanie aliasu URL
   generateUrlAlias(code: string, productTitle?: string): string {
     const baseAlias = code.toLowerCase();
-    
+
     if (productTitle) {
       const titleSlug = productTitle
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
         .trim();
-      
+
       return `${baseAlias}-${titleSlug}`;
     }
-    
+
     return baseAlias;
   }
 
   // Aktualizacja kodu produktu (tylko dla administratorów)
-  async updateProductCode(productId: string, newCode: string): Promise<boolean> {
+  async updateProductCode(
+    productId: string,
+    newCode: string
+  ): Promise<boolean> {
     if (!this.validateCode(newCode)) {
-      throw new Error('Nieprawidłowy format kodu');
+      throw new Error("Nieprawidłowy format kodu");
     }
 
-    const existingCode = this.productCodes.find(pc => pc.code === newCode && pc.productId !== productId);
+    const existingCode = this.productCodes.find(
+      (pc) =>
+        pc.code.toLowerCase() === newCode.toLowerCase() &&
+        pc.productId !== productId
+    );
     if (existingCode) {
-      throw new Error('Kod już istnieje dla innego produktu');
+      throw new Error("Kod już istnieje dla innego produktu");
     }
 
-    const productCodeIndex = this.productCodes.findIndex(pc => pc.productId === productId);
+    const productCodeIndex = this.productCodes.findIndex(
+      (pc) => pc.productId === productId
+    );
     if (productCodeIndex === -1) {
-      throw new Error('Nie znaleziono kodu dla produktu');
+      throw new Error("Nie znaleziono kodu dla produktu");
     }
 
     const parsedCode = this.parseCode(newCode);
     if (!parsedCode) {
-      throw new Error('Błąd parsowania kodu');
+      throw new Error("Błąd parsowania kodu");
     }
 
     this.productCodes[productCodeIndex] = {
@@ -179,7 +228,7 @@ class ProductCodeService {
       code: newCode,
       categoryCode: parsedCode.categoryCode,
       typeCode: parsedCode.typeCode,
-      sequenceNumber: parsedCode.sequenceNumber
+      sequenceNumber: parsedCode.sequenceNumber,
     };
 
     return true;
@@ -190,37 +239,45 @@ class ProductCodeService {
     const codesByCategory: Record<string, number> = {};
     const codesByType: Record<string, number> = {};
 
-    this.productCodes.forEach(pc => {
+    this.productCodes.forEach((pc) => {
       if (pc.isActive) {
-        codesByCategory[pc.categoryCode] = (codesByCategory[pc.categoryCode] || 0) + 1;
+        codesByCategory[pc.categoryCode] =
+          (codesByCategory[pc.categoryCode] || 0) + 1;
         const typeKey = `${pc.categoryCode}-${pc.typeCode}`;
         codesByType[typeKey] = (codesByType[typeKey] || 0) + 1;
       }
     });
 
     return {
-      totalCodes: this.productCodes.filter(pc => pc.isActive).length,
+      totalCodes: this.productCodes.filter((pc) => pc.isActive).length,
       codesByCategory,
       codesByType,
       lastGeneratedCodes: this.productCodes
-        .filter(pc => pc.isActive)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 10)
+        .filter((pc) => pc.isActive)
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        .slice(0, 10),
     };
   }
 
   // Pobieranie dostępnych kategorii
   getCategories(): CategoryMapping[] {
-    return categoryMappings.filter(c => c.isActive);
+    return categoryMappings.filter((c) => c.isActive);
   }
 
   // Pobieranie typów dla kategorii
   getTypesForCategory(categoryId: string): TypeMapping[] {
-    return typeMappings.filter(t => t.categoryId === categoryId && t.isActive);
+    return typeMappings.filter(
+      (t) => t.categoryId === categoryId && t.isActive
+    );
   }
 
   // Migracja istniejących produktów
-  async migrateExistingProducts(products: Array<{ id: string; category: string }>): Promise<void> {
+  async migrateExistingProducts(
+    products: Array<{ id: string; category: string }>
+  ): Promise<void> {
     for (const product of products) {
       try {
         await this.registerProductCode(product.id, product.category);
@@ -234,7 +291,7 @@ class ProductCodeService {
   exportCodes(): string {
     return JSON.stringify({
       productCodes: this.productCodes,
-      sequences: Array.from(this.codeSequences.entries())
+      sequences: Array.from(this.codeSequences.entries()),
     });
   }
 
@@ -244,7 +301,7 @@ class ProductCodeService {
       this.productCodes = parsed.productCodes || [];
       this.codeSequences = new Map(parsed.sequences || []);
     } catch (error) {
-      throw new Error('Błąd importu kodów produktów');
+      throw new Error("Błąd importu kodów produktów");
     }
   }
 }

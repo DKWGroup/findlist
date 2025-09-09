@@ -57,7 +57,7 @@ export const ProductPage: React.FC = () => {
 
         // If we have a urlAlias or codeOrAlias but no direct ID
         if (!id && searchParam) {
-          // Query by code or alias
+          // Query by code or alias (case-insensitive for code)
           const { data, error } = await supabase
             .from("products")
             .select(
@@ -70,7 +70,7 @@ export const ProductPage: React.FC = () => {
               product_stats(*)
             `
             )
-            .or(`code.eq.${searchParam},url_alias.eq.${searchParam}`)
+            .or(`code.ilike.${searchParam},url_alias.eq.${searchParam}`)
             .single();
 
           if (error) throw error;

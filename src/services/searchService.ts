@@ -23,7 +23,7 @@ class SearchService {
       let searchResults: any[] = [];
 
       if (isProductCodeQuery) {
-        // Wyszukiwanie po kodzie produktu
+        // Wyszukiwanie po kodzie produktu (case-insensitive, exact match)
         const { data: productsByCode, error: codeError } = await supabase
           .from("products")
           .select(
@@ -35,7 +35,7 @@ class SearchService {
             code
           `
           )
-          .ilike("code", `${query.trim()}%`)
+          .ilike("code", query.trim())
           .order("title")
           .limit(10);
 
