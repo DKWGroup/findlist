@@ -964,10 +964,13 @@ export const UserProfile: React.FC = () => {
                       <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                         {product.title}
                       </h3>
-                      <p className="text-blue-600 font-bold mb-3">
-                        {product.price.discounted?.toFixed(2)}{" "}
-                        {product.price.currency}
-                      </p>
+                      {/* Price - temporarily hidden */}
+                      {false && (
+                        <p className="text-blue-600 font-bold mb-3">
+                          {product.price.discounted?.toFixed(2)}{" "}
+                          {product.price.currency}
+                        </p>
+                      )}
                       <div className="flex gap-2">
                         <a
                           href={`/produkt/${product.id}`}

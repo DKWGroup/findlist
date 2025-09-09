@@ -357,42 +357,44 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Price Range */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Zakres cen (PLN)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Od"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      priceRange: {
-                        ...prev.priceRange,
-                        min: parseFloat(e.target.value) || 0,
-                      },
-                    }))
-                  }
-                />
-                <input
-                  type="number"
-                  placeholder="Do"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      priceRange: {
-                        ...prev.priceRange,
-                        max: parseFloat(e.target.value) || 1000,
-                      },
-                    }))
-                  }
-                />
+            {/* Price Range - temporarily hidden */}
+            {false && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Zakres cen (PLN)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Od"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        priceRange: {
+                          ...prev.priceRange,
+                          min: parseFloat(e.target.value) || 0,
+                        },
+                      }))
+                    }
+                  />
+                  <input
+                    type="number"
+                    placeholder="Do"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        priceRange: {
+                          ...prev.priceRange,
+                          max: parseFloat(e.target.value) || 1000,
+                        },
+                      }))
+                    }
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Rating */}
             <div>

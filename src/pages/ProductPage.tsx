@@ -454,60 +454,62 @@ export const ProductPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Price */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center gap-4 mb-4">
-                {product.price.discounted && (
-                  <span className="text-3xl font-bold text-blue-600">
-                    {product.price.discounted.toFixed(2)}{" "}
-                    {product.price.currency}
-                  </span>
-                )}
-                {product.price.original && product.price.discounted && (
-                  <span className="text-xl text-gray-500 line-through">
-                    {product.price.original.toFixed(2)} {product.price.currency}
-                  </span>
+            {/* Price - temporarily hidden */}
+            {false && (
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4 mb-4">
+                  {product.price.discounted && (
+                    <span className="text-3xl font-bold text-blue-600">
+                      {product.price.discounted.toFixed(2)}{" "}
+                      {product.price.currency}
+                    </span>
+                  )}
+                  {product.price.original && product.price.discounted && (
+                    <span className="text-xl text-gray-500 line-through">
+                      {product.price.original.toFixed(2)}{" "}
+                      {product.price.currency}
+                    </span>
+                  )}
+                </div>
+
+                {calculateDiscount() > 0 && (
+                  <p className="text-green-600 font-medium mb-4">
+                    Oszczędzasz{" "}
+                    {(
+                      product.price.original! - product.price.discounted!
+                    ).toFixed(2)}{" "}
+                    {product.price.currency} ({calculateDiscount()}%)
+                  </p>
                 )}
               </div>
+            )}
 
-              {calculateDiscount() > 0 && (
-                <p className="text-green-600 font-medium mb-4">
-                  Oszczędzasz{" "}
-                  {(
-                    product.price.original! - product.price.discounted!
-                  ).toFixed(2)}{" "}
-                  {product.price.currency} ({calculateDiscount()}%)
-                </p>
-              )}
-
-              {/* Affiliate Links */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">
-                  Dostępne w sklepach:
-                </h3>
-                {affiliateLinks.map(([platform, url]) => (
-                  <a
-                    key={platform}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                        <ExternalLink className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="font-medium text-gray-900 capitalize">
-                        {platform === "aliexpress"
-                          ? "AliExpress"
-                          : platform.charAt(0).toUpperCase() +
-                            platform.slice(1)}
-                      </span>
+            {/* Affiliate Links */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-900">
+                Dostępne w sklepach:
+              </h3>
+              {affiliateLinks.map(([platform, url]) => (
+                <a
+                  key={platform}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                      <ExternalLink className="h-4 w-4 text-white" />
                     </div>
-                    <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                  </a>
-                ))}
-              </div>
+                    <span className="font-medium text-gray-900 capitalize">
+                      {platform === "aliexpress"
+                        ? "AliExpress"
+                        : platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    </span>
+                  </div>
+                  <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                </a>
+              ))}
             </div>
 
             {/* Stats */}

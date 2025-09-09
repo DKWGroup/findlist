@@ -312,19 +312,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </h3>
         </Link>
 
-        {/* Price */}
-        <div className="flex items-center gap-2 mb-3">
-          {product.price.discounted && (
-            <span className="text-lg font-bold text-blue-600">
-              {product.price.discounted.toFixed(2)} {product.price.currency}
-            </span>
-          )}
-          {product.price.original && product.price.discounted && (
-            <span className="text-sm text-gray-500 line-through">
-              {product.price.original.toFixed(2)} {product.price.currency}
-            </span>
-          )}
-        </div>
+        {/* Price - temporarily hidden */}
+        {false && (
+          <div className="flex items-center gap-2 mb-3">
+            {product.price.discounted && (
+              <span className="text-lg font-bold text-blue-600">
+                {product.price.discounted.toFixed(2)} {product.price.currency}
+              </span>
+            )}
+            {product.price.original && product.price.discounted && (
+              <span className="text-sm text-gray-500 line-through">
+                {product.price.original.toFixed(2)} {product.price.currency}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Stats */}
         <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
