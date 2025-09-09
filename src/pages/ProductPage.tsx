@@ -12,7 +12,7 @@ import {
   ThumbsUp,
   TrendingUp,
 } from "lucide-react";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
@@ -134,29 +134,34 @@ export const ProductPage: React.FC = () => {
     loadProduct();
   }, [id, codeOrAlias, urlAlias, fetchedProduct, isAuthenticated, user]);
 
-  const checkWishlistStatus = useCallback(async (productId: string) => {
-    if (!isAuthenticated || !user) return;
+  const checkWishlistStatus = useCallback(
+    async (productId: string) => {
+      if (!isAuthenticated || !user) return;
 
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('wishlist')
-        .eq('id', user.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("wishlist")
+          .eq("id", user.id)
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (data?.wishlist) {
-        const wishlistArray = Array.isArray(data.wishlist) ? data.wishlist : [];
-        setIsInWishlist(wishlistArray.includes(productId));
-      } else {
+        if (data?.wishlist) {
+          const wishlistArray = Array.isArray(data.wishlist)
+            ? data.wishlist
+            : [];
+          setIsInWishlist(wishlistArray.includes(productId));
+        } else {
+          setIsInWishlist(false);
+        }
+      } catch (error) {
+        console.error("Error checking wishlist status:", error);
         setIsInWishlist(false);
       }
-    } catch (error) {
-      console.error("Error checking wishlist status:", error);
-      setIsInWishlist(false);
-    }
-  }, [isAuthenticated, user]);
+    },
+    [isAuthenticated, user]
+  );
 
   // Separate effect to check wishlist status when user or product changes
   useEffect(() => {
