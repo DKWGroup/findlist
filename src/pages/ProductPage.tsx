@@ -12,7 +12,7 @@ import {
   ThumbsUp,
   TrendingUp,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
@@ -120,13 +120,6 @@ export const ProductPage: React.FC = () => {
 
         setProduct(foundProduct);
 
-        // Check if product is in user's wishlist
-        if (isAuthenticated && user && foundProduct) {
-          const isInList =
-            (user as any).wishlist?.includes(foundProduct.id) || false;
-          setIsInWishlist(isInList);
-        }
-
         // Load reviews for the product
         if (foundProduct) {
           loadProductReviews(foundProduct.id);
@@ -140,6 +133,39 @@ export const ProductPage: React.FC = () => {
 
     loadProduct();
   }, [id, codeOrAlias, urlAlias, fetchedProduct, isAuthenticated, user]);
+
+  const checkWishlistStatus = useCallback(async (productId: string) => {
+    if (!isAuthenticated || !user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('wishlist')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.wishlist) {
+        const wishlistArray = Array.isArray(data.wishlist) ? data.wishlist : [];
+        setIsInWishlist(wishlistArray.includes(productId));
+      } else {
+        setIsInWishlist(false);
+      }
+    } catch (error) {
+      console.error("Error checking wishlist status:", error);
+      setIsInWishlist(false);
+    }
+  }, [isAuthenticated, user]);
+
+  // Separate effect to check wishlist status when user or product changes
+  useEffect(() => {
+    if (product && isAuthenticated && user) {
+      checkWishlistStatus(product.id);
+    } else {
+      setIsInWishlist(false);
+    }
+  }, [product, isAuthenticated, user, checkWishlistStatus]);
 
   const loadProductReviews = async (productId: string) => {
     try {
@@ -268,10 +294,9 @@ export const ProductPage: React.FC = () => {
     }
   };
 
-  const handleWishlistToggle = () => {
-    if (user) {
-      toggleWishlist(product.id);
-      setIsInWishlist(!isInWishlist);
+  const handleWishlistToggle = async () => {
+    if (user && product) {
+      await toggleWishlist(product.id);
     }
   };
 

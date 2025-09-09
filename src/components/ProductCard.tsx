@@ -235,10 +235,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className="block relative w-full h-full"
         >
           <LazyImage
-            src={
-              product.images?.[0] ||
-              "/images/placeholder-product.jpg"
-            }
+            src={product.images?.[0] || "/images/placeholder-product.jpg"}
             alt={product.title}
             className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
             width={400}
