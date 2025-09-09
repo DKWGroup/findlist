@@ -9,7 +9,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { isUserAdmin } from "../utils/adminUtils";
@@ -27,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const userMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 
   console.log("Header auth state:", { user, isLoading, isAuthenticated });
@@ -68,6 +69,29 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       setIsMobileSearchOpen(false);
     }
   }, [isMenuOpen]);
+
+  const handleUserMenuEnter = () => {
+    if (userMenuTimeoutRef.current) {
+      clearTimeout(userMenuTimeoutRef.current);
+      userMenuTimeoutRef.current = null;
+    }
+    setIsUserMenuOpen(true);
+  };
+
+  const handleUserMenuLeave = () => {
+    userMenuTimeoutRef.current = setTimeout(() => {
+      setIsUserMenuOpen(false);
+    }, 300); // 300ms opóźnienie
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (userMenuTimeoutRef.current) {
+        clearTimeout(userMenuTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <header className="bg-white shadow-sm border-b border-blue-100 sticky top-0 z-50">
@@ -118,11 +142,12 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
             ) : isAuthenticated && user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
-                >
+              <div
+                className="relative"
+                onMouseEnter={handleUserMenuEnter}
+                onMouseLeave={handleUserMenuLeave}
+              >
+                <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-blue-600" />
                   </div>
@@ -130,11 +155,10 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 top-full w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <Link
                       to="/profil"
                       className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
                     >
                       <User className="h-4 w-4" />
                       <span>Mój profil</span>
@@ -143,7 +167,6 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
                       <Link
                         to="/admin"
                         className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         <Shield className="h-4 w-4" />
                         <span>Panel Admin</span>
