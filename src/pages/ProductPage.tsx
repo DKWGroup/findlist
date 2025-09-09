@@ -454,38 +454,6 @@ export const ProductPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Product Code */}
-            {product.code && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Hash className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-900">
-                      Kod produktu:
-                    </span>
-                    <span className="font-mono font-bold text-blue-800">
-                      {product.code}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard(product.code || "")}
-                    className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                    title="Kopiuj kod"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </button>
-                </div>
-                {product.urlAlias && (
-                  <div className="mt-2 text-sm text-blue-700">
-                    <span className="font-medium">Link bezpośredni:</span>{" "}
-                    <span className="font-mono">
-                      {window.location.origin}/{product.urlAlias}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Price */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-4 mb-4">
