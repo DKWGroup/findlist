@@ -231,7 +231,7 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
             <button
               type="button"
               onClick={() => setShowFiltersPanel(!showFiltersPanel)}
-              className={`px-4 py-3 border-t border-b border-gray-300 transition-colors relative ${
+              className={`px-4 py-3 border border-gray-300 transition-colors relative ${
                 showFiltersPanel
                   ? "bg-blue-50 text-blue-600 border-blue-300"
                   : "bg-white text-gray-600 hover:bg-gray-50"
@@ -249,7 +249,7 @@ export const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({
           <button
             type="submit"
             disabled={!query.trim()}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-r-xl transition-colors font-medium"
+            className="px-6 py-3 border border-blue-600 bg-blue-600 hover:bg-blue-700 hover:border-blue-700 disabled:bg-blue-400 disabled:border-blue-400 text-white rounded-r-xl transition-colors font-medium"
           >
             Szukaj
           </button>
