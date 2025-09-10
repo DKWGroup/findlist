@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { BlogReviewLink } from "../components/BlogReviewLink";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
 import { generateProductSchema } from "../components/SEO/SchemaMarkup";
@@ -444,19 +445,7 @@ export const ProductPage: React.FC = () => {
                 {product.title}
               </h1>
               {product.socialLinks?.blog && (
-                <div className="mb-3">
-                  <a
-                    href={product.socialLinks.blog}
-                    className="inline-flex items-center gap-2 text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-2 rounded-lg transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="font-semibold">
-                      Przeczytaj recenzję tego produktu na blogu
-                    </span>
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </div>
+                <BlogReviewLink url={product.socialLinks.blog} />
               )}
               <p className="text-gray-600 text-lg leading-relaxed">
                 {product.description}
