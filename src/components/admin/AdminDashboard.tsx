@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePageState } from "../../hooks/usePageState";
-import { useProducts, useCategories } from "../../hooks/useProducts";
+import { useCategories, useProducts } from "../../hooks/useProducts";
 import {
   adminDashboardService,
   OverviewStats,
@@ -235,7 +235,7 @@ export const AdminDashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
+        <div className="w-64 flex-shrink-0 bg-white shadow-sm border-r border-gray-200 min-h-screen">
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               Panel Admin
@@ -247,10 +247,10 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors border ${
                       activeTab === tab.id
-                        ? "bg-blue-50 text-blue-700 border border-blue-200"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "bg-blue-50 text-blue-700 border-blue-200"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-transparent"
                     }`}
                   >
                     <IconComponent className="h-5 w-5" />
@@ -515,7 +515,8 @@ export const AdminDashboard: React.FC = () => {
                               )}
                             </td>
                             <td className="py-4 px-4 text-gray-600 capitalize">
-                              {categoryMap[product.category] || product.category}
+                              {categoryMap[product.category] ||
+                                product.category}
                             </td>
                             <td className="py-4 px-4 text-gray-900 font-medium">
                               {product.price.discounted?.toFixed(2)}{" "}
