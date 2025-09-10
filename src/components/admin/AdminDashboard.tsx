@@ -15,9 +15,9 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePageState } from "../../hooks/usePageState";
-import { useProducts } from "../../hooks/useProducts";
+import { useProducts, useCategories } from "../../hooks/useProducts";
 import {
   adminDashboardService,
   OverviewStats,
@@ -44,6 +44,36 @@ export const AdminDashboard: React.FC = () => {
   const { products: productList, refresh: refreshProducts } = useProducts({
     autoFetch: true,
   });
+
+  // Categories: fetch and map id -> real name
+  const { categories: categoryRows } = useCategories();
+  const categoryMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (categoryRows || []).forEach((c: any) => {
+      if (c?.id) map[c.id] = c.name || c.code || c.id;
+    });
+    return map;
+  }, [categoryRows]);
+
+  // Build category options: only categories that are used by products, and dedupe by name
+  const validCategoryIds = useMemo(() => {
+    return new Set(productList.map((p: Product) => p.category).filter(Boolean));
+  }, [productList]);
+
+  const categoryOptions = useMemo(() => {
+    const seenNames = new Set<string>();
+    const options: { id: string; name: string }[] = [];
+    (categoryRows || []).forEach((c: any) => {
+      if (!c?.id) return;
+      if (!validCategoryIds.has(c.id)) return; // include only functional (used) categories
+      const name = (c.name || c.code || c.id || "").toString();
+      const key = name.trim().toLowerCase();
+      if (seenNames.has(key)) return; // dedupe by displayed name
+      seenNames.add(key);
+      options.push({ id: c.id, name });
+    });
+    return options;
+  }, [categoryRows, validCategoryIds]);
 
   // Live overview state
   const [overviewStats, setOverviewStats] = useState<OverviewStats | null>(
@@ -154,11 +184,6 @@ export const AdminDashboard: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  const categories = Array.from(
-    new Set(productList.map((p: Product) => p.category))
-  );
-
   // On mount, auto-reopen ProductForm if a draft exists (after refresh/tab restore)
   const hasCheckedDraftRef = useRef(false);
   useEffect(() => {
@@ -416,9 +441,9 @@ export const AdminDashboard: React.FC = () => {
                       className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Wszystkie kategorie</option>
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
+                      {categoryOptions.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
                         </option>
                       ))}
                     </select>
@@ -490,7 +515,7 @@ export const AdminDashboard: React.FC = () => {
                               )}
                             </td>
                             <td className="py-4 px-4 text-gray-600 capitalize">
-                              {product.category}
+                              {categoryMap[product.category] || product.category}
                             </td>
                             <td className="py-4 px-4 text-gray-900 font-medium">
                               {product.price.discounted?.toFixed(2)}{" "}
