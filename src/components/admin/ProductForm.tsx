@@ -1,14 +1,6 @@
-import {
-  Copy,
-  Hash,
-  Link as LinkIcon,
-  Plus,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
+import { Copy, Hash, Link as LinkIcon, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { categories } from "../../data/mockData";
+// import { categories } from "../../data/mockData";
 import { productCodeService } from "../../services/productCodeService";
 import { productService } from "../../services/productService";
 import { Product } from "../../types";
@@ -50,6 +42,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     socialLinks: {
       tiktok: "",
       instagram: "",
+      blog: "",
     },
     isVerified: false,
     isTrending: false,
@@ -104,6 +97,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         socialLinks: {
           tiktok: "",
           instagram: "",
+          blog: "",
         },
         isVerified: false,
         isTrending: false,
@@ -885,11 +879,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       TikTok
                     </label>
                     <input
                       type="url"
+                      className="w-full border rounded-lg p-2"
                       value={formData.socialLinks?.tiktok || ""}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -900,16 +895,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                           },
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       placeholder="https://tiktok.com/@user/video/..."
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Instagram
                     </label>
                     <input
                       type="url"
+                      className="w-full border rounded-lg p-2"
                       value={formData.socialLinks?.instagram || ""}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -920,9 +915,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                           },
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       placeholder="https://instagram.com/p/..."
                     />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Link do recenzji produktu na blogu (opcjonalnie)
+                    </label>
+                    <input
+                      type="url"
+                      className="w-full border rounded-lg p-2"
+                      value={formData.socialLinks?.blog || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          socialLinks: {
+                            ...prev.socialLinks!,
+                            blog: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="https://findlist.net/blog/twoja-recenzja"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Wklej URL wpisu recenzji dla tego produktu. Zostanie
+                      pokazany na stronie produktu.
+                    </p>
                   </div>
                 </div>
               </div>

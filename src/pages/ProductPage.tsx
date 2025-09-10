@@ -2,27 +2,22 @@ import {
   ArrowLeft,
   Badge,
   Calendar,
-  Copy,
   ExternalLink,
   Eye,
   Hash,
   Heart,
   Share2,
   Star,
-  ThumbsUp,
   TrendingUp,
 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
-import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
 import { generateProductSchema } from "../components/SEO/SchemaMarkup";
 import SEOHead from "../components/SEO/SEOHead";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { useProduct } from "../hooks/useProducts";
-import { useSEO } from "../hooks/useSEO";
-import { productCodeService } from "../services/productCodeService";
 import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
 
@@ -321,10 +316,9 @@ export const ProductPage: React.FC = () => {
     addReview(product.id, reviewData);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    // Można dodać toast notification
-  };
+  // const copyToClipboard = (text: string) => {
+  //   navigator.clipboard.writeText(text);
+  // };
 
   const affiliateLinks = Object.entries(product.affiliateLinks).filter(
     ([_, url]) => url
@@ -449,40 +443,28 @@ export const ProductPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {product.title}
               </h1>
+              {product.socialLinks?.blog && (
+                <div className="mb-3">
+                  <a
+                    href={product.socialLinks.blog}
+                    className="inline-flex items-center gap-2 text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-2 rounded-lg transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="font-semibold">
+                      Przeczytaj recenzję tego produktu na blogu
+                    </span>
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </div>
+              )}
               <p className="text-gray-600 text-lg leading-relaxed">
                 {product.description}
               </p>
             </div>
 
             {/* Price - temporarily hidden */}
-            {false && (
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex items-center gap-4 mb-4">
-                  {product.price.discounted && (
-                    <span className="text-3xl font-bold text-blue-600">
-                      {product.price.discounted.toFixed(2)}{" "}
-                      {product.price.currency}
-                    </span>
-                  )}
-                  {product.price.original && product.price.discounted && (
-                    <span className="text-xl text-gray-500 line-through">
-                      {product.price.original.toFixed(2)}{" "}
-                      {product.price.currency}
-                    </span>
-                  )}
-                </div>
-
-                {calculateDiscount() > 0 && (
-                  <p className="text-green-600 font-medium mb-4">
-                    Oszczędzasz{" "}
-                    {(
-                      product.price.original! - product.price.discounted!
-                    ).toFixed(2)}{" "}
-                    {product.price.currency} ({calculateDiscount()}%)
-                  </p>
-                )}
-              </div>
-            )}
+            {/* Sekcja ceny tymczasowo wyłączona */}
 
             {/* Affiliate Links */}
             <div className="space-y-3">
