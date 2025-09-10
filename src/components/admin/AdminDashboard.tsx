@@ -22,6 +22,7 @@ import {
   adminDashboardService,
   OverviewStats,
 } from "../../services/adminDashboardService";
+import { productService } from "../../services/productService";
 import { Product } from "../../types";
 import { formatCompactNumber } from "../../utils/numberFormat";
 import { BlogManagement } from "./BlogManagement";
@@ -150,9 +151,7 @@ export const AdminDashboard: React.FC = () => {
     if (window.confirm("Czy na pewno chcesz usunąć ten produkt?")) {
       setIsLoading(true);
       try {
-        // Here you would call productService.deleteProduct(productId)
-        console.log("Deleting product:", productId);
-        // For now, just refresh the products list
+        await productService.deleteProduct(productId);
         await refreshProducts();
         if (activeTab === "overview") await loadOverview();
         pageState.markAsSaved(); // Oznacz jako zapisane po udanym usunięciu
