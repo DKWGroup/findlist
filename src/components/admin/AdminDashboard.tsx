@@ -13,13 +13,17 @@ import {
   Star,
   ThumbsUp,
   Trash2,
-  TrendingUp,
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { usePageState } from "../../hooks/usePageState";
 import { useProducts } from "../../hooks/useProducts";
+import {
+  adminDashboardService,
+  OverviewStats,
+} from "../../services/adminDashboardService";
 import { Product } from "../../types";
+import { formatCompactNumber } from "../../utils/numberFormat";
 import { BlogManagement } from "./BlogManagement";
 import { ProductCodeManager } from "./ProductCodeManager";
 import { ProductForm } from "./ProductForm";
@@ -41,22 +45,43 @@ export const AdminDashboard: React.FC = () => {
     autoFetch: true,
   });
 
-  const stats = {
+  // Live overview state
+  const [overviewStats, setOverviewStats] = useState<OverviewStats | null>(
+    null
+  );
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [overviewLoading, setOverviewLoading] = useState(false);
+
+  const loadOverview = async () => {
+    setOverviewLoading(true);
+    try {
+      const [stats, recent] = await Promise.all([
+        adminDashboardService.getOverviewStats(),
+        adminDashboardService.getRecentProducts(5),
+      ]);
+      setOverviewStats(stats);
+      setRecentProducts(recent);
+    } catch (e) {
+      console.error("Failed to load overview:", e);
+    } finally {
+      setOverviewLoading(false);
+    }
+  };
+
+  const stats = overviewStats || {
     totalProducts: productList.length,
-    totalUsers: 1247,
+    totalUsers: 0,
     totalViews: productList.reduce(
-      (sum: number, p: Product) => sum + p.popularity.views,
+      (sum: number, p: Product) => sum + (p.popularity?.views || 0),
       0
     ),
     totalReviews: productList.reduce(
-      (sum: number, p: Product) => sum + p.ratings.count,
+      (sum: number, p: Product) => sum + (p.ratings?.count || 0),
       0
     ),
     trendingProducts: productList.filter((p: Product) => p.isTrending).length,
     verifiedProducts: productList.filter((p: Product) => p.isVerified).length,
   };
-
-  const recentProducts = productList.slice(0, 5);
 
   const tabs = [
     { id: "overview", label: "Przegląd", icon: BarChart3 },
@@ -99,6 +124,7 @@ export const AdminDashboard: React.FC = () => {
         console.log("Deleting product:", productId);
         // For now, just refresh the products list
         await refreshProducts();
+        if (activeTab === "overview") await loadOverview();
         pageState.markAsSaved(); // Oznacz jako zapisane po udanym usunięciu
       } catch (error) {
         console.error("Error deleting product:", error);
@@ -117,6 +143,7 @@ export const AdminDashboard: React.FC = () => {
       console.log("Saving product:", productData);
       // Just refresh the products list and close the form
       await refreshProducts();
+      if (activeTab === "overview") await loadOverview();
       setIsProductFormOpen(false);
       setSelectedProduct(null);
       pageState.markAsSaved(); // Oznacz jako zapisane po udanym zapisie
@@ -172,6 +199,13 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [productList, isProductFormOpen, pageState]);
 
+  // Load overview when tab is active
+  useEffect(() => {
+    if (activeTab === "overview") {
+      loadOverview();
+    }
+  }, [activeTab]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
@@ -218,6 +252,12 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
 
+              {overviewLoading && (
+                <div className="mb-4 text-sm text-gray-500">
+                  Odświeżam dane…
+                </div>
+              )}
+
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -230,10 +270,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <Package className="h-12 w-12 text-blue-600 bg-blue-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+12% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -246,10 +283,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <Users className="h-12 w-12 text-green-600 bg-green-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+8% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -257,15 +291,12 @@ export const AdminDashboard: React.FC = () => {
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Wyświetlenia</p>
                       <p className="text-3xl font-bold text-gray-900">
-                        {(stats.totalViews / 1000).toFixed(0)}K
+                        {formatCompactNumber(stats.totalViews)}
                       </p>
                     </div>
                     <Eye className="h-12 w-12 text-purple-600 bg-purple-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+24% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -278,10 +309,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <Star className="h-12 w-12 text-yellow-600 bg-yellow-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+18% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
               </div>
 
@@ -323,11 +351,11 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <Eye className="h-4 w-4" />
-                            {(product.popularity.views / 1000).toFixed(1)}K
+                            {formatCompactNumber(product.popularity.views)}
                           </div>
                           <div className="flex items-center gap-1">
                             <ThumbsUp className="h-4 w-4" />
-                            {(product.popularity.likes / 1000).toFixed(1)}K
+                            {formatCompactNumber(product.popularity.likes)}
                           </div>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4" />
@@ -483,7 +511,7 @@ export const AdminDashboard: React.FC = () => {
                               </div>
                             </td>
                             <td className="py-4 px-4 text-gray-600">
-                              {(product.popularity.views / 1000).toFixed(1)}K
+                              {formatCompactNumber(product.popularity.views)}
                             </td>
                             <td className="py-4 px-4">
                               <div className="flex gap-2">
