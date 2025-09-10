@@ -16,7 +16,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { usePageState } from "../../hooks/usePageState";
 import { useProducts } from "../../hooks/useProducts";
 import { Product } from "../../types";
@@ -37,12 +37,7 @@ export const AdminDashboard: React.FC = () => {
   const pageState = usePageState();
 
   // Use products hook
-  const {
-    products: productList,
-    loading: productsLoading,
-    error: productsError,
-    refresh: refreshProducts,
-  } = useProducts({
+  const { products: productList, refresh: refreshProducts } = useProducts({
     autoFetch: true,
   });
 
@@ -136,6 +131,46 @@ export const AdminDashboard: React.FC = () => {
   const categories = Array.from(
     new Set(productList.map((p: Product) => p.category))
   );
+
+  // On mount, auto-reopen ProductForm if a draft exists (after refresh/tab restore)
+  const hasCheckedDraftRef = useRef(false);
+  useEffect(() => {
+    try {
+      // Skip restore if user closed manually in this session
+      const skipRestore = sessionStorage.getItem("admin-form-restore-skip");
+      if (skipRestore === "1") return;
+
+      // Ensure we only auto-open once per mount/session
+      if (hasCheckedDraftRef.current) return;
+
+      const draftNew = localStorage.getItem("admin-product-form-draft:new");
+      const draftExistingKeys = Object.keys(localStorage).filter(
+        (k) =>
+          k.startsWith("admin-product-form-draft:") &&
+          k !== "admin-product-form-draft:new"
+      );
+
+      if (!isProductFormOpen && draftExistingKeys.length > 0) {
+        // Extract first product id from key and try to preselect product
+        const firstKey = draftExistingKeys[0];
+        const productId = firstKey.split(":")[1];
+        const prod = productList.find((p) => p.id === productId) || null;
+        setSelectedProduct(prod);
+        setIsProductFormOpen(true);
+        sessionStorage.setItem("admin-form-restore-attempted", "1");
+        pageState.markAsModified();
+        hasCheckedDraftRef.current = true;
+      } else if (!isProductFormOpen && draftNew) {
+        setSelectedProduct(null);
+        setIsProductFormOpen(true);
+        sessionStorage.setItem("admin-form-restore-attempted", "1");
+        pageState.markAsModified();
+        hasCheckedDraftRef.current = true;
+      }
+    } catch (e) {
+      // no-op
+    }
+  }, [productList, isProductFormOpen, pageState]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -523,6 +558,9 @@ export const AdminDashboard: React.FC = () => {
         product={selectedProduct}
         isOpen={isProductFormOpen}
         onClose={() => {
+          try {
+            sessionStorage.setItem("admin-form-restore-skip", "1");
+          } catch {}
           setIsProductFormOpen(false);
           setSelectedProduct(null);
         }}

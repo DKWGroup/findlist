@@ -242,16 +242,18 @@ export const useSimplifiedAuth = () => {
           setUser(session?.user ?? null);
           setIsLoading(false);
           console.log("SimplifiedAuth: Initial session loaded");
-          
+
           // Check if user is admin and update role
           if (session?.user) {
-            isUserAdmin().then(isAdmin => {
-              if (isAdmin) {
-                setUserRole("admin");
-              }
-            }).catch(err => {
-              console.error("Error checking admin status:", err);
-            });
+            isUserAdmin()
+              .then((isAdmin) => {
+                if (isAdmin) {
+                  setUserRole("admin");
+                }
+              })
+              .catch((err) => {
+                console.error("Error checking admin status:", err);
+              });
           }
         }
       } catch (err) {
@@ -271,9 +273,29 @@ export const useSimplifiedAuth = () => {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("SimplifiedAuth: Auth state change:", event);
 
-      if (mounted) {
-        setUser(session?.user ?? null);
+      if (!mounted) return;
+
+      try {
+        if (event === "SIGNED_OUT") {
+          setUser(null);
+        } else if (
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED" ||
+          event === "USER_UPDATED" ||
+          event === "PASSWORD_RECOVERY"
+        ) {
+          if (session?.user) {
+            setUser(session.user);
+          }
+          // If no session, keep previous user to avoid flicker
+        } else {
+          // For INITIAL_SESSION and other events, update only if session exists
+          if (session?.user) {
+            setUser(session.user);
+          }
+        }
         setError(null);
+      } finally {
         setIsLoading(false);
       }
     });

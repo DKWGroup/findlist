@@ -17,6 +17,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
   const [isCheckingAdmin, setIsCheckingAdmin] = React.useState(false);
   const [isCheckingSession, setIsCheckingSession] = React.useState(false);
+  const [visibilityReady, setVisibilityReady] = React.useState(true);
+  const visibilityTimerRef = React.useRef<number | null>(null);
   const location = useLocation();
 
   console.log("ProtectedRoute state:", {
@@ -78,7 +80,30 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     checkAdminStatus();
   }, [requireAdmin, isAuthenticated, user]);
 
-  if (isLoading || isCheckingSession) {
+  // Defer auth decisions briefly after tab becomes visible to avoid flicker/redirects
+  React.useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        setVisibilityReady(false);
+        if (visibilityTimerRef.current) {
+          clearTimeout(visibilityTimerRef.current);
+        }
+        visibilityTimerRef.current = window.setTimeout(() => {
+          setVisibilityReady(true);
+          visibilityTimerRef.current = null;
+        }, 200);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      if (visibilityTimerRef.current) {
+        clearTimeout(visibilityTimerRef.current);
+      }
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  if (isLoading || isCheckingSession || !visibilityReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600">

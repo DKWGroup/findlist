@@ -1,6 +1,7 @@
 import { Copy, Hash, Link as LinkIcon, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 // import { categories } from "../../data/mockData";
+import { useFormPersistence } from "../../hooks/useFormPersistence";
 import { productCodeService } from "../../services/productCodeService";
 import { productService } from "../../services/productService";
 import { Product } from "../../types";
@@ -58,55 +59,91 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
+  // Persist draft locally to avoid data loss on unexpected reload/tab switch
+  const draftKey = `admin-product-form-draft:${product?.id || "new"}`;
+  const { handleFormSubmit, clearSavedData } = useFormPersistence(
+    formData,
+    (data) => setFormData(data),
+    { key: draftKey, debounceMs: 500, clearOnSubmit: true }
+  );
+
   useEffect(() => {
     // Załaduj dostępne kategorie i typy
     const cats = productCodeService.getCategories();
     setAvailableCategories(cats);
 
+    // Try load saved draft synchronously to prevent losing user input
+    let savedDraft: Partial<Product> | null = null;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) savedDraft = JSON.parse(raw);
+    } catch {}
+
     if (product) {
-      setFormData({
+      const base = {
         ...product,
         images: product.images.length > 0 ? product.images : [],
-      });
-      setUploadedImages(product.images || []);
+      } as Partial<Product>;
+      const merged = savedDraft ? { ...base, ...savedDraft } : base;
+      setFormData(merged);
+      setUploadedImages(merged.images || []);
 
-      // Załaduj typy dla kategorii produktu
-      if (product.category) {
-        const types = productCodeService.getTypesForCategory(product.category);
+      // Załaduj typy dla kategorii (użyj kodu -> UUID jeśli możliwe)
+      const categoryCode = merged.category || product.category;
+      if (categoryCode) {
+        const catObj = cats.find((c) => c.code === categoryCode);
+        const types = catObj
+          ? productCodeService.getTypesForCategory(catObj.id)
+          : productCodeService.getTypesForCategory(categoryCode as string);
         setAvailableTypes(types);
       }
     } else {
-      // Reset form for new product
-      setFormData({
-        title: "",
-        description: "",
-        images: [],
-        category: "",
-        productType: "",
-        tags: [],
-        price: {
-          original: 0,
-          discounted: 0,
-          currency: "PLN",
-        },
-        affiliateLinks: {
-          temu: "",
-          aliexpress: "",
-          amazon: "",
-        },
-        socialLinks: {
-          tiktok: "",
-          instagram: "",
-          blog: "",
-        },
-        isVerified: false,
-        isTrending: false,
-        code: "",
-        urlAlias: "",
-      });
-      setAvailableTypes([]);
+      if (savedDraft) {
+        setFormData(savedDraft);
+        setUploadedImages(savedDraft.images || []);
+        const categoryCode = savedDraft.category;
+        if (categoryCode) {
+          const catObj = cats.find((c) => c.code === categoryCode);
+          const types = catObj
+            ? productCodeService.getTypesForCategory(catObj.id)
+            : [];
+          setAvailableTypes(types);
+        } else {
+          setAvailableTypes([]);
+        }
+      } else {
+        // Reset form for new product
+        setFormData({
+          title: "",
+          description: "",
+          images: [],
+          category: "",
+          productType: "",
+          tags: [],
+          price: {
+            original: 0,
+            discounted: 0,
+            currency: "PLN",
+          },
+          affiliateLinks: {
+            temu: "",
+            aliexpress: "",
+            amazon: "",
+          },
+          socialLinks: {
+            tiktok: "",
+            instagram: "",
+            blog: "",
+          },
+          isVerified: false,
+          isTrending: false,
+          code: "",
+          urlAlias: "",
+        });
+        setAvailableTypes([]);
+      }
     }
-  }, [product, isOpen]);
+  }, [product, isOpen, draftKey]);
 
   const handleImageUpload = (urls: string[]) => {
     const newImages = [...uploadedImages, ...urls];
@@ -295,6 +332,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     console.log("🧹 Cleaned data prepared:", cleanedData);
     console.log("🖼️ Images to be saved:", uploadedImages);
 
+    // Clear saved draft (we're submitting)
+    handleFormSubmit();
+
     // Save to database
     saveProductToDatabase(cleanedData);
   };
@@ -395,18 +435,45 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }));
   };
 
+  const clearForm = () => {
+    try {
+      clearSavedData();
+    } catch {}
+    const empty: Partial<Product> = {
+      title: "",
+      description: "",
+      images: [],
+      category: "",
+      productType: "",
+      tags: [],
+      price: { original: 0, discounted: 0, currency: "PLN" },
+      affiliateLinks: { temu: "", aliexpress: "", amazon: "" },
+      socialLinks: { tiktok: "", instagram: "", blog: "" },
+      isVerified: false,
+      isTrending: false,
+      code: "",
+      urlAlias: "",
+    };
+    setUploadedImages([]);
+    setAvailableTypes([]);
+    setFormData(empty);
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col min-h-0">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">
             {product ? "Edytuj produkt" : "Dodaj nowy produkt"}
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => {
+              // User cancels editing: keep draft for safety but allow manual clear below if needed
+              onClose();
+            }}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <X className="h-6 w-6 text-gray-500" />
@@ -414,8 +481,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+          <div className="flex-1 overflow-y-auto min-h-0">
             <div className="p-6 space-y-6">
               {/* Kod produktu i alias URL */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
@@ -984,15 +1051,25 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </div>
               </div>
             </div>
-
-            {/* Footer */}
           </div>
-
           {/* Footer */}
-          <div className="flex items-center justify-end gap-4 p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between gap-4 p-6 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center gap-3">
+              {!product && (
+                <button
+                  type="button"
+                  onClick={clearForm}
+                  className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Wyczyść formularz
+                </button>
+              )}
+            </div>
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+              }}
               className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Anuluj
