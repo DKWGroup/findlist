@@ -6,12 +6,12 @@ import {
   Eye,
   Hash,
   Heart,
-  Share2,
   Star,
   TrendingUp,
 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ShareButton } from "../components/actions/ShareButton";
 import { BlogReviewLink } from "../components/BlogReviewLink";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
@@ -275,26 +275,6 @@ export const ProductPage: React.FC = () => {
     return 0;
   };
 
-  const handleShare = async () => {
-    const shareUrl = product.urlAlias
-      ? `${window.location.origin}/${product.urlAlias}`
-      : window.location.href;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product.title,
-          text: product.description,
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.log("Sharing failed:", error);
-      }
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-    }
-  };
-
   const handleWishlistToggle = async () => {
     if (user && product) {
       await toggleWishlist(product.id);
@@ -365,18 +345,14 @@ export const ProductPage: React.FC = () => {
                       : "text-gray-400 group-hover:text-red-500"
                   }`}
                 />
-                <span className="text-sm font-medium">
-                  {isInWishlist ? "W wishlist" : "Dodaj do wishlist"}
-                </span>
               </button>
 
-              <button
-                onClick={handleShare}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-300 hover:border-blue-300 transition-colors"
-              >
-                <Share2 className="h-5 w-5 text-gray-400" />
-                <span className="text-sm font-medium">Udostępnij</span>
-              </button>
+              <ShareButton
+                variant="full"
+                title={product.title}
+                description={product.description}
+                urlAlias={product.urlAlias || null}
+              />
             </div>
           </div>
         </div>
