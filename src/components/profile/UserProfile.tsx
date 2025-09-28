@@ -582,29 +582,34 @@ export const UserProfile: React.FC = () => {
         </div>
 
         {/* Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="flex">
-            {tabs.map((tab) => {
-              const IconComponent = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+        <div className="px-4 sm:px-8 border-b border-gray-200">
+          {/* Zmieniono: Usunięto 'sm:justify-around', dodano 'justify-center' */}
+          <nav className="-mb-px flex justify-center overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                // Zmieniono: Usunięto 'sm:flex-1'
+                className={`group inline-flex items-center justify-center sm:gap-2 py-4 px-4 border-b-2 font-medium text-sm transition-colors flex-shrink-0 ${
+                  activeTab === tab.id
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <tab.icon
+                  className={`h-5 w-5 ${
                     activeTab === tab.id
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      ? "text-blue-600"
+                      : "text-gray-400 group-hover:text-gray-500"
                   }`}
-                >
-                  <IconComponent className="h-4 w-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
+                />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
           </nav>
         </div>
 
-        {/* Content */}
+        {/* Tab Content */}
         <div className="p-8">
           {activeTab === "profile" && (
             <div className="max-w-2xl">
