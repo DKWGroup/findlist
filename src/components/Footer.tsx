@@ -36,7 +36,7 @@ export const Footer: React.FC = () => {
             </p>
             <div className="flex space-x-4">
               <a
-                href="https://www.instagram.com/findlist_pl"
+                href="https://www.instagram.com/findlistnet"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-pink-400 transition-colors"
@@ -45,7 +45,7 @@ export const Footer: React.FC = () => {
                 <Instagram className="h-6 w-6" />
               </a>
               <a
-                href="https://www.tiktok.com/@findlist_pl"
+                href="https://www.tiktok.com/@findlist.net"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-purple-400 transition-colors"
