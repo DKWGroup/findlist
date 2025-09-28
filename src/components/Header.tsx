@@ -125,13 +125,13 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             >
               Produkty
             </Link>
-            <Link
+            {/* <Link
               to="/szukaj"
               className="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1"
             >
               <Search className="h-4 w-4" />
               Wyszukiwanie
-            </Link>
+            </Link> */}
             <Link
               to="/blog"
               className="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1"
@@ -268,14 +268,14 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
               <Package className="h-4 w-4" />
               Produkty
             </Link>
-            <Link
+            {/* <Link
               to="/search"
               className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               <Search className="h-4 w-4" />
               Wyszukiwanie
-            </Link>
+            </Link> */}
             <Link
               to="/blog"
               className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"

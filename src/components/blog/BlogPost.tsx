@@ -71,7 +71,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
       )
       .replace(
         /!\[([^\]]*)\]\(([^)]+)\)/g,
-        '<img src="$2" alt="$1" class="w-full rounded-lg my-6 shadow-sm" />'
+        '<img src="$2" alt="$1" class="block mx-auto w-full lg:max-w-lg rounded-lg my-6 shadow-sm" />'
       )
       .replace(
         /\[([^\]]+)\]\(([^)]+)\)/g,
@@ -122,7 +122,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link
             to="/blog"
             className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
@@ -196,18 +196,18 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
             </div>
           </div>
 
-          <img
+          {/* <img
             src={post.featuredImage}
             alt={post.title}
-            className="w-full aspect-video object-cover rounded-xl shadow-lg"
-          />
+            className="w-full max-h-80 object-cover rounded-xl shadow-lg"
+          /> */}
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Table of Contents Sidebar */}
           {tableOfContents.length > 0 && (
             <aside className="lg:col-span-1">
-              <div className="sticky top-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="sticky top-24 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">
                   Spis treści
                 </h3>

@@ -132,7 +132,6 @@ export const UserProfile: React.FC = () => {
       user?.id
     );
     try {
-      // Get user reviews from profile
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("reviews")
@@ -149,38 +148,35 @@ export const UserProfile: React.FC = () => {
         throw error;
       }
 
-      if (profile && profile.reviews) {
+      if (profile && profile.reviews && profile.reviews.length > 0) {
         console.log(
           "📝 [REVIEWS] Znalezione recenzje w profilu:",
           profile.reviews.length,
           "recenzji"
         );
-        console.log("📄 [REVIEWS] Surowe dane recenzji:", profile.reviews);
 
-        // Get product details for each review
         const reviewsWithProducts = await Promise.all(
-          profile.reviews.map(async (review: any, index: number) => {
+          profile.reviews.map(async (reviewId: string, index: number) => {
             console.log(
-              `🔄 [REVIEWS] Ładowanie produktu ${index + 1}/${
+              `🔄 [REVIEWS] Ładowanie danych ${index + 1}/${
                 profile.reviews.length
-              } dla recenzji:`,
-              review
+              } dla recenzji ID:`,
+              reviewId
             );
             try {
               const { data: reviewData, error: reviewError } = await supabase
                 .from("product_reviews")
-                .select("product_id, rating, comment, created_at")
-                .eq("id", review)
+                .select("id, product_id, rating, comment, created_at")
+                .eq("id", reviewId)
                 .single();
 
-              console.log(`📊 [REVIEWS] Recenzja ${index + 1}:`, reviewData);
-
-              if (!reviewData) {
+              if (reviewError || !reviewData) {
                 console.warn(
                   `⚠️ [REVIEWS] Nie znaleziono danych recenzji dla ID:`,
-                  review
+                  reviewId,
+                  reviewError
                 );
-                return { ...review, product: null };
+                return { id: reviewId, product: null };
               }
 
               const { data: product, error: productError } = await supabase
@@ -189,11 +185,6 @@ export const UserProfile: React.FC = () => {
                 .eq("id", reviewData.product_id)
                 .single();
 
-              console.log(`📊 [REVIEWS] Produkt ${index + 1}:`, {
-                product,
-                productError,
-              });
-
               if (productError) {
                 console.warn(
                   `⚠️ [REVIEWS] Nie znaleziono produktu ${reviewData.product_id}:`,
@@ -201,21 +192,36 @@ export const UserProfile: React.FC = () => {
                 );
               }
 
-              const { data: productImage, error: productImageError } =
+              // --- POPRAWKA ---
+              // Zmieniono .single() na .limit(1) aby uniknąć błędu przy wielu obrazkach
+              const { data: productImages, error: productImageError } =
                 await supabase
                   .from("product_images")
                   .select("url")
                   .eq("product_id", reviewData.product_id)
-                  .single();
+                  .order("position", { ascending: true }) // Sortuj, by dostać spójny obrazek
+                  .limit(1);
+
+              if (productImageError) {
+                console.warn(
+                  `⚠️ [REVIEWS] Błąd pobierania obrazka dla produktu ${reviewData.product_id}:`,
+                  productImageError
+                );
+              }
+
+              const imageUrl = productImages?.[0]?.url || null;
+              // --- KONIEC POPRAWKI ---
 
               const reviewWithProduct = {
-                ...reviewData,
+                id: reviewData.id,
+                rating: reviewData.rating,
+                comment: reviewData.comment,
                 dateCreated: reviewData.created_at,
                 product: product
                   ? {
                       id: product.id,
                       title: product.title,
-                      image: productImage?.url || null,
+                      image: imageUrl, // Użycie poprawnego linku
                       url: product.url_alias,
                     }
                   : null,
@@ -228,10 +234,10 @@ export const UserProfile: React.FC = () => {
               return reviewWithProduct;
             } catch (err) {
               console.error(
-                `❌ [REVIEWS] Błąd ładowania produktu dla recenzji ${review.productId}:`,
+                `❌ [REVIEWS] Błąd ładowania danych dla recenzji ${reviewId}:`,
                 err
               );
-              return review;
+              return { id: reviewId, product: null }; // Zwróć obiekt z ID, aby uniknąć błędu
             }
           })
         );
@@ -240,7 +246,7 @@ export const UserProfile: React.FC = () => {
           "✅ [REVIEWS] Wszystkie recenzje z produktami załadowane:",
           reviewsWithProducts.length
         );
-        setUserReviews(reviewsWithProducts || []);
+        setUserReviews(reviewsWithProducts.filter(Boolean) || []); // Filtruj puste wyniki
       } else {
         console.log("ℹ️ [REVIEWS] Brak recenzji w profilu użytkownika");
         setUserReviews([]);
