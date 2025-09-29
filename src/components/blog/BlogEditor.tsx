@@ -1,6 +1,7 @@
-import { Eye, Plus, Save, Star, Trash2, X } from "lucide-react";
+import { Eye, Plus, Save, Star, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { blogCategories, blogLabels } from "../../data/blogData";
+import { blogLabels } from "../../data/blogData";
+import { productService } from "../../services/productService";
 import { BlogPost } from "../../types/blog";
 import { ImageUploadZone } from "../upload/ImageUploadZone";
 
@@ -64,11 +65,121 @@ const parseContentToSections = (
   return sections;
 };
 
+const defaultSectionRatings = {
+  purpose: 5,
+  quality: 5,
+  functionality: 5,
+  price: 5,
+  conclusions: 5,
+};
+
+const defaultRatings = {
+  quality: 0,
+  priceQuality: 0,
+  functionality: 0,
+};
+
+const defaultProductLinks = {
+  temu: "",
+  aliexpress: "",
+  amazon: "",
+};
+
+const defaultProductLinkKeys = ["temu", "aliexpress", "amazon"] as const;
+
+const defaultSeo = {
+  metaTitle: "",
+  metaDescription: "",
+  keywords: [] as string[],
+};
+
+const generateTempId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `temp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const toDateTimeLocalValue = (value?: string) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (num: number) => num.toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+const fromDateTimeLocalValue = (value: string) => {
+  if (!value) return undefined;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toISOString();
+};
+
+const createInitialFormData = (post?: BlogPost): Partial<BlogPost> => ({
+  type: post?.type ?? "review",
+  title: post?.title ?? "",
+  slug: post?.slug ?? "",
+  excerpt: post?.excerpt ?? "",
+  content: post?.content ?? "",
+  featuredImage: post?.featuredImage ?? "",
+  category: post?.category ?? "",
+  tags: post?.tags ?? [],
+  labels: post?.labels ?? [],
+  isPublished: post?.isPublished ?? false,
+  isFeatured: post?.isFeatured ?? false,
+  sectionRatings: {
+    ...defaultSectionRatings,
+    ...(post?.sectionRatings ?? {}),
+  },
+  overallRating: post?.overallRating ?? 5,
+  pros: post?.pros ?? [],
+  cons: post?.cons ?? [],
+  notForWho: post?.notForWho ?? "",
+  productLinks: {
+    ...defaultProductLinks,
+    ...(post?.productLinks ?? {}),
+  },
+  tiktokVideo: post?.tiktokVideo ?? "",
+  productId: post?.productId ?? "",
+  ratings: {
+    ...defaultRatings,
+    ...(post?.ratings ?? {}),
+  },
+  seo: {
+    ...defaultSeo,
+    ...(post?.seo ?? {}),
+    keywords: [...(post?.seo?.keywords ?? [])],
+  },
+  products: post?.products ?? [],
+  scamReason: post?.scamReason ?? "",
+  originalProductLink: post?.originalProductLink ?? "",
+  publishedAt: post?.publishedAt,
+  updatedAt: post?.updatedAt,
+  author: post?.author,
+  id: post?.id,
+});
+
+type CollectionProduct = NonNullable<BlogPost["products"]>[number];
+
+const createEmptyCollectionProduct = (): CollectionProduct => ({
+  id: generateTempId(),
+  title: "",
+  image: "",
+  description: "",
+  reviewLink: "",
+  shopLink: "",
+  tiktokLink: "",
+});
+
 interface BlogEditorProps {
   post?: BlogPost;
   onSave: (post: Partial<BlogPost>) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  // Usunięto: categories: ProductCategory[];
 }
 
 export const BlogEditor: React.FC<BlogEditorProps> = ({
@@ -76,36 +187,14 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
   onSave,
   onCancel,
   isLoading = false,
+  // Usunięto: categories,
 }) => {
-  const [formData, setFormData] = useState<Partial<BlogPost>>({
-    type: "review",
-    title: "",
-    excerpt: "",
-    featuredImage: "",
-    category: "",
-    tags: [],
-    labels: [],
-    isPublished: false,
-    isFeatured: false,
-    sectionRatings: {
-      purpose: 5,
-      quality: 5,
-      functionality: 5,
-      price: 5,
-      conclusions: 5,
-    },
-    overallRating: 5,
-    pros: "",
-    cons: "",
-    notForWho: "",
-    productLinks: {
-      temu: "",
-      aliexpress: "",
-      amazon: "",
-    },
-    tiktokVideo: "",
-    ...post,
-  });
+  const [formData, setFormData] = useState<Partial<BlogPost>>(() =>
+    createInitialFormData(post)
+  );
+
+  // Nowy stan dla nazw kategorii
+  const [categoryNames, setCategoryNames] = useState<string[]>([]);
 
   // Stan dla treści poszczególnych sekcji
   const [sectionContent, setSectionContent] = useState<Record<string, string>>(
@@ -116,6 +205,39 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
   const [previewMode, setPreviewMode] = useState(false);
   const [uploadedFeaturedImage, setUploadedFeaturedImage] =
     useState<string>("");
+  const [keywordsInput, setKeywordsInput] = useState(() =>
+    (post?.seo?.keywords ?? []).join(", ")
+  );
+  const [newProductLink, setNewProductLink] = useState({
+    platform: "",
+    url: "",
+  });
+  const [newRatingKey, setNewRatingKey] = useState("");
+
+  // Pobieranie nazw kategorii przy pierwszym renderowaniu
+  useEffect(() => {
+    const fetchCategoryNames = async () => {
+      try {
+        const names = await productService.getCategoryNames();
+        const uniqueNames = Array.from(
+          new Map(
+            names.map((name) => [name.trim().toLowerCase(), name.trim()])
+          ).values()
+        );
+        setCategoryNames(uniqueNames);
+      } catch (error) {
+        console.error("Nie udało się załadować nazw kategorii:", error);
+      }
+    };
+    fetchCategoryNames();
+  }, []);
+
+  useEffect(() => {
+    setFormData(createInitialFormData(post));
+    setSectionContent(parseContentToSections(post?.content));
+    setKeywordsInput((post?.seo?.keywords ?? []).join(", "));
+    setUploadedFeaturedImage("");
+  }, [post]);
 
   const handleFeaturedImageUpload = (urls: string[]) => {
     if (urls.length > 0) {
@@ -136,13 +258,70 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const slug =
+    const generatedSlug =
       formData.title
         ?.toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         .trim() || "";
+
+    const manualSlug = formData.slug?.trim();
+    const slug =
+      manualSlug && manualSlug.length > 0 ? manualSlug : generatedSlug;
+
+    const finalContent = combineSectionsToContent();
+
+    const sanitizedProductLinksEntries = Object.entries(
+      formData.productLinks ?? {}
+    )
+      .map(([platform, url]) => [platform, url?.trim() || ""] as const)
+      .filter(([, url]) => url.length > 0);
+
+    const sanitizedProductLinks = sanitizedProductLinksEntries.length
+      ? sanitizedProductLinksEntries.reduce<Record<string, string>>(
+          (acc, [platform, url]) => {
+            acc[platform] = url;
+            return acc;
+          },
+          {}
+        )
+      : undefined;
+
+    const sanitizedRatings = Object.entries(formData.ratings ?? {}).reduce<
+      Record<string, number>
+    >((acc, [key, value]) => {
+      const numericValue =
+        typeof value === "number" ? value : parseFloat(String(value));
+      if (!Number.isNaN(numericValue)) {
+        acc[key] = numericValue;
+      }
+      return acc;
+    }, {});
+
+    const sanitizedProducts =
+      formData.products && formData.products.length > 0
+        ? formData.products
+            .map((product) => ({
+              ...product,
+              id:
+                product?.id && product.id.length > 0
+                  ? product.id
+                  : generateTempId(),
+            }))
+            .filter((product) =>
+              Boolean(
+                product.title ||
+                  product.description ||
+                  product.image ||
+                  product.shopLink ||
+                  product.reviewLink ||
+                  product.tiktokLink
+              )
+            )
+        : undefined;
+
+    const sanitizedKeywords = (formData.seo?.keywords ?? []).filter(Boolean);
 
     const postData = {
       ...formData,
@@ -151,7 +330,17 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
       publishedAt:
         formData.isPublished && !post
           ? new Date().toISOString()
-          : post?.publishedAt,
+          : formData.publishedAt,
+      content: finalContent.trim().length > 0 ? finalContent : formData.content,
+      productLinks: sanitizedProductLinks,
+      ratings:
+        Object.keys(sanitizedRatings).length > 0 ? sanitizedRatings : undefined,
+      products: sanitizedProducts,
+      seo: {
+        metaTitle: formData.seo?.metaTitle?.trim() || undefined,
+        metaDescription: formData.seo?.metaDescription?.trim() || undefined,
+        keywords: sanitizedKeywords,
+      },
     };
 
     onSave(postData);
@@ -351,6 +540,11 @@ Ostrzeżenie i rekomendacje...`;
       ...prev,
       type: newType as "review" | "collection" | "scam-alert",
       content: prev.content || getTemplateContent(newType),
+      products:
+        newType === "collection" &&
+        (!prev.products || prev.products.length === 0)
+          ? [createEmptyCollectionProduct()]
+          : prev.products,
     }));
   };
 
@@ -370,19 +564,214 @@ Ostrzeżenie i rekomendacje...`;
       .join("\n\n---\n\n");
   };
 
-  const handleSave = () => {
-    const finalContent = combineSectionsToContent();
-    const dataToSave = { ...formData, content: finalContent };
-
-    // --- DODANY LOG ---
-    console.log('[BlogEditor] Dane przygotowane do zapisu:', dataToSave);
-    // ------------------
-
-    onSave(dataToSave);
+  const handleListChange = (field: "pros" | "cons", value: string) => {
+    // Konwertuje string z textarea na tablicę stringów
+    const list = value.split("\n").filter((item) => item.trim() !== "");
+    setFormData((prev) => ({ ...prev, [field]: list }));
   };
 
+  // --- DODAJ TĘ FUNKCJĘ ---
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  // -------------------------
+
+  const handleSeoChange = (
+    field: "metaTitle" | "metaDescription",
+    value: string
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      seo: {
+        ...defaultSeo,
+        ...(prev.seo ?? {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleKeywordsChange = (value: string) => {
+    setKeywordsInput(value);
+    const keywords = value
+      .split(",")
+      .map((keyword) => keyword.trim())
+      .filter(Boolean);
+    setFormData((prev) => ({
+      ...prev,
+      seo: {
+        ...defaultSeo,
+        ...(prev.seo ?? {}),
+        keywords,
+      },
+    }));
+  };
+
+  const handleProductLinkChange = (platform: string, url: string) => {
+    setFormData((prev) => {
+      const current: Record<string, string> = {
+        ...(prev.productLinks ?? {}),
+      } as Record<string, string>;
+      current[platform] = url;
+      return {
+        ...prev,
+        productLinks: current,
+      };
+    });
+  };
+
+  const handleAddProductLink = () => {
+    const platform = newProductLink.platform.trim().toLowerCase();
+    const url = newProductLink.url.trim();
+    if (!platform || !url) {
+      return;
+    }
+
+    setFormData((prev) => {
+      const current: Record<string, string> = {
+        ...(prev.productLinks ?? {}),
+      } as Record<string, string>;
+      current[platform] = url;
+      return {
+        ...prev,
+        productLinks: current,
+      };
+    });
+    setNewProductLink({ platform: "", url: "" });
+  };
+
+  const handleRemoveProductLink = (platform: string) => {
+    if (defaultProductLinkKeys.includes(platform as any)) {
+      return;
+    }
+
+    setFormData((prev) => {
+      const current: Record<string, string> = {
+        ...(prev.productLinks ?? {}),
+      } as Record<string, string>;
+      delete current[platform];
+      return {
+        ...prev,
+        productLinks: current,
+      };
+    });
+  };
+
+  const handleRatingValueChange = (ratingKey: string, value: number) => {
+    const normalized = Number.isNaN(value)
+      ? 0
+      : Math.max(0, Math.min(5, value));
+    setFormData((prev) => ({
+      ...prev,
+      ratings: {
+        ...(prev.ratings ?? {}),
+        [ratingKey]: normalized,
+      },
+    }));
+  };
+
+  const handleAddRating = () => {
+    const key = newRatingKey.trim();
+    if (!key) {
+      return;
+    }
+
+    setFormData((prev) => {
+      if (
+        prev.ratings &&
+        Object.prototype.hasOwnProperty.call(prev.ratings, key)
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        ratings: {
+          ...(prev.ratings ?? {}),
+          [key]: 0,
+        },
+      };
+    });
+    setNewRatingKey("");
+  };
+
+  const handleRemoveRating = (ratingKey: string) => {
+    if (Object.prototype.hasOwnProperty.call(defaultRatings, ratingKey)) {
+      return;
+    }
+
+    setFormData((prev) => {
+      const current = { ...(prev.ratings ?? {}) };
+      delete current[ratingKey];
+      return {
+        ...prev,
+        ratings: current,
+      };
+    });
+  };
+
+  const handleCollectionProductChange = (
+    index: number,
+    field: keyof CollectionProduct,
+    value: string
+  ) => {
+    setFormData((prev) => {
+      const products = [...(prev.products ?? [])] as CollectionProduct[];
+      const existing = products[index] ?? createEmptyCollectionProduct();
+      products[index] = {
+        ...existing,
+        [field]: value,
+      };
+      return {
+        ...prev,
+        products,
+      };
+    });
+  };
+
+  const handleAddCollectionProduct = () => {
+    setFormData((prev) => ({
+      ...prev,
+      products: [...(prev.products ?? []), createEmptyCollectionProduct()],
+    }));
+  };
+
+  const handleRemoveCollectionProduct = (index: number) => {
+    setFormData((prev) => {
+      const products = [...(prev.products ?? [])];
+      products.splice(index, 1);
+      return {
+        ...prev,
+        products,
+      };
+    });
+  };
+
+  const mergedProductLinks = {
+    ...defaultProductLinks,
+    ...(formData.productLinks ?? {}),
+  } as Record<string, string>;
+
+  const productLinkEntries = Object.entries(mergedProductLinks);
+
+  const mergedRatings = {
+    ...defaultRatings,
+    ...(formData.ratings ?? {}),
+  } as Record<string, number>;
+
+  const ratingEntries = Object.entries(mergedRatings);
+
+  const collectionProducts = (formData.products ?? []) as CollectionProduct[];
+  const isCollection = formData.type === "collection";
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -452,6 +841,24 @@ Ostrzeżenie i rekomendacje...`;
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Slug (opcjonalnie)
+                  </label>
+                  <input
+                    type="text"
+                    name="slug"
+                    value={formData.slug ?? ""}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="np. viralny-produkt-2025"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Jeśli pozostawisz puste pole, slug zostanie wygenerowany
+                    automatycznie na podstawie tytułu.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Excerpt (krótki opis)
                   </label>
                   <textarea
@@ -488,6 +895,79 @@ Ostrzeżenie i rekomendacje...`;
               </div>
             </div>
 
+            {/* Additional Info */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Parametry wpisu
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Data publikacji
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={toDateTimeLocalValue(formData.publishedAt)}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        publishedAt: fromDateTimeLocalValue(e.target.value),
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Pozostaw puste, aby ustawić datę podczas publikacji.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    TikTok video (URL)
+                  </label>
+                  <input
+                    type="url"
+                    name="tiktokVideo"
+                    value={formData.tiktokVideo || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="https://www.tiktok.com/..."
+                  />
+                </div>
+
+                {formData.type === "scam-alert" && (
+                  <>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Przyczyna scam alertu
+                      </label>
+                      <textarea
+                        name="scamReason"
+                        value={formData.scamReason || ""}
+                        onChange={handleInputChange}
+                        rows={3}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Dlaczego produkt został oznaczony jako scam?"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Oryginalny link do produktu
+                      </label>
+                      <input
+                        type="url"
+                        name="originalProductLink"
+                        value={formData.originalProductLink || ""}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
             {/* Content Editor */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -519,6 +999,20 @@ Ostrzeżenie i rekomendacje...`;
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Oceny szczegółowe
                 </h2>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    ID powiązanego produktu
+                  </label>
+                  <input
+                    type="text"
+                    name="productId"
+                    value={formData.productId || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="np. produkt-123"
+                  />
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   {Object.entries(formData.sectionRatings || {}).map(
@@ -574,40 +1068,37 @@ Ostrzeżenie i rekomendacje...`;
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Plusy (tekst ciągły)
+                      Plusy (każdy w nowej linii)
                     </label>
                     <textarea
-                      value={formData.pros}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          pros: e.target.value,
-                        }))
+                      value={
+                        Array.isArray(formData.pros)
+                          ? formData.pros.join("\n")
+                          : ""
                       }
+                      onChange={(e) => handleListChange("pros", e.target.value)}
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Opisz pozytywne aspekty w formie ciągłego tekstu..."
+                      placeholder="Każdy plus w nowej linii..."
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Minusy (tekst ciągły)
+                      Minusy (każdy w nowej linii)
                     </label>
                     <textarea
-                      value={formData.cons}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          cons: e.target.value,
-                        }))
+                      value={
+                        Array.isArray(formData.cons)
+                          ? formData.cons.join("\n")
+                          : ""
                       }
+                      onChange={(e) => handleListChange("cons", e.target.value)}
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Opisz negatywne aspekty w formie ciągłego tekstu..."
+                      placeholder="Każdy minus w nowej linii..."
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Dla kogo NIE jest ten produkt
@@ -629,25 +1120,266 @@ Ostrzeżenie i rekomendacje...`;
               </div>
             )}
 
+            {/* Additional ratings */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Dodatkowe oceny
+              </h3>
+              <div className="space-y-4">
+                {ratingEntries.map(([ratingKey, ratingValue]) => (
+                  <div
+                    key={ratingKey}
+                    className="flex flex-col gap-2 md:flex-row md:items-center"
+                  >
+                    <div className="md:w-48">
+                      <span className="text-sm font-medium text-gray-700 capitalize">
+                        {ratingKey}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        step={0.1}
+                        min={0}
+                        max={5}
+                        value={ratingValue}
+                        onChange={(e) =>
+                          handleRatingValueChange(
+                            ratingKey,
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                      <span className="text-sm text-gray-500">/ 5</span>
+                    </div>
+                    {!Object.prototype.hasOwnProperty.call(
+                      defaultRatings,
+                      ratingKey
+                    ) && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveRating(ratingKey)}
+                        className="text-sm text-red-600 hover:text-red-700"
+                      >
+                        Usuń
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-2 md:flex-row md:items-center">
+                <input
+                  type="text"
+                  value={newRatingKey}
+                  onChange={(e) => setNewRatingKey(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  placeholder="Nazwa dodatkowej oceny"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddRating}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                >
+                  Dodaj ocenę
+                </button>
+              </div>
+            </div>
+
+            {isCollection && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Produkty w kolekcji
+                </h3>
+
+                <div className="space-y-6">
+                  {collectionProducts.length === 0 && (
+                    <p className="text-sm text-gray-600">
+                      Dodaj pierwszy produkt do kolekcji, aby rozpocząć.
+                    </p>
+                  )}
+
+                  {collectionProducts.map((product, index) => (
+                    <div
+                      key={product.id || index}
+                      className="border border-gray-200 rounded-lg p-4 space-y-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold text-gray-800">
+                          Produkt #{index + 1}
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCollectionProduct(index)}
+                          className="text-sm text-red-600 hover:text-red-700"
+                        >
+                          Usuń
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            ID (opcjonalnie)
+                          </label>
+                          <input
+                            type="text"
+                            value={product.id || ""}
+                            onChange={(e) =>
+                              handleCollectionProductChange(
+                                index,
+                                "id",
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Tytuł
+                          </label>
+                          <input
+                            type="text"
+                            value={product.title}
+                            onChange={(e) =>
+                              handleCollectionProductChange(
+                                index,
+                                "title",
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder="Nazwa produktu"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Zdjęcie (URL)
+                          </label>
+                          <input
+                            type="url"
+                            value={product.image || ""}
+                            onChange={(e) =>
+                              handleCollectionProductChange(
+                                index,
+                                "image",
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder="https://..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Link do sklepu
+                          </label>
+                          <input
+                            type="url"
+                            value={product.shopLink || ""}
+                            onChange={(e) =>
+                              handleCollectionProductChange(
+                                index,
+                                "shopLink",
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder="https://..."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Link do recenzji (opcjonalnie)
+                          </label>
+                          <input
+                            type="url"
+                            value={product.reviewLink || ""}
+                            onChange={(e) =>
+                              handleCollectionProductChange(
+                                index,
+                                "reviewLink",
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder="https://..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            TikTok (opcjonalnie)
+                          </label>
+                          <input
+                            type="url"
+                            value={product.tiktokLink || ""}
+                            onChange={(e) =>
+                              handleCollectionProductChange(
+                                index,
+                                "tiktokLink",
+                                e.target.value
+                              )
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder="https://www.tiktok.com/..."
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Opis
+                        </label>
+                        <textarea
+                          value={product.description || ""}
+                          onChange={(e) =>
+                            handleCollectionProductChange(
+                              index,
+                              "description",
+                              e.target.value
+                            )
+                          }
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          placeholder="Krótki opis produktu"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddCollectionProduct}
+                  className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                >
+                  <Plus className="h-4 w-4" /> Dodaj produkt
+                </button>
+              </div>
+            )}
+
             {/* Category */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Kategoria
               </h3>
               <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    category: e.target.value,
-                  }))
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                name="category"
+                value={formData.category || ""}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Wybierz kategorię</option>
-                {blogCategories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
+                <option value="" disabled>
+                  Wybierz kategorię...
+                </option>
+                {/* Dynamicznie renderowane nazwy kategorii */}
+                {categoryNames.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
                   </option>
                 ))}
               </select>
@@ -720,73 +1452,131 @@ Ostrzeżenie i rekomendacje...`;
               </div>
             </div>
 
+            {/* SEO */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Ustawienia SEO
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Meta title
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.seo?.metaTitle || ""}
+                    onChange={(e) =>
+                      handleSeoChange("metaTitle", e.target.value)
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Tytuł wyświetlany w wynikach wyszukiwania"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Meta description
+                  </label>
+                  <textarea
+                    value={formData.seo?.metaDescription || ""}
+                    onChange={(e) =>
+                      handleSeoChange("metaDescription", e.target.value)
+                    }
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Krótki opis wpisu dla wyszukiwarek"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Słowa kluczowe (oddzielone przecinkami)
+                  </label>
+                  <input
+                    type="text"
+                    value={keywordsInput}
+                    onChange={(e) => handleKeywordsChange(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="np. viral, recenzja, trend"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Product Links */}
             {(formData.type === "review" || formData.type === "scam-alert") && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Linki do produktu
                 </h3>
+
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Temu
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.productLinks?.temu || ""}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          productLinks: {
-                            ...prev.productLinks!,
-                            temu: e.target.value,
-                          },
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      placeholder="https://temu.com/..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      AliExpress
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.productLinks?.aliexpress || ""}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          productLinks: {
-                            ...prev.productLinks!,
-                            aliexpress: e.target.value,
-                          },
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      placeholder="https://aliexpress.com/..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Amazon
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.productLinks?.amazon || ""}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          productLinks: {
-                            ...prev.productLinks!,
-                            amazon: e.target.value,
-                          },
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      placeholder="https://amazon.com/..."
-                    />
-                  </div>
+                  {productLinkEntries.map(([platform, url]) => (
+                    <div
+                      key={platform}
+                      className="flex flex-col gap-2 md:flex-row md:items-center"
+                    >
+                      <div className="md:w-40">
+                        <span className="text-sm font-medium text-gray-700 capitalize">
+                          {platform === "aliexpress" ? "AliExpress" : platform}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="url"
+                          value={url || ""}
+                          onChange={(e) =>
+                            handleProductLinkChange(platform, e.target.value)
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          placeholder="https://..."
+                        />
+                      </div>
+                      {!defaultProductLinkKeys.includes(platform as any) && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveProductLink(platform)}
+                          className="text-sm text-red-600 hover:text-red-700"
+                        >
+                          Usuń
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex flex-col gap-2 md:flex-row">
+                  <input
+                    type="text"
+                    value={newProductLink.platform}
+                    onChange={(e) =>
+                      setNewProductLink((prev) => ({
+                        ...prev,
+                        platform: e.target.value,
+                      }))
+                    }
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="Platforma (np. sklep)"
+                  />
+                  <input
+                    type="url"
+                    value={newProductLink.url}
+                    onChange={(e) =>
+                      setNewProductLink((prev) => ({
+                        ...prev,
+                        url: e.target.value,
+                      }))
+                    }
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="https://..."
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddProductLink}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                  >
+                    Dodaj link
+                  </button>
                 </div>
               </div>
             )}

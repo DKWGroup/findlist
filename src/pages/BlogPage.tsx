@@ -1,5 +1,5 @@
 import { Filter, Plus, Search } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { BlogCard } from "../components/blog/BlogCard";
 import { Layout } from "../components/Layout";
@@ -7,17 +7,50 @@ import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
 import { generateWebSiteSchema } from "../components/SEO/SchemaMarkup";
 import SEOHead from "../components/SEO/SEOHead";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
-import { blogCategories, blogLabels, blogPosts } from "../data/blogData";
+import { blogLabels } from "../data/blogData";
+import { getPosts } from "../services/blogService";
+import { getCategoryNames } from "../services/productService";
+import { BlogPost } from "../types/blog";
 
 export const BlogPage: React.FC = () => {
   const { user } = useSimplifiedAuthContext();
+
+  // 3. Stany dla danych z bazy, ładowania i błędów
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Stany dla filtrów (bez zmian)
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
 
+  // 4. Pobieranie danych przy montowaniu komponentu
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [fetchedPosts, fetchedCategories] = await Promise.all([
+          getPosts(),
+          getCategoryNames(),
+        ]);
+        setPosts(fetchedPosts);
+        setCategories(fetchedCategories);
+      } catch (err: any) {
+        setError("Nie udało się załadować danych. Spróbuj odświeżyć stronę.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBlogData();
+  }, []);
+
   const filteredPosts = useMemo(() => {
-    let filtered = [...blogPosts];
+    let filtered = [...posts]; // 5. Użycie stanu 'posts' zamiast 'blogPosts'
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -25,8 +58,9 @@ export const BlogPage: React.FC = () => {
       filtered = filtered.filter(
         (post) =>
           post.title.toLowerCase().includes(query) ||
-          post.excerpt.toLowerCase().includes(query) ||
-          post.tags.some((tag) => tag.toLowerCase().includes(query))
+          (post.excerpt && post.excerpt.toLowerCase().includes(query)) ||
+          (post.tags &&
+            post.tags.some((tag) => tag.toLowerCase().includes(query)))
       );
     }
 
@@ -43,7 +77,9 @@ export const BlogPage: React.FC = () => {
     // Filter by labels
     if (selectedLabels.length > 0) {
       filtered = filtered.filter((post) =>
-        selectedLabels.some((label) => post.labels.includes(label))
+        selectedLabels.some(
+          (label) => post.labels && post.labels.includes(label)
+        )
       );
     }
 
@@ -62,7 +98,14 @@ export const BlogPage: React.FC = () => {
     });
 
     return filtered;
-  }, [searchQuery, selectedCategory, selectedType, selectedLabels, user]);
+  }, [
+    searchQuery,
+    selectedCategory,
+    selectedType,
+    selectedLabels,
+    user,
+    posts,
+  ]); // 6. Dodanie 'posts' do zależności
 
   const toggleLabel = (labelId: string) => {
     setSelectedLabels((prev) =>
@@ -131,11 +174,12 @@ export const BlogPage: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Wszystkie kategorie</option>
-                {blogCategories.map((category) => (
+                {/* 7. Użycie stanu 'categories' zamiast 'blogCategories' */}
+                {/* {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
-                ))}
+                ))} */}
               </select>
             </div>
 
@@ -197,31 +241,44 @@ export const BlogPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Results */}
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Znaleziono {filteredPosts.length} wpisów
-          </p>
-        </div>
-
-        {/* Posts Grid */}
-        {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
-              <BlogCard key={post.id} post={post} />
-            ))}
+        {/* 8. Obsługa stanu ładowania i błędów */}
+        {isLoading ? (
+          <div className="text-center py-16">
+            <p className="text-gray-600">Ładowanie wpisów...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16 bg-red-50 rounded-lg">
+            <p className="text-red-700 font-semibold">{error}</p>
           </div>
         ) : (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📝</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Brak wpisów
-            </h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              Nie znaleziono wpisów spełniających kryteria wyszukiwania. Spróbuj
-              zmienić filtry.
-            </p>
-          </div>
+          <>
+            {/* Results */}
+            <div className="mb-6">
+              <p className="text-gray-600">
+                Znaleziono {filteredPosts.length} wpisów
+              </p>
+            </div>
+
+            {/* Posts Grid */}
+            {filteredPosts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredPosts.map((post) => (
+                  <BlogCard key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-4">📝</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Brak wpisów
+                </h3>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Nie znaleziono wpisów spełniających kryteria wyszukiwania.
+                  Spróbuj zmienić filtry.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Layout>
