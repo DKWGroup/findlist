@@ -117,11 +117,11 @@ export const AdminDashboard: React.FC = () => {
   const tabs = [
     { id: "overview", label: "Przegląd", icon: BarChart3 },
     { id: "products", label: "Produkty", icon: Package },
-    { id: "product-codes", label: "Kody produktów", icon: Hash },
+    // { id: "product-codes", label: "Kody produktów", icon: Hash },
     { id: "blog", label: "Blog", icon: BookOpen },
-    { id: "users", label: "Role użytkowników", icon: Users },
-    { id: "reviews", label: "Recenzje", icon: MessageSquare },
-    { id: "settings", label: "Ustawienia", icon: Settings },
+    // { id: "users", label: "Role użytkowników", icon: Users },
+    // { id: "reviews", label: "Recenzje", icon: MessageSquare },
+    // { id: "settings", label: "Ustawienia", icon: Settings },
   ];
 
   const filteredProducts = productList.filter((product: Product) => {
