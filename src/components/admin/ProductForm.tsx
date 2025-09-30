@@ -749,6 +749,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   onUploadError={handleImageUploadError}
                   maxFiles={5}
                   folder="products"
+                  existingCount={uploadedImages.length}
                   className="mb-4"
                 />
 
@@ -756,7 +757,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 {uploadedImages.length > 0 && (
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-3">
-                      Przesłane obrazy:
+                      Aktualne obrazy produktu:
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {uploadedImages.map((image, index) => (
