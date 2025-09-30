@@ -20,7 +20,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
     if (headings) {
       const toc = headings
         .filter((heading) => !heading.includes("Spis treści")) // Exclude manual TOC
-        .map((heading, index) => {
+        .map((heading) => {
           const level = heading.match(/^#+/)?.[0].length || 1;
           const title = heading.replace(/^#+\s+/, "");
           const id = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -41,6 +41,20 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
         }`}
       />
     ));
+  };
+
+  const normalizeListItems = (input: unknown): string[] => {
+    if (!input) return [];
+    if (Array.isArray(input)) {
+      return input.map((item) => String(item).trim()).filter(Boolean);
+    }
+    if (typeof input === "string") {
+      return input
+        .split(/\r?\n|,/) // obsługa starszych wpisów z tekstem oddzielonym przecinkiem lub nową linią
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+    return [];
   };
 
   const formatContent = (content: string) => {
@@ -87,7 +101,10 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
 
   // Process pros and cons for two-column layout
   const renderProsAndCons = () => {
-    if (!post.pros && !post.cons) return null;
+    const prosItems = normalizeListItems(post.pros);
+    const consItems = normalizeListItems(post.cons);
+
+    if (prosItems.length === 0 && consItems.length === 0) return null;
 
     return (
       <div className="mt-8 p-6 bg-gray-50 rounded-lg">
@@ -95,22 +112,30 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
           Plusy i minusy
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {post.pros && (
+          {prosItems.length > 0 && (
             <div>
               <h4 className="font-medium text-green-700 mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                 Plusy
               </h4>
-              <p className="text-gray-700 leading-relaxed">{post.pros}</p>
+              <ul className="space-y-2 list-disc list-inside text-gray-700 leading-relaxed">
+                {prosItems.map((item, index) => (
+                  <li key={`pro-${index}`}>{item}</li>
+                ))}
+              </ul>
             </div>
           )}
-          {post.cons && (
+          {consItems.length > 0 && (
             <div>
               <h4 className="font-medium text-red-700 mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                 Minusy
               </h4>
-              <p className="text-gray-700 leading-relaxed">{post.cons}</p>
+              <ul className="space-y-2 list-disc list-inside text-gray-700 leading-relaxed">
+                {consItems.map((item, index) => (
+                  <li key={`con-${index}`}>{item}</li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
@@ -196,11 +221,15 @@ export const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
             </div>
           </div>
 
-          {/* <img
-            src={post.featuredImage}
-            alt={post.title}
-            className="w-full max-h-80 object-cover rounded-xl shadow-lg"
-          /> */}
+          {post.featuredImage && (
+            <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 shadow-md">
+              <img
+                src={post.featuredImage}
+                alt={post.title}
+                className="w-full h-auto max-h-[520px] object-cover"
+              />
+            </div>
+          )}
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

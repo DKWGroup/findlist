@@ -47,6 +47,10 @@ const predefinedSections = [
   },
 ];
 
+const SECTION_DELIMITER = "\n\n---\n\n";
+
+const delimiterPattern = "\\r?\\n\\r?\\n---\\r?\\n\\r?\\n";
+
 // Funkcja do parsowania istniejącej treści na obiekt sekcji
 const parseContentToSections = (
   content: string | undefined
@@ -56,11 +60,19 @@ const parseContentToSections = (
 
   predefinedSections.forEach((sectionInfo) => {
     const regex = new RegExp(
-      `## ${sectionInfo.label}\\n\\n([\\s\\S]*?)(?=\\n\\n##|$)`,
+      `## ${sectionInfo.label}\\r?\\n\\r?\\n([\\s\\S]*?)(?=\\r?\\n\\r?\\n##|${delimiterPattern}|$)`,
       "i"
     );
     const match = content.match(regex);
-    sections[sectionInfo.id] = match ? match[1].trim() : "";
+    if (match && match[1]) {
+      const lines = match[1].replace(/\s+$/, "").split(/\r?\n/);
+      while (lines.length > 0 && lines[lines.length - 1].trim() === "---") {
+        lines.pop();
+      }
+      sections[sectionInfo.id] = lines.join("\n").trim();
+    } else {
+      sections[sectionInfo.id] = "";
+    }
   });
   return sections;
 };
@@ -213,6 +225,8 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
     url: "",
   });
   const [newRatingKey, setNewRatingKey] = useState("");
+  const [newPro, setNewPro] = useState("");
+  const [newCon, setNewCon] = useState("");
 
   // Pobieranie nazw kategorii przy pierwszym renderowaniu
   useEffect(() => {
@@ -237,6 +251,8 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
     setSectionContent(parseContentToSections(post?.content));
     setKeywordsInput((post?.seo?.keywords ?? []).join(", "));
     setUploadedFeaturedImage("");
+    setNewPro("");
+    setNewCon("");
   }, [post]);
 
   const handleFeaturedImageUpload = (urls: string[]) => {
@@ -323,6 +339,14 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
 
     const sanitizedKeywords = (formData.seo?.keywords ?? []).filter(Boolean);
 
+    const sanitizedPros = (formData.pros ?? [])
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    const sanitizedCons = (formData.cons ?? [])
+      .map((item) => item.trim())
+      .filter(Boolean);
+
     const postData = {
       ...formData,
       slug,
@@ -336,6 +360,8 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({
       ratings:
         Object.keys(sanitizedRatings).length > 0 ? sanitizedRatings : undefined,
       products: sanitizedProducts,
+      pros: sanitizedPros,
+      cons: sanitizedCons,
       seo: {
         metaTitle: formData.seo?.metaTitle?.trim() || undefined,
         metaDescription: formData.seo?.metaDescription?.trim() || undefined,
@@ -554,20 +580,81 @@ Ostrzeżenie i rekomendacje...`;
 
   // Funkcja do łączenia sekcji w jeden string przed zapisem
   const combineSectionsToContent = (): string => {
-    return predefinedSections
+    const combined = predefinedSections
       .map((sectionInfo) => {
         const content = sectionContent[sectionInfo.id] || "";
         if (!content.trim()) return ""; // Pomiń puste sekcje
         return `## ${sectionInfo.label}\n\n${content}`;
       })
       .filter(Boolean) // Usuń puste wpisy
-      .join("\n\n---\n\n");
+      .join(SECTION_DELIMITER)
+      .trim();
+
+    return combined;
   };
 
-  const handleListChange = (field: "pros" | "cons", value: string) => {
-    // Konwertuje string z textarea na tablicę stringów
-    const list = value.split("\n").filter((item) => item.trim() !== "");
-    setFormData((prev) => ({ ...prev, [field]: list }));
+  const handleProsItemChange = (index: number, value: string) => {
+    setFormData((prev) => {
+      const pros = [...(prev.pros ?? [])];
+      pros[index] = value;
+      return {
+        ...prev,
+        pros,
+      };
+    });
+  };
+
+  const handleConsItemChange = (index: number, value: string) => {
+    setFormData((prev) => {
+      const cons = [...(prev.cons ?? [])];
+      cons[index] = value;
+      return {
+        ...prev,
+        cons,
+      };
+    });
+  };
+
+  const handleAddProsItem = () => {
+    const trimmed = newPro.trim();
+    if (!trimmed) return;
+    setFormData((prev) => ({
+      ...prev,
+      pros: [...(prev.pros ?? []), trimmed],
+    }));
+    setNewPro("");
+  };
+
+  const handleAddConsItem = () => {
+    const trimmed = newCon.trim();
+    if (!trimmed) return;
+    setFormData((prev) => ({
+      ...prev,
+      cons: [...(prev.cons ?? []), trimmed],
+    }));
+    setNewCon("");
+  };
+
+  const handleRemoveProsItem = (index: number) => {
+    setFormData((prev) => {
+      const pros = [...(prev.pros ?? [])];
+      pros.splice(index, 1);
+      return {
+        ...prev,
+        pros,
+      };
+    });
+  };
+
+  const handleRemoveConsItem = (index: number) => {
+    setFormData((prev) => {
+      const cons = [...(prev.cons ?? [])];
+      cons.splice(index, 1);
+      return {
+        ...prev,
+        cons,
+      };
+    });
   };
 
   // --- DODAJ TĘ FUNKCJĘ ---
@@ -1068,39 +1155,6 @@ Ostrzeżenie i rekomendacje...`;
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Plusy (każdy w nowej linii)
-                    </label>
-                    <textarea
-                      value={
-                        Array.isArray(formData.pros)
-                          ? formData.pros.join("\n")
-                          : ""
-                      }
-                      onChange={(e) => handleListChange("pros", e.target.value)}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Każdy plus w nowej linii..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Minusy (każdy w nowej linii)
-                    </label>
-                    <textarea
-                      value={
-                        Array.isArray(formData.cons)
-                          ? formData.cons.join("\n")
-                          : ""
-                      }
-                      onChange={(e) => handleListChange("cons", e.target.value)}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Każdy minus w nowej linii..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Dla kogo NIE jest ten produkt
                     </label>
                     <textarea
@@ -1186,6 +1240,126 @@ Ostrzeżenie i rekomendacje...`;
                 </button>
               </div>
             </div>
+
+            {(formData.type === "review" || formData.type === "scam-alert") && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Plusy i minusy
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Plusy
+                    </label>
+                    <div className="space-y-3">
+                      {(formData.pros ?? []).length === 0 && (
+                        <p className="text-sm text-gray-500">
+                          Dodaj pierwszy plus, aby go wyświetlić na liście.
+                        </p>
+                      )}
+                      {(formData.pros ?? []).map((pro, index) => (
+                        <div key={`pro-${index}`} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={pro}
+                            onChange={(e) =>
+                              handleProsItemChange(index, e.target.value)
+                            }
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder={`Plus #${index + 1}`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveProsItem(index)}
+                            className="px-3 py-2 text-sm text-red-600 hover:text-red-700"
+                          >
+                            Usuń
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newPro}
+                          onChange={(e) => setNewPro(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddProsItem();
+                            }
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          placeholder="Dodaj nowy plus"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddProsItem}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                        >
+                          Dodaj
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Minusy
+                    </label>
+                    <div className="space-y-3">
+                      {(formData.cons ?? []).length === 0 && (
+                        <p className="text-sm text-gray-500">
+                          Dodaj pierwszy minus, aby go wyświetlić na liście.
+                        </p>
+                      )}
+                      {(formData.cons ?? []).map((con, index) => (
+                        <div key={`con-${index}`} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={con}
+                            onChange={(e) =>
+                              handleConsItemChange(index, e.target.value)
+                            }
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder={`Minus #${index + 1}`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveConsItem(index)}
+                            className="px-3 py-2 text-sm text-red-600 hover:text-red-700"
+                          >
+                            Usuń
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newCon}
+                          onChange={(e) => setNewCon(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddConsItem();
+                            }
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          placeholder="Dodaj nowy minus"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddConsItem}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                        >
+                          Dodaj
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isCollection && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
