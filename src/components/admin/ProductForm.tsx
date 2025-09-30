@@ -68,81 +68,102 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   );
 
   useEffect(() => {
-    // Załaduj dostępne kategorie i typy
-    const cats = productCodeService.getCategories();
-    setAvailableCategories(cats);
+    let isMounted = true;
 
-    // Try load saved draft synchronously to prevent losing user input
-    let savedDraft: Partial<Product> | null = null;
-    try {
-      const raw = localStorage.getItem(draftKey);
-      if (raw) savedDraft = JSON.parse(raw);
-    } catch {}
+    const hydrateForm = async () => {
+      try {
+        const cats = await productCodeService.loadCategories();
+        if (!isMounted) {
+          return;
+        }
 
-    if (product) {
-      const base = {
-        ...product,
-        images: product.images.length > 0 ? product.images : [],
-      } as Partial<Product>;
-      const merged = savedDraft ? { ...base, ...savedDraft } : base;
-      setFormData(merged);
-      setUploadedImages(merged.images || []);
+        setAvailableCategories(cats);
 
-      // Załaduj typy dla kategorii (użyj kodu -> UUID jeśli możliwe)
-      const categoryCode = merged.category || product.category;
-      if (categoryCode) {
-        const catObj = cats.find((c) => c.code === categoryCode);
-        const types = catObj
-          ? productCodeService.getTypesForCategory(catObj.id)
-          : productCodeService.getTypesForCategory(categoryCode as string);
-        setAvailableTypes(types);
-      }
-    } else {
-      if (savedDraft) {
-        setFormData(savedDraft);
-        setUploadedImages(savedDraft.images || []);
-        const categoryCode = savedDraft.category;
-        if (categoryCode) {
-          const catObj = cats.find((c) => c.code === categoryCode);
-          const types = catObj
-            ? productCodeService.getTypesForCategory(catObj.id)
-            : [];
-          setAvailableTypes(types);
+        // Try load saved draft synchronously to prevent losing user input
+        let savedDraft: Partial<Product> | null = null;
+        try {
+          const raw = localStorage.getItem(draftKey);
+          if (raw) savedDraft = JSON.parse(raw);
+        } catch (error) {
+          console.error("Failed to parse saved product draft:", error);
+        }
+
+        const resolveTypesForCategory = (categoryCode?: string) => {
+          if (!categoryCode) {
+            setAvailableTypes([]);
+            return;
+          }
+
+          const categoryObj =
+            cats.find((c) => c.code === categoryCode) ||
+            cats.find((c) => c.id === categoryCode);
+          if (categoryObj) {
+            setAvailableTypes(
+              productCodeService.getTypesForCategory(categoryObj.id)
+            );
+          } else {
+            setAvailableTypes(
+              productCodeService.getTypesForCategory(categoryCode as string)
+            );
+          }
+        };
+
+        if (product) {
+          const base = {
+            ...product,
+            images: product.images.length > 0 ? product.images : [],
+          } as Partial<Product>;
+          const merged = savedDraft ? { ...base, ...savedDraft } : base;
+
+          setFormData(merged);
+          setUploadedImages(merged.images || []);
+
+          const categoryCode = merged.category || product.category;
+          resolveTypesForCategory(categoryCode);
+        } else if (savedDraft) {
+          setFormData(savedDraft);
+          setUploadedImages(savedDraft.images || []);
+          resolveTypesForCategory(savedDraft.category);
         } else {
+          setFormData({
+            title: "",
+            description: "",
+            images: [],
+            category: "",
+            productType: "",
+            tags: [],
+            price: {
+              original: 0,
+              discounted: 0,
+              currency: "PLN",
+            },
+            affiliateLinks: {
+              temu: "",
+              aliexpress: "",
+              amazon: "",
+            },
+            socialLinks: {
+              tiktok: "",
+              instagram: "",
+              blog: "",
+            },
+            isVerified: false,
+            isTrending: false,
+            code: "",
+            urlAlias: "",
+          });
           setAvailableTypes([]);
         }
-      } else {
-        // Reset form for new product
-        setFormData({
-          title: "",
-          description: "",
-          images: [],
-          category: "",
-          productType: "",
-          tags: [],
-          price: {
-            original: 0,
-            discounted: 0,
-            currency: "PLN",
-          },
-          affiliateLinks: {
-            temu: "",
-            aliexpress: "",
-            amazon: "",
-          },
-          socialLinks: {
-            tiktok: "",
-            instagram: "",
-            blog: "",
-          },
-          isVerified: false,
-          isTrending: false,
-          code: "",
-          urlAlias: "",
-        });
-        setAvailableTypes([]);
+      } catch (error) {
+        console.error("Failed to load product categories:", error);
       }
-    }
+    };
+
+    hydrateForm();
+
+    return () => {
+      isMounted = false;
+    };
   }, [product, isOpen, draftKey]);
 
   const handleImageUpload = (urls: string[]) => {

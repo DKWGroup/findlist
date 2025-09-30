@@ -9,13 +9,20 @@ import {
   ProductCodeStats,
   TypeMapping,
 } from "../types/productCode";
+import { productService } from "./productService";
 
 class ProductCodeService {
   private productCodes: ProductCode[] = [];
   private codeSequences: Map<string, number> = new Map();
+  private categories: CategoryMapping[] = categoryMappings.filter(
+    (c) => c.isActive
+  );
+  private categoriesLoadedFromSupabase = false;
+  private categoriesLoadingPromise: Promise<CategoryMapping[]> | null = null;
 
   constructor() {
     this.initializeSequences();
+    this.ensureSequencesForCategories(this.categories);
   }
 
   // Inicjalizacja sekwencji dla istniejących kombinacji
@@ -31,9 +38,88 @@ class ProductCodeService {
     });
   }
 
+  private ensureSequencesForCategories(categories: CategoryMapping[]): void {
+    categories.forEach((category) => {
+      const categoryTypes = typeMappings.filter(
+        (type) => type.categoryId === category.id
+      );
+      categoryTypes.forEach((type) => {
+        const key = `${category.code}-${type.code}`;
+        if (!this.codeSequences.has(key)) {
+          this.codeSequences.set(key, 0);
+        }
+      });
+    });
+  }
+
+  private mapDatabaseCategory(record: any): CategoryMapping {
+    const fallback = categoryMappings.find((c) => c.id === record.id);
+    return {
+      id: record.id,
+      name: record.name || fallback?.name || "",
+      code: (record.code || fallback?.code || "").toUpperCase(),
+      parentId: record.parent_id ?? fallback?.parentId,
+      description: record.description || fallback?.description || "",
+      isActive: record.is_active !== false,
+    };
+  }
+
+  async loadCategories(): Promise<CategoryMapping[]> {
+    if (this.categoriesLoadedFromSupabase && this.categories.length > 0) {
+      return this.categories;
+    }
+
+    if (this.categoriesLoadingPromise) {
+      return this.categoriesLoadingPromise;
+    }
+
+    this.categoriesLoadingPromise = productService
+      .getCategories()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data
+            .filter((category) => category)
+            .map((category) => this.mapDatabaseCategory(category))
+            .filter((category) => category.isActive);
+
+          if (mapped.length > 0) {
+            this.categories = mapped;
+            this.categoriesLoadedFromSupabase = true;
+            this.ensureSequencesForCategories(this.categories);
+          }
+        }
+
+        if (!this.categories.length) {
+          this.categories = categoryMappings.filter((c) => c.isActive);
+          this.ensureSequencesForCategories(this.categories);
+        }
+
+        return this.categories;
+      })
+      .catch((error) => {
+        console.error(
+          "Failed to load product categories from Supabase, using fallback mappings:",
+          error
+        );
+
+        if (!this.categories.length) {
+          this.categories = categoryMappings.filter((c) => c.isActive);
+          this.ensureSequencesForCategories(this.categories);
+        }
+
+        return this.categories;
+      })
+      .finally(() => {
+        this.categoriesLoadingPromise = null;
+      });
+
+    return this.categoriesLoadingPromise;
+  }
+
   // Generowanie nowego kodu produktu
   async generateCode(categoryId: string, typeId?: string): Promise<string> {
-    const category = categoryMappings.find((c) => c.id === categoryId);
+    await this.loadCategories();
+    const category = this.categories.find((c) => c.id === categoryId);
     if (!category) {
       throw new Error(`Nieznana kategoria: ${categoryId}`);
     }
@@ -264,7 +350,7 @@ class ProductCodeService {
 
   // Pobieranie dostępnych kategorii
   getCategories(): CategoryMapping[] {
-    return categoryMappings.filter((c) => c.isActive);
+    return [...this.categories];
   }
 
   // Pobieranie typów dla kategorii
