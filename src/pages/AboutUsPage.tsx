@@ -67,10 +67,10 @@ export const AboutUsPage: React.FC = () => {
 
           {/* Our Mission */}
           <section className="py-16 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="items-center">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                  <h2 className="text-3xl text-center font-bold text-gray-900 mb-6">
                     Nasza misja
                   </h2>
                   <p className="text-lg text-gray-600 mb-6">
@@ -122,17 +122,6 @@ export const AboutUsPage: React.FC = () => {
                       </div>
                     </li>
                   </ul>
-                </div>
-                <div className="relative">
-                  <img
-                    src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800"
-                    alt="Zespół FINDLIST podczas pracy"
-                    className="rounded-xl shadow-lg"
-                  />
-                  <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
-                    <p className="font-bold text-blue-600">Od 2023 roku</p>
-                    <p className="text-gray-600">Pomagamy odkrywać trendy</p>
-                  </div>
                 </div>
               </div>
             </div>

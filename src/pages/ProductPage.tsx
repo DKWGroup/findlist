@@ -2,27 +2,23 @@ import {
   ArrowLeft,
   Badge,
   Calendar,
-  Copy,
   ExternalLink,
   Eye,
   Hash,
   Heart,
-  Share2,
   Star,
-  ThumbsUp,
   TrendingUp,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ShareButton } from "../components/actions/ShareButton";
+import { BlogReviewLink } from "../components/BlogReviewLink";
 import { Layout } from "../components/Layout";
 import { ProductReviews } from "../components/ProductReviews";
-import { Breadcrumbs } from "../components/SEO/Breadcrumbs";
 import { generateProductSchema } from "../components/SEO/SchemaMarkup";
 import SEOHead from "../components/SEO/SEOHead";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { useProduct } from "../hooks/useProducts";
-import { useSEO } from "../hooks/useSEO";
-import { productCodeService } from "../services/productCodeService";
 import { supabase } from "../services/supabaseStorage";
 import { Product } from "../types";
 
@@ -57,7 +53,7 @@ export const ProductPage: React.FC = () => {
 
         // If we have a urlAlias or codeOrAlias but no direct ID
         if (!id && searchParam) {
-          // Query by code or alias
+          // Query by code or alias (case-insensitive for code)
           const { data, error } = await supabase
             .from("products")
             .select(
@@ -70,7 +66,7 @@ export const ProductPage: React.FC = () => {
               product_stats(*)
             `
             )
-            .or(`code.eq.${searchParam},url_alias.eq.${searchParam}`)
+            .or(`code.ilike.${searchParam},url_alias.eq.${searchParam}`)
             .single();
 
           if (error) throw error;
@@ -120,13 +116,6 @@ export const ProductPage: React.FC = () => {
 
         setProduct(foundProduct);
 
-        // Check if product is in user's wishlist
-        if (isAuthenticated && user && foundProduct) {
-          const isInList =
-            (user as any).wishlist?.includes(foundProduct.id) || false;
-          setIsInWishlist(isInList);
-        }
-
         // Load reviews for the product
         if (foundProduct) {
           loadProductReviews(foundProduct.id);
@@ -140,6 +129,44 @@ export const ProductPage: React.FC = () => {
 
     loadProduct();
   }, [id, codeOrAlias, urlAlias, fetchedProduct, isAuthenticated, user]);
+
+  const checkWishlistStatus = useCallback(
+    async (productId: string) => {
+      if (!isAuthenticated || !user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("wishlist")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+
+        if (data?.wishlist) {
+          const wishlistArray = Array.isArray(data.wishlist)
+            ? data.wishlist
+            : [];
+          setIsInWishlist(wishlistArray.includes(productId));
+        } else {
+          setIsInWishlist(false);
+        }
+      } catch (error) {
+        console.error("Error checking wishlist status:", error);
+        setIsInWishlist(false);
+      }
+    },
+    [isAuthenticated, user]
+  );
+
+  // Separate effect to check wishlist status when user or product changes
+  useEffect(() => {
+    if (product && isAuthenticated && user) {
+      checkWishlistStatus(product.id);
+    } else {
+      setIsInWishlist(false);
+    }
+  }, [product, isAuthenticated, user, checkWishlistStatus]);
 
   const loadProductReviews = async (productId: string) => {
     try {
@@ -248,30 +275,9 @@ export const ProductPage: React.FC = () => {
     return 0;
   };
 
-  const handleShare = async () => {
-    const shareUrl = product.urlAlias
-      ? `${window.location.origin}/${product.urlAlias}`
-      : window.location.href;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product.title,
-          text: product.description,
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.log("Sharing failed:", error);
-      }
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-    }
-  };
-
-  const handleWishlistToggle = () => {
-    if (user) {
-      toggleWishlist(product.id);
-      setIsInWishlist(!isInWishlist);
+  const handleWishlistToggle = async () => {
+    if (user && product) {
+      await toggleWishlist(product.id);
     }
   };
 
@@ -291,10 +297,9 @@ export const ProductPage: React.FC = () => {
     addReview(product.id, reviewData);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    // Można dodać toast notification
-  };
+  // const copyToClipboard = (text: string) => {
+  //   navigator.clipboard.writeText(text);
+  // };
 
   const affiliateLinks = Object.entries(product.affiliateLinks).filter(
     ([_, url]) => url
@@ -340,18 +345,14 @@ export const ProductPage: React.FC = () => {
                       : "text-gray-400 group-hover:text-red-500"
                   }`}
                 />
-                <span className="text-sm font-medium">
-                  {isInWishlist ? "W wishlist" : "Dodaj do wishlist"}
-                </span>
               </button>
 
-              <button
-                onClick={handleShare}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-300 hover:border-blue-300 transition-colors"
-              >
-                <Share2 className="h-5 w-5 text-gray-400" />
-                <span className="text-sm font-medium">Udostępnij</span>
-              </button>
+              <ShareButton
+                variant="full"
+                title={product.title}
+                description={product.description}
+                urlAlias={product.urlAlias || null}
+              />
             </div>
           </div>
         </div>
@@ -419,97 +420,43 @@ export const ProductPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {product.title}
               </h1>
+              {product.socialLinks?.blog && (
+                <BlogReviewLink url={product.socialLinks.blog} />
+              )}
               <p className="text-gray-600 text-lg leading-relaxed">
                 {product.description}
               </p>
             </div>
 
-            {/* Product Code */}
-            {product.code && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Hash className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-900">
-                      Kod produktu:
-                    </span>
-                    <span className="font-mono font-bold text-blue-800">
-                      {product.code}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard(product.code || "")}
-                    className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                    title="Kopiuj kod"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </button>
-                </div>
-                {product.urlAlias && (
-                  <div className="mt-2 text-sm text-blue-700">
-                    <span className="font-medium">Link bezpośredni:</span>{" "}
-                    <span className="font-mono">
-                      {window.location.origin}/{product.urlAlias}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Price - temporarily hidden */}
+            {/* Sekcja ceny tymczasowo wyłączona */}
 
-            {/* Price */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center gap-4 mb-4">
-                {product.price.discounted && (
-                  <span className="text-3xl font-bold text-blue-600">
-                    {product.price.discounted.toFixed(2)}{" "}
-                    {product.price.currency}
-                  </span>
-                )}
-                {product.price.original && product.price.discounted && (
-                  <span className="text-xl text-gray-500 line-through">
-                    {product.price.original.toFixed(2)} {product.price.currency}
-                  </span>
-                )}
-              </div>
-
-              {calculateDiscount() > 0 && (
-                <p className="text-green-600 font-medium mb-4">
-                  Oszczędzasz{" "}
-                  {(
-                    product.price.original! - product.price.discounted!
-                  ).toFixed(2)}{" "}
-                  {product.price.currency} ({calculateDiscount()}%)
-                </p>
-              )}
-
-              {/* Affiliate Links */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">
-                  Dostępne w sklepach:
-                </h3>
-                {affiliateLinks.map(([platform, url]) => (
-                  <a
-                    key={platform}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                        <ExternalLink className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="font-medium text-gray-900 capitalize">
-                        {platform === "aliexpress"
-                          ? "AliExpress"
-                          : platform.charAt(0).toUpperCase() +
-                            platform.slice(1)}
-                      </span>
+            {/* Affiliate Links */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-900">
+                Dostępne w sklepach:
+              </h3>
+              {affiliateLinks.map(([platform, url]) => (
+                <a
+                  key={platform}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                      <ExternalLink className="h-4 w-4 text-white" />
                     </div>
-                    <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                  </a>
-                ))}
-              </div>
+                    <span className="font-medium text-gray-900 capitalize">
+                      {platform === "aliexpress"
+                        ? "AliExpress"
+                        : platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    </span>
+                  </div>
+                  <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                </a>
+              ))}
             </div>
 
             {/* Stats */}

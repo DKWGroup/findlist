@@ -20,6 +20,10 @@ export interface Product {
   socialLinks: {
     tiktok?: string;
     instagram?: string;
+    // Opcjonalny link do recenzji produktu na blogu
+    blog?: string;
+    // Dodatkowe linki platformowe w przyszłości
+    [key: string]: string | undefined;
   };
   popularity: {
     views: number;

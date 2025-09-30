@@ -1,6 +1,6 @@
 export interface BlogPost {
   id: string;
-  type: 'review' | 'collection' | 'scam-alert';
+  type: "review" | "collection" | "scam-alert";
   title: string;
   slug: string;
   excerpt: string;
@@ -9,7 +9,6 @@ export interface BlogPost {
   author: {
     id: string;
     name: string;
-    avatar?: string;
   };
   publishedAt: string;
   updatedAt: string;
@@ -33,13 +32,15 @@ export interface BlogPost {
     price: number;
     conclusions: number;
   };
-  pros?: string;
-  cons?: string;
+  pros?: string[];
+  cons?: string[];
   notForWho?: string;
+  ratings?: { [key: string]: number }; // <-- DODANE POLE
   productLinks?: {
     temu?: string;
     aliexpress?: string;
     amazon?: string;
+    [key: string]: string | undefined;
   };
   tiktokVideo?: string;
   // Collection specific fields
@@ -71,5 +72,5 @@ export interface BlogLabel {
   id: string;
   name: string;
   color: string;
-  type: 'positive' | 'negative' | 'neutral' | 'warning';
+  type: "positive" | "negative" | "neutral" | "warning";
 }

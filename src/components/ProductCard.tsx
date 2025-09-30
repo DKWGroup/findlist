@@ -66,7 +66,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.warn("AuthProvider not ready in ProductCard, using defaults");
   }
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [productStats, setProductStats] = useState<ProductStats | null>(null);
 
@@ -234,17 +233,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           to={productUrl}
           onClick={handleCardClick}
           className="block relative w-full h-full"
-          onMouseEnter={() =>
-            product.images?.length > 1 && setCurrentImageIndex(1)
-          }
-          onMouseLeave={() => setCurrentImageIndex(0)}
         >
           <LazyImage
-            src={
-              product.images?.[currentImageIndex] ||
-              product.images?.[0] ||
-              "/images/placeholder-product.jpg"
-            }
+            src={product.images?.[0] || "/images/placeholder-product.jpg"}
             alt={product.title}
             className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
             width={400}
@@ -321,19 +312,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </h3>
         </Link>
 
-        {/* Price */}
-        <div className="flex items-center gap-2 mb-3">
-          {product.price.discounted && (
-            <span className="text-lg font-bold text-blue-600">
-              {product.price.discounted.toFixed(2)} {product.price.currency}
-            </span>
-          )}
-          {product.price.original && product.price.discounted && (
-            <span className="text-sm text-gray-500 line-through">
-              {product.price.original.toFixed(2)} {product.price.currency}
-            </span>
-          )}
-        </div>
+        {/* Price - temporarily hidden */}
+        {false && (
+          <div className="flex items-center gap-2 mb-3">
+            {product.price.discounted && (
+              <span className="text-lg font-bold text-blue-600">
+                {product.price.discounted.toFixed(2)} {product.price.currency}
+              </span>
+            )}
+            {product.price.original && product.price.discounted && (
+              <span className="text-sm text-gray-500 line-through">
+                {product.price.original.toFixed(2)} {product.price.currency}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Stats */}
         <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">

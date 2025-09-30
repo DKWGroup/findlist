@@ -17,6 +17,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
   const [isCheckingAdmin, setIsCheckingAdmin] = React.useState(false);
   const [isCheckingSession, setIsCheckingSession] = React.useState(false);
+  const [hasRenderedOnce, setHasRenderedOnce] = React.useState(false);
+  const [isVisibilityTransitioning, setIsVisibilityTransitioning] =
+    React.useState(false);
+  const visibilityTimerRef = React.useRef<number | null>(null);
   const location = useLocation();
 
   console.log("ProtectedRoute state:", {
@@ -78,22 +82,58 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     checkAdminStatus();
   }, [requireAdmin, isAuthenticated, user]);
 
-  if (isLoading || isCheckingSession) {
+  // Smoothly handle tab visibility changes without unmounting children
+  React.useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        setIsVisibilityTransitioning(true);
+        if (visibilityTimerRef.current) {
+          clearTimeout(visibilityTimerRef.current);
+        }
+        visibilityTimerRef.current = window.setTimeout(() => {
+          setIsVisibilityTransitioning(false);
+          visibilityTimerRef.current = null;
+        }, 200);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      if (visibilityTimerRef.current) {
+        clearTimeout(visibilityTimerRef.current);
+      }
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  const isAwaitingAuth = isLoading || isCheckingSession;
+  const isAwaitingAdmin = requireAdmin && (isCheckingAdmin || isAdmin === null);
+
+  React.useEffect(() => {
+    if (!isAuthenticated || !user || (requireAdmin && isAdmin === false)) {
+      setHasRenderedOnce(false);
+      return;
+    }
+
+    if (!isAwaitingAuth && !isAwaitingAdmin) {
+      setHasRenderedOnce(true);
+    }
+  }, [
+    isAuthenticated,
+    user,
+    requireAdmin,
+    isAdmin,
+    isAwaitingAuth,
+    isAwaitingAdmin,
+  ]);
+
+  const shouldShowBlockingSpinner =
+    !hasRenderedOnce && (isAwaitingAuth || isAwaitingAdmin);
+
+  if (shouldShowBlockingSpinner) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600">
           <span className="sr-only">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading while checking admin status
-  if (requireAdmin && (isCheckingAdmin || isAdmin === null)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600">
-          <span className="sr-only">Checking admin permissions...</span>
         </div>
       </div>
     );
@@ -121,5 +161,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     isAdmin,
     isAuthenticated,
   });
-  return <>{children}</>;
+
+  const shouldShowOverlay =
+    hasRenderedOnce &&
+    (isAwaitingAuth || isAwaitingAdmin || isVisibilityTransitioning);
+
+  return (
+    <>
+      {children}
+      {shouldShowOverlay && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600">
+            <span className="sr-only">Wznawianie widoku…</span>
+          </div>
+        </div>
+      )}
+    </>
+  );
 };

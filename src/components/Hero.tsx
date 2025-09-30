@@ -17,7 +17,7 @@ export const Hero: React.FC = () => {
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(query)}`;
+      window.location.href = `/szukaj?q=${encodeURIComponent(query)}`;
     }
   };
 

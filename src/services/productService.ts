@@ -1,5 +1,5 @@
-import { supabase } from './supabaseStorage';
-import { Product } from '../types';
+import { Product } from "../types";
+import { supabase } from "./supabaseStorage";
 
 interface CreateProductParams {
   title: string;
@@ -34,14 +34,14 @@ class ProductService {
    */
   async createProduct(params: CreateProductParams): Promise<string> {
     try {
-      const { data, error } = await supabase.rpc('create_product', {
+      const { data, error } = await supabase.rpc("create_product", {
         p_title: params.title,
         p_description: params.description,
         p_category_id: params.categoryId,
         p_product_type: params.productType || null,
         p_price_original: params.priceOriginal || null,
         p_price_discounted: params.priceDiscounted || null,
-        p_price_currency: params.priceCurrency || 'PLN',
+        p_price_currency: params.priceCurrency || "PLN",
         p_is_verified: params.isVerified || false,
         p_is_trending: params.isTrending || false,
         p_code: params.code || null,
@@ -49,14 +49,14 @@ class ProductService {
         p_tags: params.tags,
         p_images: params.images,
         p_affiliate_links: params.affiliateLinks,
-        p_social_links: params.socialLinks
+        p_social_links: params.socialLinks,
       });
 
       if (error) throw error;
       return data;
     } catch (error: any) {
-      console.error('Error creating product:', error);
-      throw new Error(error.message || 'Failed to create product');
+      console.error("Error creating product:", error);
+      throw new Error(error.message || "Failed to create product");
     }
   }
 
@@ -65,40 +65,35 @@ class ProductService {
    */
   async getProduct(productId: string): Promise<Product> {
     try {
-      const { data, error } = await supabase.rpc('get_product_complete', {
-        p_product_id: productId
+      const { data, error } = await supabase.rpc("get_product_complete", {
+        p_product_id: productId,
       });
 
       if (error) throw error;
       return this.mapToProductModel(data);
     } catch (error: any) {
-      console.error('Error getting product:', error);
-      throw new Error(error.message || 'Failed to get product');
+      console.error("Error getting product:", error);
+      throw new Error(error.message || "Failed to get product");
     }
   }
 
   /**
    * Get all products with pagination and filtering
    */
-  async getProducts(options: {
-    page?: number;
-    limit?: number;
-    category?: string;
-    trending?: boolean;
-    search?: string;
-  } = {}): Promise<{ products: Product[]; total: number }> {
+  async getProducts(
+    options: {
+      page?: number;
+      limit?: number;
+      category?: string;
+      trending?: boolean;
+      search?: string;
+    } = {}
+  ): Promise<{ products: Product[]; total: number }> {
     try {
-      const {
-        page = 1,
-        limit = 20,
-        category,
-        trending,
-        search
-      } = options;
+      const { page = 1, limit = 20, category, trending, search } = options;
 
-      let query = supabase
-        .from('products')
-        .select(`
+      let query = supabase.from("products").select(
+        `
           *,
           product_tags(tag),
           product_images(url, position),
@@ -106,19 +101,23 @@ class ProductService {
           product_social_links(platform, url),
           product_stats(*),
           product_categories(name, code, icon)
-        `, { count: 'exact' });
+        `,
+        { count: "exact" }
+      );
 
       // Apply filters
       if (category) {
-        query = query.eq('category_id', category);
+        query = query.eq("category_id", category);
       }
 
       if (trending) {
-        query = query.eq('is_trending', true);
+        query = query.eq("is_trending", true);
       }
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,code.ilike.%${search}%`);
+        query = query.or(
+          `title.ilike.%${search}%,description.ilike.%${search}%,code.ilike.%${search}%`
+        );
       }
 
       // Apply pagination
@@ -132,52 +131,70 @@ class ProductService {
       if (error) throw error;
 
       // Map data to Product model
-      const products = data.map(item => this.mapToProductModel(item));
+      const products = data.map((item) => this.mapToProductModel(item));
 
       return {
         products,
-        total: count || 0
+        total: count || 0,
       };
     } catch (error: any) {
-      console.error('Error getting products:', error);
-      throw new Error(error.message || 'Failed to get products');
+      console.error("Error getting products:", error);
+      throw new Error(error.message || "Failed to get products");
     }
   }
 
   /**
    * Update a product
    */
-  async updateProduct(productId: string, params: Partial<CreateProductParams>): Promise<void> {
+  async updateProduct(
+    productId: string,
+    params: Partial<CreateProductParams>
+  ): Promise<void> {
     try {
       // Start a transaction
-      const { error: transactionError } = await supabase.rpc('begin_transaction');
+      const { error: transactionError } = await supabase.rpc(
+        "begin_transaction"
+      );
       if (transactionError) throw transactionError;
 
       try {
         // Update product basic info
-        if (params.title || params.description || params.categoryId || params.productType ||
-            params.priceOriginal !== undefined || params.priceDiscounted !== undefined || 
-            params.priceCurrency || params.isVerified !== undefined || 
-            params.isTrending !== undefined || params.code || params.urlAlias) {
-          
+        if (
+          params.title ||
+          params.description ||
+          params.categoryId ||
+          params.productType ||
+          params.priceOriginal !== undefined ||
+          params.priceDiscounted !== undefined ||
+          params.priceCurrency ||
+          params.isVerified !== undefined ||
+          params.isTrending !== undefined ||
+          params.code ||
+          params.urlAlias
+        ) {
           const updateData: any = {};
           if (params.title) updateData.title = params.title;
           if (params.description) updateData.description = params.description;
           if (params.categoryId) updateData.category_id = params.categoryId;
           if (params.productType) updateData.product_type = params.productType;
-          if (params.priceOriginal !== undefined) updateData.price_original = params.priceOriginal;
-          if (params.priceDiscounted !== undefined) updateData.price_discounted = params.priceDiscounted;
-          if (params.priceCurrency) updateData.price_currency = params.priceCurrency;
-          if (params.isVerified !== undefined) updateData.is_verified = params.isVerified;
-          if (params.isTrending !== undefined) updateData.is_trending = params.isTrending;
+          if (params.priceOriginal !== undefined)
+            updateData.price_original = params.priceOriginal;
+          if (params.priceDiscounted !== undefined)
+            updateData.price_discounted = params.priceDiscounted;
+          if (params.priceCurrency)
+            updateData.price_currency = params.priceCurrency;
+          if (params.isVerified !== undefined)
+            updateData.is_verified = params.isVerified;
+          if (params.isTrending !== undefined)
+            updateData.is_trending = params.isTrending;
           if (params.code) updateData.code = params.code;
           if (params.urlAlias) updateData.url_alias = params.urlAlias;
           updateData.updated_at = new Date().toISOString();
 
           const { error } = await supabase
-            .from('products')
+            .from("products")
             .update(updateData)
-            .eq('id', productId);
+            .eq("id", productId);
 
           if (error) throw error;
         }
@@ -186,20 +203,20 @@ class ProductService {
         if (params.tags) {
           // Delete existing tags
           const { error: deleteError } = await supabase
-            .from('product_tags')
+            .from("product_tags")
             .delete()
-            .eq('product_id', productId);
+            .eq("product_id", productId);
 
           if (deleteError) throw deleteError;
 
           // Insert new tags
-          const tagRows = params.tags.map(tag => ({
+          const tagRows = params.tags.map((tag) => ({
             product_id: productId,
-            tag
+            tag,
           }));
 
           const { error: insertError } = await supabase
-            .from('product_tags')
+            .from("product_tags")
             .insert(tagRows);
 
           if (insertError) throw insertError;
@@ -209,9 +226,9 @@ class ProductService {
         if (params.images) {
           // Delete existing images
           const { error: deleteError } = await supabase
-            .from('product_images')
+            .from("product_images")
             .delete()
-            .eq('product_id', productId);
+            .eq("product_id", productId);
 
           if (deleteError) throw deleteError;
 
@@ -219,11 +236,11 @@ class ProductService {
           const imageRows = params.images.map((url, index) => ({
             product_id: productId,
             url,
-            position: index
+            position: index,
           }));
 
           const { error: insertError } = await supabase
-            .from('product_images')
+            .from("product_images")
             .insert(imageRows);
 
           if (insertError) throw insertError;
@@ -233,24 +250,24 @@ class ProductService {
         if (params.affiliateLinks) {
           // Delete existing links
           const { error: deleteError } = await supabase
-            .from('product_affiliate_links')
+            .from("product_affiliate_links")
             .delete()
-            .eq('product_id', productId);
+            .eq("product_id", productId);
 
           if (deleteError) throw deleteError;
 
           // Insert new links
           const linkRows = Object.entries(params.affiliateLinks)
-            .filter(([_, url]) => url && url.trim() !== '')
+            .filter(([_, url]) => url && url.trim() !== "")
             .map(([platform, url]) => ({
               product_id: productId,
               platform,
-              url
+              url,
             }));
 
           if (linkRows.length > 0) {
             const { error: insertError } = await supabase
-              .from('product_affiliate_links')
+              .from("product_affiliate_links")
               .insert(linkRows);
 
             if (insertError) throw insertError;
@@ -261,24 +278,24 @@ class ProductService {
         if (params.socialLinks) {
           // Delete existing links
           const { error: deleteError } = await supabase
-            .from('product_social_links')
+            .from("product_social_links")
             .delete()
-            .eq('product_id', productId);
+            .eq("product_id", productId);
 
           if (deleteError) throw deleteError;
 
           // Insert new links
           const linkRows = Object.entries(params.socialLinks)
-            .filter(([_, url]) => url && url.trim() !== '')
+            .filter(([_, url]) => url && url.trim() !== "")
             .map(([platform, url]) => ({
               product_id: productId,
               platform,
-              url
+              url,
             }));
 
           if (linkRows.length > 0) {
             const { error: insertError } = await supabase
-              .from('product_social_links')
+              .from("product_social_links")
               .insert(linkRows);
 
             if (insertError) throw insertError;
@@ -286,17 +303,16 @@ class ProductService {
         }
 
         // Commit transaction
-        const { error: commitError } = await supabase.rpc('commit_transaction');
+        const { error: commitError } = await supabase.rpc("commit_transaction");
         if (commitError) throw commitError;
-
       } catch (error) {
         // Rollback transaction on error
-        await supabase.rpc('rollback_transaction');
+        await supabase.rpc("rollback_transaction");
         throw error;
       }
     } catch (error: any) {
-      console.error('Error updating product:', error);
-      throw new Error(error.message || 'Failed to update product');
+      console.error("Error updating product:", error);
+      throw new Error(error.message || "Failed to update product");
     }
   }
 
@@ -306,14 +322,14 @@ class ProductService {
   async deleteProduct(productId: string): Promise<void> {
     try {
       const { error } = await supabase
-        .from('products')
+        .from("products")
         .delete()
-        .eq('id', productId);
+        .eq("id", productId);
 
       if (error) throw error;
     } catch (error: any) {
-      console.error('Error deleting product:', error);
-      throw new Error(error.message || 'Failed to delete product');
+      console.error("Error deleting product:", error);
+      throw new Error(error.message || "Failed to delete product");
     }
   }
 
@@ -323,16 +339,35 @@ class ProductService {
   async getCategories(): Promise<any[]> {
     try {
       const { data, error } = await supabase
-        .from('product_categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
+        .from("product_categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
 
       if (error) throw error;
       return data;
     } catch (error: any) {
-      console.error('Error getting categories:', error);
-      throw new Error(error.message || 'Failed to get categories');
+      console.error("Error getting categories:", error);
+      throw new Error(error.message || "Failed to get categories");
+    }
+  }
+
+  /**
+   * Get all active product category names
+   */
+  async getCategoryNames(): Promise<string[]> {
+    try {
+      const { data, error } = await supabase
+        .from("product_categories")
+        .select("name")
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) throw error;
+      return data.map((category) => category.name);
+    } catch (error: any) {
+      console.error("Error getting category names:", error);
+      throw new Error(error.message || "Failed to get category names");
     }
   }
 
@@ -347,31 +382,37 @@ class ProductService {
       description: data.description,
       category: data.category_id || data.category,
       productType: data.product_type,
-      tags: Array.isArray(data.tags) ? data.tags : 
-            (data.product_tags ? data.product_tags.map((t: any) => t.tag) : []),
-      images: Array.isArray(data.images) ? data.images : 
-              (data.product_images ? data.product_images.map((i: any) => i.url) : []),
+      tags: Array.isArray(data.tags)
+        ? data.tags
+        : data.product_tags
+        ? data.product_tags.map((t: any) => t.tag)
+        : [],
+      images: Array.isArray(data.images)
+        ? data.images
+        : data.product_images
+        ? data.product_images.map((i: any) => i.url)
+        : [],
       price: {
         original: data.price?.original || data.price_original,
         discounted: data.price?.discounted || data.price_discounted,
-        currency: data.price?.currency || data.price_currency || 'PLN'
+        currency: data.price?.currency || data.price_currency || "PLN",
       },
       affiliateLinks: data.affiliate_links || {},
       socialLinks: data.social_links || {},
       popularity: data.popularity || {
         views: 0,
         likes: 0,
-        shares: 0
+        shares: 0,
       },
       ratings: {
         average: data.ratings?.average || 0,
-        count: data.ratings?.count || 0
+        count: data.ratings?.count || 0,
       },
       dateAdded: data.created_at,
       isVerified: data.is_verified,
       isTrending: data.is_trending,
       code: data.code,
-      urlAlias: data.url_alias
+      urlAlias: data.url_alias,
     };
 
     return product;
@@ -379,3 +420,4 @@ class ProductService {
 }
 
 export const productService = new ProductService();
+export const getCategoryNames = () => productService.getCategoryNames();

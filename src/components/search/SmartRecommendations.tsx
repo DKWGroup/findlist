@@ -1,7 +1,7 @@
 import { ArrowRight, Clock, Heart, Sparkles, TrendingUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { searchService } from "../../services/searchService";
+import searchService from "../../services/searchService";
 import { Product } from "../../types";
 import { SearchContext } from "../../types/search";
 import { LazyImage } from "../Performance/LazyImage";
@@ -248,14 +248,16 @@ export const SmartRecommendations: React.FC<SmartRecommendationsProps> = ({
                       </div>
                     )}
 
-                    {/* Price badge */}
-                    <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                      <span className="text-sm font-bold text-blue-600">
-                        {product.price.discounted?.toFixed(2) ||
-                          product.price.original?.toFixed(2)}{" "}
-                        {product.price.currency}
-                      </span>
-                    </div>
+                    {/* Price badge - temporarily hidden */}
+                    {false && (
+                      <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                        <span className="text-sm font-bold text-blue-600">
+                          {product.price.discounted?.toFixed(2) ||
+                            product.price.original?.toFixed(2)}{" "}
+                          {product.price.currency}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Content */}

@@ -13,13 +13,18 @@ import {
   Star,
   ThumbsUp,
   Trash2,
-  TrendingUp,
   Users,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePageState } from "../../hooks/usePageState";
-import { useProducts } from "../../hooks/useProducts";
+import { useCategories, useProducts } from "../../hooks/useProducts";
+import {
+  adminDashboardService,
+  OverviewStats,
+} from "../../services/adminDashboardService";
+import { productService } from "../../services/productService";
 import { Product } from "../../types";
+import { formatCompactNumber } from "../../utils/numberFormat";
 import { BlogManagement } from "./BlogManagement";
 import { ProductCodeManager } from "./ProductCodeManager";
 import { ProductForm } from "./ProductForm";
@@ -37,40 +42,86 @@ export const AdminDashboard: React.FC = () => {
   const pageState = usePageState();
 
   // Use products hook
-  const {
-    products: productList,
-    loading: productsLoading,
-    error: productsError,
-    refresh: refreshProducts,
-  } = useProducts({
+  const { products: productList, refresh: refreshProducts } = useProducts({
     autoFetch: true,
   });
 
-  const stats = {
+  // Categories: fetch and map id -> real name
+  const { categories: categoryRows } = useCategories();
+  const categoryMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (categoryRows || []).forEach((c: any) => {
+      if (c?.id) map[c.id] = c.name || c.code || c.id;
+    });
+    return map;
+  }, [categoryRows]);
+
+  // Build category options: only categories that are used by products, and dedupe by name
+  const validCategoryIds = useMemo(() => {
+    return new Set(productList.map((p: Product) => p.category).filter(Boolean));
+  }, [productList]);
+
+  const categoryOptions = useMemo(() => {
+    const seenNames = new Set<string>();
+    const options: { id: string; name: string }[] = [];
+    (categoryRows || []).forEach((c: any) => {
+      if (!c?.id) return;
+      if (!validCategoryIds.has(c.id)) return; // include only functional (used) categories
+      const name = (c.name || c.code || c.id || "").toString();
+      const key = name.trim().toLowerCase();
+      if (seenNames.has(key)) return; // dedupe by displayed name
+      seenNames.add(key);
+      options.push({ id: c.id, name });
+    });
+    return options;
+  }, [categoryRows, validCategoryIds]);
+
+  // Live overview state
+  const [overviewStats, setOverviewStats] = useState<OverviewStats | null>(
+    null
+  );
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [overviewLoading, setOverviewLoading] = useState(false);
+
+  const loadOverview = async () => {
+    setOverviewLoading(true);
+    try {
+      const [stats, recent] = await Promise.all([
+        adminDashboardService.getOverviewStats(),
+        adminDashboardService.getRecentProducts(5),
+      ]);
+      setOverviewStats(stats);
+      setRecentProducts(recent);
+    } catch (e) {
+      console.error("Failed to load overview:", e);
+    } finally {
+      setOverviewLoading(false);
+    }
+  };
+
+  const stats = overviewStats || {
     totalProducts: productList.length,
-    totalUsers: 1247,
+    totalUsers: 0,
     totalViews: productList.reduce(
-      (sum: number, p: Product) => sum + p.popularity.views,
+      (sum: number, p: Product) => sum + (p.popularity?.views || 0),
       0
     ),
     totalReviews: productList.reduce(
-      (sum: number, p: Product) => sum + p.ratings.count,
+      (sum: number, p: Product) => sum + (p.ratings?.count || 0),
       0
     ),
     trendingProducts: productList.filter((p: Product) => p.isTrending).length,
     verifiedProducts: productList.filter((p: Product) => p.isVerified).length,
   };
 
-  const recentProducts = productList.slice(0, 5);
-
   const tabs = [
     { id: "overview", label: "Przegląd", icon: BarChart3 },
     { id: "products", label: "Produkty", icon: Package },
-    { id: "product-codes", label: "Kody produktów", icon: Hash },
+    // { id: "product-codes", label: "Kody produktów", icon: Hash },
     { id: "blog", label: "Blog", icon: BookOpen },
-    { id: "users", label: "Role użytkowników", icon: Users },
-    { id: "reviews", label: "Recenzje", icon: MessageSquare },
-    { id: "settings", label: "Ustawienia", icon: Settings },
+    // { id: "users", label: "Role użytkowników", icon: Users },
+    // { id: "reviews", label: "Recenzje", icon: MessageSquare },
+    // { id: "settings", label: "Ustawienia", icon: Settings },
   ];
 
   const filteredProducts = productList.filter((product: Product) => {
@@ -100,10 +151,9 @@ export const AdminDashboard: React.FC = () => {
     if (window.confirm("Czy na pewno chcesz usunąć ten produkt?")) {
       setIsLoading(true);
       try {
-        // Here you would call productService.deleteProduct(productId)
-        console.log("Deleting product:", productId);
-        // For now, just refresh the products list
+        await productService.deleteProduct(productId);
         await refreshProducts();
+        if (activeTab === "overview") await loadOverview();
         pageState.markAsSaved(); // Oznacz jako zapisane po udanym usunięciu
       } catch (error) {
         console.error("Error deleting product:", error);
@@ -122,6 +172,7 @@ export const AdminDashboard: React.FC = () => {
       console.log("Saving product:", productData);
       // Just refresh the products list and close the form
       await refreshProducts();
+      if (activeTab === "overview") await loadOverview();
       setIsProductFormOpen(false);
       setSelectedProduct(null);
       pageState.markAsSaved(); // Oznacz jako zapisane po udanym zapisie
@@ -132,16 +183,58 @@ export const AdminDashboard: React.FC = () => {
       setIsLoading(false);
     }
   };
+  // On mount, auto-reopen ProductForm if a draft exists (after refresh/tab restore)
+  const hasCheckedDraftRef = useRef(false);
+  useEffect(() => {
+    try {
+      // Skip restore if user closed manually in this session
+      const skipRestore = sessionStorage.getItem("admin-form-restore-skip");
+      if (skipRestore === "1") return;
 
-  const categories = Array.from(
-    new Set(productList.map((p: Product) => p.category))
-  );
+      // Ensure we only auto-open once per mount/session
+      if (hasCheckedDraftRef.current) return;
+
+      const draftNew = localStorage.getItem("admin-product-form-draft:new");
+      const draftExistingKeys = Object.keys(localStorage).filter(
+        (k) =>
+          k.startsWith("admin-product-form-draft:") &&
+          k !== "admin-product-form-draft:new"
+      );
+
+      if (!isProductFormOpen && draftExistingKeys.length > 0) {
+        // Extract first product id from key and try to preselect product
+        const firstKey = draftExistingKeys[0];
+        const productId = firstKey.split(":")[1];
+        const prod = productList.find((p) => p.id === productId) || null;
+        setSelectedProduct(prod);
+        setIsProductFormOpen(true);
+        sessionStorage.setItem("admin-form-restore-attempted", "1");
+        pageState.markAsModified();
+        hasCheckedDraftRef.current = true;
+      } else if (!isProductFormOpen && draftNew) {
+        setSelectedProduct(null);
+        setIsProductFormOpen(true);
+        sessionStorage.setItem("admin-form-restore-attempted", "1");
+        pageState.markAsModified();
+        hasCheckedDraftRef.current = true;
+      }
+    } catch (e) {
+      // no-op
+    }
+  }, [productList, isProductFormOpen, pageState]);
+
+  // Load overview when tab is active
+  useEffect(() => {
+    if (activeTab === "overview") {
+      loadOverview();
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
+        <div className="w-64 flex-shrink-0 bg-white shadow-sm border-r border-gray-200 min-h-screen">
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               Panel Admin
@@ -153,10 +246,10 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors border ${
                       activeTab === tab.id
-                        ? "bg-blue-50 text-blue-700 border border-blue-200"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "bg-blue-50 text-blue-700 border-blue-200"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-transparent"
                     }`}
                   >
                     <IconComponent className="h-5 w-5" />
@@ -183,6 +276,12 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
 
+              {overviewLoading && (
+                <div className="mb-4 text-sm text-gray-500">
+                  Odświeżam dane…
+                </div>
+              )}
+
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -195,10 +294,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <Package className="h-12 w-12 text-blue-600 bg-blue-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+12% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -211,10 +307,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <Users className="h-12 w-12 text-green-600 bg-green-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+8% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -222,15 +315,12 @@ export const AdminDashboard: React.FC = () => {
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Wyświetlenia</p>
                       <p className="text-3xl font-bold text-gray-900">
-                        {(stats.totalViews / 1000).toFixed(0)}K
+                        {formatCompactNumber(stats.totalViews)}
                       </p>
                     </div>
                     <Eye className="h-12 w-12 text-purple-600 bg-purple-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+24% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -243,10 +333,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <Star className="h-12 w-12 text-yellow-600 bg-yellow-100 rounded-lg p-3" />
                   </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600">+18% w tym miesiącu</span>
-                  </div>
+                  {/* Removed monthly comparison */}
                 </div>
               </div>
 
@@ -288,11 +375,11 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <Eye className="h-4 w-4" />
-                            {(product.popularity.views / 1000).toFixed(1)}K
+                            {formatCompactNumber(product.popularity.views)}
                           </div>
                           <div className="flex items-center gap-1">
                             <ThumbsUp className="h-4 w-4" />
-                            {(product.popularity.likes / 1000).toFixed(1)}K
+                            {formatCompactNumber(product.popularity.likes)}
                           </div>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4" />
@@ -353,9 +440,9 @@ export const AdminDashboard: React.FC = () => {
                       className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Wszystkie kategorie</option>
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
+                      {categoryOptions.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
                         </option>
                       ))}
                     </select>
@@ -427,7 +514,8 @@ export const AdminDashboard: React.FC = () => {
                               )}
                             </td>
                             <td className="py-4 px-4 text-gray-600 capitalize">
-                              {product.category}
+                              {categoryMap[product.category] ||
+                                product.category}
                             </td>
                             <td className="py-4 px-4 text-gray-900 font-medium">
                               {product.price.discounted?.toFixed(2)}{" "}
@@ -448,7 +536,7 @@ export const AdminDashboard: React.FC = () => {
                               </div>
                             </td>
                             <td className="py-4 px-4 text-gray-600">
-                              {(product.popularity.views / 1000).toFixed(1)}K
+                              {formatCompactNumber(product.popularity.views)}
                             </td>
                             <td className="py-4 px-4">
                               <div className="flex gap-2">
@@ -523,6 +611,9 @@ export const AdminDashboard: React.FC = () => {
         product={selectedProduct}
         isOpen={isProductFormOpen}
         onClose={() => {
+          try {
+            sessionStorage.setItem("admin-form-restore-skip", "1");
+          } catch {}
           setIsProductFormOpen(false);
           setSelectedProduct(null);
         }}

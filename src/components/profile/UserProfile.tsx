@@ -132,7 +132,6 @@ export const UserProfile: React.FC = () => {
       user?.id
     );
     try {
-      // Get user reviews from profile
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("reviews")
@@ -149,38 +148,35 @@ export const UserProfile: React.FC = () => {
         throw error;
       }
 
-      if (profile && profile.reviews) {
+      if (profile && profile.reviews && profile.reviews.length > 0) {
         console.log(
           "📝 [REVIEWS] Znalezione recenzje w profilu:",
           profile.reviews.length,
           "recenzji"
         );
-        console.log("📄 [REVIEWS] Surowe dane recenzji:", profile.reviews);
 
-        // Get product details for each review
         const reviewsWithProducts = await Promise.all(
-          profile.reviews.map(async (review: any, index: number) => {
+          profile.reviews.map(async (reviewId: string, index: number) => {
             console.log(
-              `🔄 [REVIEWS] Ładowanie produktu ${index + 1}/${
+              `🔄 [REVIEWS] Ładowanie danych ${index + 1}/${
                 profile.reviews.length
-              } dla recenzji:`,
-              review
+              } dla recenzji ID:`,
+              reviewId
             );
             try {
               const { data: reviewData, error: reviewError } = await supabase
                 .from("product_reviews")
-                .select("product_id, rating, comment, created_at")
-                .eq("id", review)
+                .select("id, product_id, rating, comment, created_at")
+                .eq("id", reviewId)
                 .single();
 
-              console.log(`📊 [REVIEWS] Recenzja ${index + 1}:`, reviewData);
-
-              if (!reviewData) {
+              if (reviewError || !reviewData) {
                 console.warn(
                   `⚠️ [REVIEWS] Nie znaleziono danych recenzji dla ID:`,
-                  review
+                  reviewId,
+                  reviewError
                 );
-                return { ...review, product: null };
+                return null; // Pomiń, jeśli recenzja nie istnieje
               }
 
               const { data: product, error: productError } = await supabase
@@ -189,36 +185,44 @@ export const UserProfile: React.FC = () => {
                 .eq("id", reviewData.product_id)
                 .single();
 
-              console.log(`📊 [REVIEWS] Produkt ${index + 1}:`, {
-                product,
-                productError,
-              });
-
-              if (productError) {
+              // --- POPRAWKA ---
+              // Jeśli produkt nie istnieje (został usunięty), zwróć null, aby go pominąć
+              if (productError || !product) {
                 console.warn(
-                  `⚠️ [REVIEWS] Nie znaleziono produktu ${reviewData.product_id}:`,
-                  productError
+                  `ℹ️ [REVIEWS] Produkt o ID ${reviewData.product_id} nie został znaleziony (prawdopodobnie usunięty). Recenzja zostanie pominięta.`
                 );
+                return null;
               }
+              // --- KONIEC POPRAWKI ---
 
-              const { data: productImage, error: productImageError } =
+              const { data: productImages, error: productImageError } =
                 await supabase
                   .from("product_images")
                   .select("url")
                   .eq("product_id", reviewData.product_id)
-                  .single();
+                  .order("position", { ascending: true })
+                  .limit(1);
+
+              if (productImageError) {
+                console.warn(
+                  `⚠️ [REVIEWS] Błąd pobierania obrazka dla produktu ${reviewData.product_id}:`,
+                  productImageError
+                );
+              }
+
+              const imageUrl = productImages?.[0]?.url || null;
 
               const reviewWithProduct = {
-                ...reviewData,
+                id: reviewData.id,
+                rating: reviewData.rating,
+                comment: reviewData.comment,
                 dateCreated: reviewData.created_at,
-                product: product
-                  ? {
-                      id: product.id,
-                      title: product.title,
-                      image: productImage?.url || null,
-                      url: product.url_alias,
-                    }
-                  : null,
+                product: {
+                  id: product.id,
+                  title: product.title,
+                  image: imageUrl,
+                  url: product.url_alias,
+                },
               };
 
               console.log(
@@ -228,10 +232,10 @@ export const UserProfile: React.FC = () => {
               return reviewWithProduct;
             } catch (err) {
               console.error(
-                `❌ [REVIEWS] Błąd ładowania produktu dla recenzji ${review.productId}:`,
+                `❌ [REVIEWS] Błąd ładowania danych dla recenzji ${reviewId}:`,
                 err
               );
-              return review;
+              return null;
             }
           })
         );
@@ -240,7 +244,7 @@ export const UserProfile: React.FC = () => {
           "✅ [REVIEWS] Wszystkie recenzje z produktami załadowane:",
           reviewsWithProducts.length
         );
-        setUserReviews(reviewsWithProducts || []);
+        setUserReviews(reviewsWithProducts.filter(Boolean) as any[]); // Filtruj puste wyniki (null)
       } else {
         console.log("ℹ️ [REVIEWS] Brak recenzji w profilu użytkownika");
         setUserReviews([]);
@@ -578,29 +582,34 @@ export const UserProfile: React.FC = () => {
         </div>
 
         {/* Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="flex">
-            {tabs.map((tab) => {
-              const IconComponent = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+        <div className="px-4 sm:px-8 border-b border-gray-200">
+          {/* Zmieniono: Usunięto 'sm:justify-around', dodano 'justify-center' */}
+          <nav className="-mb-px flex justify-center overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                // Zmieniono: Usunięto 'sm:flex-1'
+                className={`group inline-flex items-center justify-center sm:gap-2 py-4 px-4 border-b-2 font-medium text-sm transition-colors flex-shrink-0 ${
+                  activeTab === tab.id
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <tab.icon
+                  className={`h-5 w-5 ${
                     activeTab === tab.id
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      ? "text-blue-600"
+                      : "text-gray-400 group-hover:text-gray-500"
                   }`}
-                >
-                  <IconComponent className="h-4 w-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
+                />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
           </nav>
         </div>
 
-        {/* Content */}
+        {/* Tab Content */}
         <div className="p-8">
           {activeTab === "profile" && (
             <div className="max-w-2xl">
@@ -964,10 +973,13 @@ export const UserProfile: React.FC = () => {
                       <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                         {product.title}
                       </h3>
-                      <p className="text-blue-600 font-bold mb-3">
-                        {product.price.discounted?.toFixed(2)}{" "}
-                        {product.price.currency}
-                      </p>
+                      {/* Price - temporarily hidden */}
+                      {false && (
+                        <p className="text-blue-600 font-bold mb-3">
+                          {product.price.discounted?.toFixed(2)}{" "}
+                          {product.price.currency}
+                        </p>
+                      )}
                       <div className="flex gap-2">
                         <a
                           href={`/produkt/${product.id}`}
