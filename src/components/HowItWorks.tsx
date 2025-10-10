@@ -91,7 +91,7 @@ export const HowItWorks: React.FC = () => {
                   <p className="text-gray-600 leading-relaxed max-w-sm mx-auto px-4">
                     {step.description}
                   </p>
-                  
+
                   {index < steps.length - 1 && (
                     <div className="flex justify-center mt-8">
                       <ArrowRight className="h-8 w-8 text-blue-300 transform rotate-90" />

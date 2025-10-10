@@ -11,7 +11,6 @@ import { BlogEditorPage } from "./pages/BlogEditorPage";
 import { BlogPage } from "./pages/BlogPage";
 import { BlogPostPage } from "./pages/BlogPostPage";
 import { ContactPage } from "./pages/ContactPage";
-import { CookiePolicyPage } from "./pages/CookiePolicyPage";
 import { HomePage } from "./pages/HomePage";
 import { HowItWorksPage } from "./pages/HowItWorksPage";
 import { LandingPage } from "./pages/LandingPage";
@@ -67,7 +66,6 @@ function App() {
                 path="/polityka-prywatnosci"
                 element={<PrivacyPolicyPage />}
               />
-              <Route path="/cookies" element={<CookiePolicyPage />} />
               <Route path="/afiliacja" element={<AffiliateProgramPage />} />
 
               {/* Krótki link produktu - MUSI BYĆ NA KOŃCU */}
