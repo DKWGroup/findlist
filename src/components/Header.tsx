@@ -15,6 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 import { isUserAdmin } from "../utils/adminUtils";
 import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
+import { SearchBar } from "./search/SearchBar";
 
 // Add loading state for auth
 interface HeaderProps {
@@ -109,12 +110,13 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
 
           {/* Desktop Search Bar */}
           <div className="hidden md:block flex-1 max-w-2xl mx-8">
-            <AdvancedSearchBar
+            {/* <AdvancedSearchBar
               onSearch={handleSearch}
               placeholder="Szukaj viralowych produktów..."
               showFilters={false}
               className="w-full"
-            />
+            /> */}
+            <SearchBar onSearch={handleSearch} />
           </div>
 
           {/* Desktop Navigation */}

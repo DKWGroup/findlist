@@ -11,6 +11,7 @@ import {
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
+import { SearchBar } from "./search/SearchBar";
 
 export const Hero: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,11 +69,15 @@ export const Hero: React.FC = () => {
           {/* Search Bar */}
           <div className="max-w-3xl mx-auto mb-8">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2">
-              <AdvancedSearchBar
+              {/* <AdvancedSearchBar
                 onSearch={handleSearch}
                 placeholder="Czego szukasz? Viralowe gadżety, prezenty, hity z TikToka..."
                 showFilters={false}
                 className="w-full"
+              /> */}
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Czego szukasz? Viralowe gadżety, prezenty, hity z TikToka..."
               />
             </div>
 
