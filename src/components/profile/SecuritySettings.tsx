@@ -316,37 +316,6 @@ export const SecuritySettings: React.FC = () => {
           </button>
         </form>
       </div>
-
-      {/* Account Security */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Shield className="h-6 w-6 text-gray-600" />
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Bezpieczeństwo konta
-            </h3>
-            <p className="text-sm text-gray-600">
-              Dodatkowe opcje bezpieczeństwa
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">
-                Uwierzytelnianie dwuskładnikowe
-              </p>
-              <p className="text-sm text-gray-600">
-                Dodatkowa warstwa bezpieczeństwa
-              </p>
-            </div>
-            <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
-              Wkrótce
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
