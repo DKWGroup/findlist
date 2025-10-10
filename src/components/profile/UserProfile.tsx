@@ -21,6 +21,7 @@ export const UserProfile: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const [nameError, setNameError] = useState("");
   const [formData, setFormData] = useState({
     name: user?.email?.split("@")[0] || "",
     email: user?.email || "",
@@ -327,6 +328,49 @@ export const UserProfile: React.FC = () => {
 
   if (!user) return null;
 
+  const validateName = (name: string): string => {
+    // Usuń białe znaki z początku i końca
+    const trimmedName = name.trim();
+
+    // Sprawdź minimalną długość
+    if (trimmedName.length < 2) {
+      return "Imię i nazwisko musi mieć co najmniej 2 znaki";
+    }
+
+    // Sprawdź maksymalną długość
+    if (trimmedName.length > 35) {
+      return "Imię i nazwisko nie może przekraczać 35 znaków";
+    }
+
+    // Sprawdź czy zawiera niedozwolone znaki (dozwolone: litery, spacje, myślniki, apostrofy)
+    const nameRegex = /^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'\.]+$/;
+    if (!nameRegex.test(trimmedName)) {
+      return "Imię i nazwisko może zawierać tylko litery, spacje, myślniki i apostrofy";
+    }
+
+    // Sprawdź czy nie składa się tylko z białych znaków
+    if (!/[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(trimmedName)) {
+      return "Imię i nazwisko musi zawierać co najmniej jedną literę";
+    }
+
+    return ""; // Brak błędu
+  };
+
+  const handleNameChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      name: value,
+    }));
+
+    // Waliduj tylko jeśli pole nie jest puste lub użytkownik zakończył edycję
+    if (value.length > 0) {
+      const error = validateName(value);
+      setNameError(error);
+    } else {
+      setNameError("");
+    }
+  };
+
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
@@ -335,6 +379,14 @@ export const UserProfile: React.FC = () => {
       user?.id
     );
     console.log("📝 [SAVE] Dane do zapisania:", formData);
+
+    // Walidacja przed zapisaniem
+    const nameValidationError = validateName(formData.name);
+    if (nameValidationError) {
+      setNameError(nameValidationError);
+      setFormError("Popraw błędy w formularzu przed zapisaniem");
+      return;
+    }
 
     setFormError("");
     setFormSuccess("");
@@ -630,14 +682,18 @@ export const UserProfile: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         type="submit"
-                        disabled={isSaving}
+                        disabled={isSaving || !!nameError}
                         className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg transition-colors"
                       >
                         {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setIsEditing(false)}
+                        onClick={() => {
+                          setIsEditing(false);
+                          setNameError("");
+                          setFormError("");
+                        }}
                         className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
                       >
                         Anuluj
@@ -667,17 +723,31 @@ export const UserProfile: React.FC = () => {
                       Imię i nazwisko
                     </label>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            name: e.target.value,
-                          }))
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                      <div>
+                        <input
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => handleNameChange(e.target.value)}
+                          maxLength={35}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            nameError
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          placeholder="np. Jan Kowalski"
+                        />
+                        <div className="mt-1 flex justify-between items-start">
+                          <p className="text-sm text-gray-500">
+                            {formData.name.length}/35 znaków
+                          </p>
+                        </div>
+                        {nameError && (
+                          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="h-4 w-4" />
+                            {nameError}
+                          </p>
+                        )}
+                      </div>
                     ) : (
                       <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
                         {formData.name ||
@@ -685,8 +755,7 @@ export const UserProfile: React.FC = () => {
                           "Nie ustawiono"}
                       </p>
                     )}
-                  </div>
-
+                  </div>{" "}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Adres email
@@ -708,7 +777,6 @@ export const UserProfile: React.FC = () => {
                       </div>
                     )}
                   </div>
-
                   {/* Notification Preferences */}
                   {isEditing && (
                     <div>
