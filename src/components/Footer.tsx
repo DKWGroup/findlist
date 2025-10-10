@@ -165,14 +165,6 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
-                  to="/cookies"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Polityka cookies
-                </Link>
-              </li>
-              <li>
-                <Link
                   to="/afiliacja"
                   className="text-gray-400 hover:text-white transition-colors"
                 >

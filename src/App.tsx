@@ -1,5 +1,6 @@
 import { HelmetProvider } from "react-helmet-async";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { CookieConsent } from "./components/CookieConsent";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SimplifiedAuthProvider } from "./contexts/SimplifiedAuthContext";
 import { usePreventPageRefresh } from "./hooks/usePreventPageRefresh";
@@ -73,6 +74,7 @@ function App() {
               <Route path="/:codeOrAlias" element={<ProductPage />} />
             </Routes>
           </div>
+          <CookieConsent />
         </Router>
       </SimplifiedAuthProvider>
     </HelmetProvider>
