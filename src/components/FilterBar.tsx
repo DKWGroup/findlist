@@ -1,5 +1,5 @@
-import React from 'react';
-import { Filter, SortAsc, Sparkles, Clock, TrendingUp } from 'lucide-react';
+import { Clock, Filter, SortAsc, Sparkles, TrendingUp } from "lucide-react";
+import React from "react";
 
 interface FilterBarProps {
   sortBy: string;
@@ -12,14 +12,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   sortBy,
   onSortChange,
   showTrendingOnly,
-  onTrendingToggle
+  onTrendingToggle,
 }) => {
   const sortOptions = [
-    { value: 'popularity', label: 'Popularność', icon: TrendingUp },
-    { value: 'newest', label: 'Najnowsze', icon: Clock },
-    { value: 'rating', label: 'Ocena', icon: Sparkles },
-    { value: 'price-low', label: 'Cena: rosnąco', icon: SortAsc },
-    { value: 'price-high', label: 'Cena: malejąco', icon: SortAsc }
+    { value: "popularity", label: "Popularność", icon: TrendingUp },
+    { value: "newest", label: "Najnowsze", icon: Clock },
+    { value: "rating", label: "Ocena", icon: Sparkles },
+    // { value: 'price-low', label: 'Cena: rosnąco', icon: SortAsc },
+    // { value: 'price-high', label: 'Cena: malejąco', icon: SortAsc }
   ];
 
   return (
@@ -32,7 +32,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <Filter className="h-4 w-4" />
               <span className="font-medium">Sortuj:</span>
             </div>
-            
+
             <div className="flex flex-wrap gap-2">
               {sortOptions.map((option) => {
                 const IconComponent = option.icon;
@@ -42,8 +42,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     onClick={() => onSortChange(option.value)}
                     className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                       sortBy === option.value
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                   >
                     <IconComponent className="h-3 w-3" />
@@ -60,8 +60,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               onClick={onTrendingToggle}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 showTrendingOnly
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               <span className="text-base">🔥</span>
