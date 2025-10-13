@@ -10,13 +10,15 @@ import {
   User,
 } from "lucide-react";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 
 export const RegisterForm: React.FC = () => {
   const { register, error, validatePassword } = useSimplifiedAuthContext();
-  const navigate = useNavigate();
   const [localLoading, setLocalLoading] = useState<boolean>(false);
+  const [registrationSuccess, setRegistrationSuccess] =
+    useState<boolean>(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -40,6 +42,28 @@ export const RegisterForm: React.FC = () => {
 
     // Clear previous errors
     setFormError("");
+
+    // Validate name
+    const trimmedName = formData.name.trim();
+    if (!trimmedName) {
+      setFormError("Imię i nazwisko jest wymagane");
+      return;
+    }
+    if (trimmedName.length < 2) {
+      setFormError("Imię i nazwisko musi mieć co najmniej 2 znaki");
+      return;
+    }
+    if (trimmedName.length > 100) {
+      setFormError("Imię i nazwisko nie może przekraczać 100 znaków");
+      return;
+    }
+    const nameRegex = /^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'\.]+$/;
+    if (!nameRegex.test(trimmedName)) {
+      setFormError(
+        "Imię i nazwisko może zawierać tylko litery, spacje, myślniki i apostrofy"
+      );
+      return;
+    }
 
     if (!formData.acceptTerms) {
       setFormError("Musisz zaakceptować regulamin i politykę prywatności");
@@ -68,9 +92,10 @@ export const RegisterForm: React.FC = () => {
     try {
       const result = await register(formData);
 
-      // Redirect to profile on successful registration
+      // Show success message instead of redirecting
       if (result.success) {
-        navigate("/profil");
+        setRegisteredEmail(formData.email);
+        setRegistrationSuccess(true);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -118,6 +143,89 @@ export const RegisterForm: React.FC = () => {
     return "bg-green-500";
   };
 
+  // If registration is successful, show success message
+  if (registrationSuccess) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="h-8 w-8 text-green-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Rejestracja zakończona!
+            </h2>
+            <p className="text-gray-600">
+              Twoje konto zostało utworzone pomyślnie
+            </p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <div className="flex items-start gap-3">
+              <Mail className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-semibold text-blue-900 mb-2">
+                  Potwierdź swój adres email
+                </h3>
+                <p className="text-sm text-blue-800 mb-3">
+                  Wysłaliśmy wiadomość z linkiem aktywacyjnym na adres:
+                </p>
+                <p className="text-sm font-semibold text-blue-900 bg-white px-3 py-2 rounded border border-blue-200 mb-3">
+                  {registeredEmail}
+                </p>
+                <p className="text-sm text-blue-800">
+                  Kliknij w link w wiadomości, aby aktywować swoje konto i móc
+                  się zalogować.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-2">
+              <Info className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-yellow-800">
+                <p className="font-semibold mb-1">Nie widzisz wiadomości?</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Sprawdź folder SPAM lub Wiadomości-śmieci</li>
+                  <li>Upewnij się, że podałeś poprawny adres email</li>
+                  <li>Poczekaj kilka minut - dostarczenie może potrwać</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Link
+              to="/logowanie"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              Przejdź do logowania
+            </Link>
+            <Link
+              to="/"
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              Wróć na stronę główną
+            </Link>
+          </div>
+
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>
+              Potrzebujesz pomocy?{" "}
+              <Link
+                to="/kontakt"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Skontaktuj się z nami
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
@@ -139,7 +247,7 @@ export const RegisterForm: React.FC = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Imię i nazwisko
+              Imię i nazwisko <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -150,15 +258,20 @@ export const RegisterForm: React.FC = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
+                minLength={2}
+                maxLength={100}
                 disabled={isFormLoading}
                 className={`w-full pl-10 pr-4 py-3 border ${
                   formError && !formData.name
                     ? "border-red-300 bg-red-50"
                     : "border-gray-300"
                 } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
-                placeholder="Jan Kowalski"
+                placeholder="np. Jan Kowalski"
               />
             </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Podaj swoje prawdziwe imię i nazwisko (2-100 znaków)
+            </p>
           </div>
 
           <div>

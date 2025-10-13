@@ -9,6 +9,7 @@ interface LoginCredentials {
 }
 
 interface RegisterCredentials {
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -100,9 +101,14 @@ export const useSimplifiedAuth = () => {
           throw new Error("Hasła nie są identyczne");
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: credentials.email.trim().toLowerCase(),
           password: credentials.password,
+          options: {
+            data: {
+              full_name: credentials.name.trim(),
+            },
+          },
         });
 
         if (error) {
@@ -120,6 +126,28 @@ export const useSimplifiedAuth = () => {
           }
 
           throw new Error(errorMessage);
+        }
+
+        // Update profile with full_name if user was created
+        if (data.user) {
+          console.log("SimplifiedAuth: Updating profile with full_name...");
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .update({
+              full_name: credentials.name.trim(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", data.user.id);
+
+          if (profileError) {
+            console.error(
+              "SimplifiedAuth: Error updating profile:",
+              profileError
+            );
+            // Don't fail registration if profile update fails
+          } else {
+            console.log("SimplifiedAuth: Profile updated with full_name");
+          }
         }
 
         console.log("SimplifiedAuth: Registration successful");
