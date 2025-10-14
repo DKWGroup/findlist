@@ -20,7 +20,7 @@ export const RegisterForm: React.FC = () => {
     useState<boolean>(false);
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -40,37 +40,28 @@ export const RegisterForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Clear previous errors
-    setFormError("");
-
-    // Validate name
-    const trimmedName = formData.name.trim();
-    if (!trimmedName) {
-      setFormError("Imię i nazwisko jest wymagane");
-      return;
-    }
-    if (trimmedName.length < 2) {
-      setFormError("Imię i nazwisko musi mieć co najmniej 2 znaki");
-      return;
-    }
-    if (trimmedName.length > 100) {
-      setFormError("Imię i nazwisko nie może przekraczać 100 znaków");
-      return;
-    }
-    const nameRegex = /^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'\.]+$/;
-    if (!nameRegex.test(trimmedName)) {
-      setFormError(
-        "Imię i nazwisko może zawierać tylko litery, spacje, myślniki i apostrofy"
+    // Prevent multiple submissions
+    if (localLoading) {
+      console.warn(
+        "⚠️ [REGISTER_FORM] Rejestracja już w toku, ignoruję kolejne kliknięcie"
       );
       return;
     }
 
+    console.log("🔵 [REGISTER_FORM] Rozpoczęcie rejestracji...");
+    console.log("📋 [REGISTER_FORM] Dane formularza:", formData);
+
+    // Clear previous errors
+    setFormError("");
+
     if (!formData.acceptTerms) {
+      console.warn("⚠️ [REGISTER_FORM] Brak akceptacji regulaminu");
       setFormError("Musisz zaakceptować regulamin i politykę prywatności");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
+      console.warn("⚠️ [REGISTER_FORM] Hasła nie są identyczne");
       setFormError("Hasła nie są identyczne");
       return;
     }
@@ -78,26 +69,63 @@ export const RegisterForm: React.FC = () => {
     // Validate email format
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(formData.email)) {
+      console.warn(
+        "⚠️ [REGISTER_FORM] Nieprawidłowy format email:",
+        formData.email
+      );
       setFormError("Nieprawidłowy format adresu email");
       return;
     }
 
     // Validate password strength
     if (!validatePassword(formData.password)) {
+      console.warn(
+        "⚠️ [REGISTER_FORM] Hasło nie spełnia wymagań bezpieczeństwa"
+      );
       setFormError("Hasło nie spełnia wymagań bezpieczeństwa");
       return;
     }
 
+    console.log("✅ [REGISTER_FORM] Walidacja przeszła pomyślnie");
+
     setLocalLoading(true);
     try {
-      const result = await register(formData);
+      // Prepare registration data
+      const registrationData = {
+        full_name: formData.full_name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      };
+
+      console.log(
+        "📤 [REGISTER_FORM] Wysyłanie danych rejestracji:",
+        registrationData
+      );
+
+      const result = await register(registrationData);
+
+      console.log("📥 [REGISTER_FORM] Otrzymano wynik rejestracji:", result);
 
       // Show success message instead of redirecting
       if (result.success) {
+        console.log("✅ [REGISTER_FORM] Rejestracja zakończona sukcesem");
         setRegisteredEmail(formData.email);
         setRegistrationSuccess(true);
+      } else {
+        console.error(
+          "❌ [REGISTER_FORM] Rejestracja nie powiodła się, ale nie rzucono błędu"
+        );
+        console.error(
+          "❌ [REGISTER_FORM] Sprawdź błąd z kontekstu auth:",
+          error
+        );
+        setFormError(
+          error || "Wystąpił błąd podczas rejestracji. Spróbuj ponownie."
+        );
       }
     } catch (error) {
+      console.error("❌ [REGISTER_FORM] Błąd podczas rejestracji:", error);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
@@ -105,6 +133,7 @@ export const RegisterForm: React.FC = () => {
       }
     } finally {
       setLocalLoading(false);
+      console.log("🔵 [REGISTER_FORM] Zakończono proces rejestracji");
     }
   };
 
@@ -247,31 +276,26 @@ export const RegisterForm: React.FC = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Imię i nazwisko <span className="text-red-500">*</span>
+              Imię i nazwisko
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="full_name"
+                name="full_name"
+                value={formData.full_name}
                 onChange={handleChange}
                 required
-                minLength={2}
-                maxLength={100}
                 disabled={isFormLoading}
                 className={`w-full pl-10 pr-4 py-3 border ${
-                  formError && !formData.name
+                  formError && !formData.full_name
                     ? "border-red-300 bg-red-50"
                     : "border-gray-300"
                 } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
-                placeholder="np. Jan Kowalski"
+                placeholder="Jan Kowalski"
               />
             </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Podaj swoje prawdziwe imię i nazwisko (2-100 znaków)
-            </p>
           </div>
 
           <div>
