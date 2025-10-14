@@ -1,8 +1,4 @@
-import {
-  categoryMappings,
-  legacyCategoryMapping,
-  typeMappings,
-} from "../data/productCodeMappings";
+import { categoryMappings, typeMappings } from "../data/productCodeMappings";
 import {
   CategoryMapping,
   ProductCode,
@@ -117,48 +113,18 @@ class ProductCodeService {
   }
 
   // Generowanie nowego kodu produktu
-  async generateCode(categoryId: string, typeId?: string): Promise<string> {
+  async generateCode(categoryId: string): Promise<string> {
     await this.loadCategories();
     const category = this.categories.find((c) => c.id === categoryId);
     if (!category) {
       throw new Error(`Nieznana kategoria: ${categoryId}`);
     }
 
-    let type: TypeMapping | undefined;
-
-    if (typeId) {
-      type = typeMappings.find(
-        (t) => t.id === typeId && t.categoryId === categoryId
-      );
-      if (!type) {
-        throw new Error(`Nieznany typ: ${typeId} dla kategorii: ${categoryId}`);
-      }
-    } else {
-      // Użyj domyślnego typu dla kategorii
-      const legacy = legacyCategoryMapping[categoryId];
-      if (legacy) {
-        type = typeMappings.find(
-          (t) => t.code === legacy.typeCode && t.categoryId === categoryId
-        );
-      }
-
-      if (!type) {
-        // Weź pierwszy dostępny typ dla kategorii
-        type = typeMappings.find((t) => t.categoryId === categoryId);
-      }
-    }
-
-    if (!type) {
-      throw new Error(`Brak dostępnych typów dla kategorii: ${categoryId}`);
-    }
-
-    const sequenceNumber = await this.getNextSequenceNumber(
-      category.code,
-      type.code
-    );
-    const code = `${category.code}-${type.code}-${sequenceNumber
+    // Nowy format: tylko kategoria + sekwencja (bez typu)
+    const sequenceNumber = await this.getNextSequenceNumber(category.code);
+    const code = `${category.code}-${sequenceNumber
       .toString()
-      .padStart(3, "0")}`;
+      .padStart(4, "0")}`;
 
     // Sprawdź unikalność (case-insensitive)
     if (
@@ -173,11 +139,8 @@ class ProductCodeService {
   }
 
   // Pobieranie następnego numeru sekwencyjnego
-  async getNextSequenceNumber(
-    categoryCode: string,
-    typeCode: string
-  ): Promise<number> {
-    const key = `${categoryCode}-${typeCode}`;
+  async getNextSequenceNumber(categoryCode: string): Promise<number> {
+    const key = categoryCode; // Tylko kod kategorii bez typu
     const currentSequence = this.codeSequences.get(key) || 0;
     const nextSequence = currentSequence + 1;
 
@@ -188,10 +151,9 @@ class ProductCodeService {
   // Rejestracja nowego kodu produktu
   async registerProductCode(
     productId: string,
-    categoryId: string,
-    typeId?: string
+    categoryId: string
   ): Promise<ProductCode> {
-    const code = await this.generateCode(categoryId, typeId);
+    const code = await this.generateCode(categoryId);
     const parsedCode = this.parseCode(code);
 
     if (!parsedCode) {
@@ -202,7 +164,7 @@ class ProductCodeService {
       id: Date.now().toString(),
       code,
       categoryCode: parsedCode.categoryCode,
-      typeCode: parsedCode.typeCode,
+      typeCode: "", // Pusty w nowym formacie
       sequenceNumber: parsedCode.sequenceNumber,
       productId,
       createdAt: new Date().toISOString(),
@@ -215,14 +177,14 @@ class ProductCodeService {
 
   // Walidacja formatu kodu
   validateCode(code: string): boolean {
-    const regex = /^[A-Z]{2}-[A-Z]{2}-\d{3}$/;
+    const regex = /^[A-Z]{2}-\d{4}$/;
     return regex.test(code);
   }
 
   // Parsowanie kodu na komponenty
   parseCode(
     code: string
-  ): { categoryCode: string; typeCode: string; sequenceNumber: number } | null {
+  ): { categoryCode: string; sequenceNumber: number } | null {
     if (!this.validateCode(code)) {
       return null;
     }
@@ -230,8 +192,7 @@ class ProductCodeService {
     const parts = code.split("-");
     return {
       categoryCode: parts[0],
-      typeCode: parts[1],
-      sequenceNumber: parseInt(parts[2], 10),
+      sequenceNumber: parseInt(parts[1], 10),
     };
   }
 
@@ -262,21 +223,34 @@ class ProductCodeService {
   }
 
   // Generowanie aliasu URL
-  generateUrlAlias(code: string, productTitle?: string): string {
-    const baseAlias = code.toLowerCase();
-
-    if (productTitle) {
-      const titleSlug = productTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim();
-
-      return `${baseAlias}-${titleSlug}`;
+  generateUrlAlias(productTitle: string): string {
+    if (!productTitle || !productTitle.trim()) {
+      throw new Error(
+        "Tytuł produktu jest wymagany do wygenerowania aliasu URL"
+      );
     }
 
-    return baseAlias;
+    const titleSlug = productTitle
+      .toLowerCase()
+      .replace(/ą/g, "a")
+      .replace(/ć/g, "c")
+      .replace(/ę/g, "e")
+      .replace(/ł/g, "l")
+      .replace(/ń/g, "n")
+      .replace(/ó/g, "o")
+      .replace(/ś/g, "s")
+      .replace(/ź|ż/g, "z")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim()
+      .replace(/^-+|-+$/g, ""); // Usuń myślniki z początku i końca
+
+    if (!titleSlug) {
+      throw new Error("Nie można wygenerować aliasu URL z podanego tytułu");
+    }
+
+    return titleSlug;
   }
 
   // Aktualizacja kodu produktu (tylko dla administratorów)
@@ -313,7 +287,7 @@ class ProductCodeService {
       ...this.productCodes[productCodeIndex],
       code: newCode,
       categoryCode: parsedCode.categoryCode,
-      typeCode: parsedCode.typeCode,
+      typeCode: "", // Pusty w nowym formacie
       sequenceNumber: parsedCode.sequenceNumber,
     };
 

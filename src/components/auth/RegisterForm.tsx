@@ -9,16 +9,20 @@ import {
   Mail,
   User,
 } from "lucide-react";
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 
 export const RegisterForm: React.FC = () => {
   const { register, error, validatePassword } = useSimplifiedAuthContext();
-  const navigate = useNavigate();
+  const REGISTRATION_SUCCESS_KEY = "findlist-registration-success";
   const [localLoading, setLocalLoading] = useState<boolean>(false);
+  const [registrationSuccess, setRegistrationSuccess] =
+    useState<boolean>(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>("");
+  const [registrationWarning, setRegistrationWarning] = useState<string>("");
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -35,18 +39,64 @@ export const RegisterForm: React.FC = () => {
     special: false,
   });
 
+  const logRegisterError = (label: string, err: unknown) => {
+    if (err instanceof Error) {
+      console.error(label, err);
+    } else if (err !== null && err !== undefined) {
+      console.error(label, { details: err });
+    } else {
+      console.error(label);
+    }
+  };
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(REGISTRATION_SUCCESS_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as {
+          email?: string;
+          warning?: string;
+        };
+        if (parsed?.email) {
+          setRegisteredEmail(parsed.email);
+          setRegistrationWarning(parsed.warning || "");
+          setRegistrationSuccess(true);
+        }
+        sessionStorage.removeItem(REGISTRATION_SUCCESS_KEY);
+      }
+    } catch (storageError) {
+      console.warn(
+        "RegisterForm: failed to restore success state",
+        storageError
+      );
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent multiple submissions
+    if (localLoading) {
+      console.warn(
+        "⚠️ [REGISTER_FORM] Rejestracja już w toku, ignoruję kolejne kliknięcie"
+      );
+      return;
+    }
+
+    console.log("🔵 [REGISTER_FORM] Rozpoczęcie rejestracji...");
+    console.log("📋 [REGISTER_FORM] Dane formularza:", formData);
 
     // Clear previous errors
     setFormError("");
 
     if (!formData.acceptTerms) {
+      console.warn("⚠️ [REGISTER_FORM] Brak akceptacji regulaminu");
       setFormError("Musisz zaakceptować regulamin i politykę prywatności");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
+      console.warn("⚠️ [REGISTER_FORM] Hasła nie są identyczne");
       setFormError("Hasła nie są identyczne");
       return;
     }
@@ -54,25 +104,77 @@ export const RegisterForm: React.FC = () => {
     // Validate email format
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(formData.email)) {
+      console.warn(
+        "⚠️ [REGISTER_FORM] Nieprawidłowy format email:",
+        formData.email
+      );
       setFormError("Nieprawidłowy format adresu email");
       return;
     }
 
     // Validate password strength
     if (!validatePassword(formData.password)) {
+      console.warn(
+        "⚠️ [REGISTER_FORM] Hasło nie spełnia wymagań bezpieczeństwa"
+      );
       setFormError("Hasło nie spełnia wymagań bezpieczeństwa");
       return;
     }
 
+    console.log("✅ [REGISTER_FORM] Walidacja przeszła pomyślnie");
+
+    setRegistrationWarning("");
+    sessionStorage.removeItem(REGISTRATION_SUCCESS_KEY);
     setLocalLoading(true);
     try {
-      const result = await register(formData);
+      // Prepare registration data
+      const registrationData = {
+        full_name: formData.full_name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      };
 
-      // Redirect to profile on successful registration
+      console.log(
+        "📤 [REGISTER_FORM] Wysyłanie danych rejestracji:",
+        registrationData
+      );
+
+      const result = await register(registrationData);
+
+      console.log("📥 [REGISTER_FORM] Otrzymano wynik rejestracji:", result);
+
+      // Show success message instead of redirecting
       if (result.success) {
-        navigate("/profil");
+        console.log("✅ [REGISTER_FORM] Rejestracja zakończona sukcesem");
+        setRegisteredEmail(formData.email);
+        setRegistrationWarning(result.warning || "");
+        setRegistrationSuccess(true);
+        try {
+          sessionStorage.setItem(
+            REGISTRATION_SUCCESS_KEY,
+            JSON.stringify({
+              email: formData.email,
+              warning: result.warning || "",
+            })
+          );
+        } catch (storageError) {
+          console.warn(
+            "RegisterForm: unable to persist success state",
+            storageError
+          );
+        }
+      } else {
+        logRegisterError(
+          "❌ [REGISTER_FORM] Rejestracja nie powiodła się, ale nie rzucono błędu",
+          error
+        );
+        setFormError(
+          error || "Wystąpił błąd podczas rejestracji. Spróbuj ponownie."
+        );
       }
     } catch (error) {
+      logRegisterError("❌ [REGISTER_FORM] Błąd podczas rejestracji:", error);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
@@ -80,6 +182,7 @@ export const RegisterForm: React.FC = () => {
       }
     } finally {
       setLocalLoading(false);
+      console.log("🔵 [REGISTER_FORM] Zakończono proces rejestracji");
     }
   };
 
@@ -118,6 +221,95 @@ export const RegisterForm: React.FC = () => {
     return "bg-green-500";
   };
 
+  // If registration is successful, show success message
+  if (registrationSuccess) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="h-8 w-8 text-green-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Rejestracja zakończona!
+            </h2>
+            <p className="text-gray-600">
+              Twoje konto zostało utworzone pomyślnie
+            </p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <div className="flex items-start gap-3">
+              <Mail className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-semibold text-blue-900 mb-2">
+                  Potwierdź swój adres email
+                </h3>
+                <p className="text-sm text-blue-800 mb-3">
+                  Wysłaliśmy wiadomość z linkiem aktywacyjnym na adres:
+                </p>
+                <p className="text-sm font-semibold text-blue-900 bg-white px-3 py-2 rounded border border-blue-200 mb-3">
+                  {registeredEmail}
+                </p>
+                <p className="text-sm text-blue-800">
+                  Kliknij w link w wiadomości, aby aktywować swoje konto i móc
+                  się zalogować.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-2">
+              <Info className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-yellow-800">
+                <p className="font-semibold mb-1">Nie widzisz wiadomości?</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Sprawdź folder SPAM lub Wiadomości-śmieci</li>
+                  <li>Upewnij się, że podałeś poprawny adres email</li>
+                  <li>Poczekaj kilka minut - dostarczenie może potrwać</li>
+                </ul>
+                {registrationWarning && (
+                  <p className="mt-3">
+                    {registrationWarning} Jeśli problem będzie się powtarzał,
+                    skontaktuj się z nami.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Link
+              to="/logowanie"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              Przejdź do logowania
+            </Link>
+            <Link
+              to="/"
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              Wróć na stronę główną
+            </Link>
+          </div>
+
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>
+              Potrzebujesz pomocy?{" "}
+              <Link
+                to="/kontakt"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Skontaktuj się z nami
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
@@ -145,14 +337,14 @@ export const RegisterForm: React.FC = () => {
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="full_name"
+                name="full_name"
+                value={formData.full_name}
                 onChange={handleChange}
                 required
                 disabled={isFormLoading}
                 className={`w-full pl-10 pr-4 py-3 border ${
-                  formError && !formData.name
+                  formError && !formData.full_name
                     ? "border-red-300 bg-red-50"
                     : "border-gray-300"
                 } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}

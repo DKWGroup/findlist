@@ -29,25 +29,11 @@ export const Features: React.FC = () => {
       color: "bg-green-100 text-green-600",
     },
     {
-      icon: Search,
-      title: "Inteligentne Wyszukiwanie",
-      description:
-        "Zaawansowane filtry i wyszukiwarka semantyczna pomagają znaleźć dokładnie to, czego szukasz.",
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
       icon: Star,
       title: "Szczere Recenzje",
       description:
         "Sprawdź opinie innych użytkowników i podziel się swoimi doświadczeniami z produktami.",
       color: "bg-yellow-100 text-yellow-600",
-    },
-    {
-      icon: Globe,
-      title: "Najlepsze Ceny",
-      description:
-        "Porównujemy ceny z Temu, AliExpress, Amazon i innych sklepów online.",
-      color: "bg-indigo-100 text-indigo-600",
     },
     {
       icon: Heart,
@@ -56,27 +42,6 @@ export const Features: React.FC = () => {
         "Zapisuj produkty na później i twórz własne kolekcje ulubionych przedmiotów.",
       color: "bg-pink-100 text-pink-600",
     },
-    {
-      icon: Zap,
-      title: "Błyskawiczne Aktualizacje",
-      description:
-        "Nowe produkty i trendy pojawiają się na platformie w czasie rzeczywistym.",
-      color: "bg-purple-100 text-purple-600",
-    },
-    {
-      icon: Users,
-      title: "Społeczność",
-      description:
-        "Dołącz do tysięcy użytkowników dzielących się swoimi odkryciami i opiniami.",
-      color: "bg-teal-100 text-teal-600",
-    },
-  ];
-
-  const trustIndicators = [
-    { icon: Award, text: "100% zweryfikowane produkty" },
-    { icon: CheckCircle, text: "Sprawdzone linki afiliacyjne" },
-    { icon: Shield, text: "Bezpieczne zakupy" },
-    { icon: Users, text: "10,000+ zadowolonych użytkowników" },
   ];
 
   return (
@@ -154,22 +119,22 @@ export const Features: React.FC = () => {
                   <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                     1
                   </span>
-                  Monitorowanie social mediów
+                  Selekcja produktów
                 </h4>
                 <p className="text-gray-600 text-sm mb-4">
-                  Nasze algorytmy 24/7 skanują TikToka, Instagrama i inne
-                  platformy w poszukiwaniu viralowych produktów.
+                  Szukamy i wybieramy najlepsze produkty z TikToka, Temu i
+                  innych platform.
                 </p>
 
                 <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                     2
                   </span>
-                  Weryfikacja jakości
+                  Testowanie produktów
                 </h4>
                 <p className="text-gray-600 text-sm">
-                  Sprawdzamy opinie, analizujemy materiały promocyjne i
-                  weryfikujemy wiarygodność sprzedawców.
+                  Osobiście testujemy dane produkty, żeby ocenić ich jakość i
+                  użyteczność.
                 </p>
               </div>
               <div>
@@ -177,11 +142,11 @@ export const Features: React.FC = () => {
                   <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                     3
                   </span>
-                  Testowanie produktów
+                  Nagrywanie recenzji
                 </h4>
                 <p className="text-gray-600 text-sm mb-4">
-                  Wybrane produkty testujemy osobiście, aby sprawdzić czy
-                  spełniają obietnice z reklam.
+                  Na podstawie testów tworzymy szczegółowe recenzje oraz
+                  scenariusz pod nagrania wideo.
                 </p>
 
                 <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">

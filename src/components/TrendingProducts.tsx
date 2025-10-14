@@ -168,20 +168,19 @@ export const TrendingProducts: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">
-                  📱 Śledzimy social media 24/7
+                  📱 Śledzimy social media
                 </h4>
                 <p className="text-gray-600 text-sm">
-                  Nasze algorytmy monitorują TikToka i Instagrama, aby znaleźć
-                  najnowsze trendy.
+                  Śledzimy TikToka i Instagrama, aby znaleźć najnowsze trendy.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">
-                  💰 Najlepsze ceny i oferty
+                  ⭐ Rzetelna recenzja
                 </h4>
                 <p className="text-gray-600 text-sm">
-                  Porównujemy ceny z różnych sklepów i pokazujemy
-                  najkorzystniejsze opcje zakupu.
+                  Dzielimy się z Wami szczerą opinią i doświadczeniami z
+                  używania produktów.
                 </p>
               </div>
             </div>

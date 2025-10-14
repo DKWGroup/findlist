@@ -48,14 +48,14 @@ export const ProductsPage: React.FC = () => {
           );
         case "rating":
           return b.ratings.average - a.ratings.average;
-        case "price-low":
-          const priceA = a.price.discounted || a.price.original || 0;
-          const priceB = b.price.discounted || b.price.original || 0;
-          return priceA - priceB;
-        case "price-high":
-          const priceA2 = a.price.discounted || a.price.original || 0;
-          const priceB2 = b.price.discounted || b.price.original || 0;
-          return priceB2 - priceA2;
+        // case "price-low":
+        //   const priceA = a.price.discounted || a.price.original || 0;
+        //   const priceB = b.price.discounted || b.price.original || 0;
+        //   return priceA - priceB;
+        // case "price-high":
+        //   const priceA2 = a.price.discounted || a.price.original || 0;
+        //   const priceB2 = b.price.discounted || b.price.original || 0;
+        //   return priceB2 - priceA2;
         default:
           return 0;
       }

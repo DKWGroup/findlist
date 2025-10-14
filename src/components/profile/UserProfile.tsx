@@ -21,6 +21,7 @@ export const UserProfile: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const [nameError, setNameError] = useState("");
   const [formData, setFormData] = useState({
     name: user?.email?.split("@")[0] || "",
     email: user?.email || "",
@@ -327,6 +328,49 @@ export const UserProfile: React.FC = () => {
 
   if (!user) return null;
 
+  const validateName = (name: string): string => {
+    // Usuń białe znaki z początku i końca
+    const trimmedName = name.trim();
+
+    // Sprawdź minimalną długość
+    if (trimmedName.length < 2) {
+      return "Imię i nazwisko musi mieć co najmniej 2 znaki";
+    }
+
+    // Sprawdź maksymalną długość
+    if (trimmedName.length > 35) {
+      return "Imię i nazwisko nie może przekraczać 35 znaków";
+    }
+
+    // Sprawdź czy zawiera niedozwolone znaki (dozwolone: litery, spacje, myślniki, apostrofy)
+    const nameRegex = /^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'\.]+$/;
+    if (!nameRegex.test(trimmedName)) {
+      return "Imię i nazwisko może zawierać tylko litery, spacje, myślniki i apostrofy";
+    }
+
+    // Sprawdź czy nie składa się tylko z białych znaków
+    if (!/[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(trimmedName)) {
+      return "Imię i nazwisko musi zawierać co najmniej jedną literę";
+    }
+
+    return ""; // Brak błędu
+  };
+
+  const handleNameChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      name: value,
+    }));
+
+    // Waliduj tylko jeśli pole nie jest puste lub użytkownik zakończył edycję
+    if (value.length > 0) {
+      const error = validateName(value);
+      setNameError(error);
+    } else {
+      setNameError("");
+    }
+  };
+
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
@@ -335,6 +379,14 @@ export const UserProfile: React.FC = () => {
       user?.id
     );
     console.log("📝 [SAVE] Dane do zapisania:", formData);
+
+    // Walidacja przed zapisaniem
+    const nameValidationError = validateName(formData.name);
+    if (nameValidationError) {
+      setNameError(nameValidationError);
+      setFormError("Popraw błędy w formularzu przed zapisaniem");
+      return;
+    }
 
     setFormError("");
     setFormSuccess("");
@@ -630,14 +682,18 @@ export const UserProfile: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         type="submit"
-                        disabled={isSaving}
+                        disabled={isSaving || !!nameError}
                         className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg transition-colors"
                       >
                         {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setIsEditing(false)}
+                        onClick={() => {
+                          setIsEditing(false);
+                          setNameError("");
+                          setFormError("");
+                        }}
                         className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
                       >
                         Anuluj
@@ -667,17 +723,31 @@ export const UserProfile: React.FC = () => {
                       Imię i nazwisko
                     </label>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            name: e.target.value,
-                          }))
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                      <div>
+                        <input
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => handleNameChange(e.target.value)}
+                          maxLength={35}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            nameError
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          placeholder="np. Jan Kowalski"
+                        />
+                        <div className="mt-1 flex justify-between items-start">
+                          <p className="text-sm text-gray-500">
+                            {formData.name.length}/35 znaków
+                          </p>
+                        </div>
+                        {nameError && (
+                          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="h-4 w-4" />
+                            {nameError}
+                          </p>
+                        )}
+                      </div>
                     ) : (
                       <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
                         {formData.name ||
@@ -685,8 +755,7 @@ export const UserProfile: React.FC = () => {
                           "Nie ustawiono"}
                       </p>
                     )}
-                  </div>
-
+                  </div>{" "}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Adres email
@@ -708,7 +777,6 @@ export const UserProfile: React.FC = () => {
                       </div>
                     )}
                   </div>
-
                   {/* Notification Preferences */}
                   {isEditing && (
                     <div>
@@ -738,213 +806,6 @@ export const UserProfile: React.FC = () => {
                             Powiadomienia email
                           </span>
                         </label>
-
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.notification_preferences.product_updates
-                            }
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                notification_preferences: {
-                                  ...prev.notification_preferences,
-                                  product_updates: e.target.checked,
-                                },
-                              }))
-                            }
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-2 text-gray-700">
-                            Aktualizacje produktów
-                          </span>
-                        </label>
-
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.notification_preferences.marketing_emails
-                            }
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                notification_preferences: {
-                                  ...prev.notification_preferences,
-                                  marketing_emails: e.target.checked,
-                                },
-                              }))
-                            }
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-2 text-gray-700">
-                            Wiadomości marketingowe
-                          </span>
-                        </label>
-
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.notification_preferences.security_alerts
-                            }
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                notification_preferences: {
-                                  ...prev.notification_preferences,
-                                  security_alerts: e.target.checked,
-                                },
-                              }))
-                            }
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-2 text-gray-700">
-                            Alerty bezpieczeństwa
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Privacy Settings */}
-                  {isEditing && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                        Ustawienia prywatności
-                      </h3>
-                      <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={formData.privacy_settings.public_profile}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                privacy_settings: {
-                                  ...prev.privacy_settings,
-                                  public_profile: e.target.checked,
-                                },
-                              }))
-                            }
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-2 text-gray-700">
-                            Profil publiczny
-                          </span>
-                        </label>
-
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={formData.privacy_settings.show_wishlist}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                privacy_settings: {
-                                  ...prev.privacy_settings,
-                                  show_wishlist: e.target.checked,
-                                },
-                              }))
-                            }
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-2 text-gray-700">
-                            Pokazuj moją wishlistę innym
-                          </span>
-                        </label>
-
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={formData.privacy_settings.show_reviews}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                privacy_settings: {
-                                  ...prev.privacy_settings,
-                                  show_reviews: e.target.checked,
-                                },
-                              }))
-                            }
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-2 text-gray-700">
-                            Pokazuj moje recenzje
-                          </span>
-                        </label>
-
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.privacy_settings.allow_recommendations
-                            }
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                privacy_settings: {
-                                  ...prev.privacy_settings,
-                                  allow_recommendations: e.target.checked,
-                                },
-                              }))
-                            }
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-2 text-gray-700">
-                            Zezwalaj na personalizowane rekomendacje
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Appearance Settings */}
-                  {isEditing && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                        Wygląd
-                      </h3>
-                      <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Motyw
-                          </label>
-                          <select
-                            value={formData.theme}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                theme: e.target.value,
-                              }))
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          >
-                            <option value="light">Jasny</option>
-                            <option value="dark">Ciemny</option>
-                            <option value="system">Systemowy</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Język
-                          </label>
-                          <select
-                            value={formData.language}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                language: e.target.value,
-                              }))
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          >
-                            <option value="pl">Polski</option>
-                            <option value="en">English</option>
-                          </select>
-                        </div>
                       </div>
                     </div>
                   )}
@@ -1116,52 +977,6 @@ export const UserProfile: React.FC = () => {
               )}
 
               <div className="space-y-6">
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-4">
-                    Powiadomienia
-                  </h3>
-                  <div className="space-y-4">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={
-                          formData.notification_preferences.product_updates
-                        }
-                        onChange={(e) =>
-                          handleNotificationChange(
-                            "product_updates",
-                            e.target.checked
-                          )
-                        }
-                        disabled={isSaving}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
-                      />
-                      <span className="ml-3 text-gray-700">
-                        Powiadomienia o nowych produktach
-                      </span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={
-                          formData.notification_preferences.marketing_emails
-                        }
-                        onChange={(e) =>
-                          handleNotificationChange(
-                            "marketing_emails",
-                            e.target.checked
-                          )
-                        }
-                        disabled={isSaving}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
-                      />
-                      <span className="ml-3 text-gray-700">
-                        Newsletter z trendami
-                      </span>
-                    </label>
-                  </div>
-                </div>
-
                 <div className="bg-red-50 rounded-xl p-6 border border-red-200">
                   <h3 className="font-semibold text-red-900 mb-2">
                     Strefa niebezpieczna

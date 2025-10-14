@@ -1,5 +1,6 @@
 import { HelmetProvider } from "react-helmet-async";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { CookieConsent } from "./components/CookieConsent";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { SimplifiedAuthProvider } from "./contexts/SimplifiedAuthContext";
 import { usePreventPageRefresh } from "./hooks/usePreventPageRefresh";
@@ -10,7 +11,6 @@ import { BlogEditorPage } from "./pages/BlogEditorPage";
 import { BlogPage } from "./pages/BlogPage";
 import { BlogPostPage } from "./pages/BlogPostPage";
 import { ContactPage } from "./pages/ContactPage";
-import { CookiePolicyPage } from "./pages/CookiePolicyPage";
 import { HomePage } from "./pages/HomePage";
 import { HowItWorksPage } from "./pages/HowItWorksPage";
 import { LandingPage } from "./pages/LandingPage";
@@ -66,13 +66,13 @@ function App() {
                 path="/polityka-prywatnosci"
                 element={<PrivacyPolicyPage />}
               />
-              <Route path="/cookies" element={<CookiePolicyPage />} />
               <Route path="/afiliacja" element={<AffiliateProgramPage />} />
 
               {/* Krótki link produktu - MUSI BYĆ NA KOŃCU */}
               <Route path="/:codeOrAlias" element={<ProductPage />} />
             </Routes>
           </div>
+          <CookieConsent />
         </Router>
       </SimplifiedAuthProvider>
     </HelmetProvider>

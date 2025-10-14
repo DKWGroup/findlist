@@ -13,8 +13,10 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
+import { supabase } from "../services/supabaseStorage";
 import { isUserAdmin } from "../utils/adminUtils";
 import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
+import { SearchBar } from "./search/SearchBar";
 
 // Add loading state for auth
 interface HeaderProps {
@@ -22,12 +24,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
-  const { user, logout, isLoading, isAuthenticated, userRole } =
+  const { user, logout, isLoading, isAuthenticated } =
     useSimplifiedAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userName, setUserName] = useState<string>("");
   const userMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 
@@ -49,13 +52,42 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     }
   }, [user]);
 
+  // Load user's full name from profile
+  useEffect(() => {
+    const loadUserName = async () => {
+      if (user) {
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user.id)
+            .single();
+
+          if (profile?.full_name) {
+            setUserName(profile.full_name);
+          } else {
+            // Fallback to email username
+            setUserName(user.email?.split("@")[0] || "Użytkownik");
+          }
+        } catch (error) {
+          console.error("Error loading user name:", error);
+          setUserName(user.email?.split("@")[0] || "Użytkownik");
+        }
+      } else {
+        setUserName("");
+      }
+    };
+
+    loadUserName();
+  }, [user]);
+
   const handleLogout = () => {
     logout();
     setIsUserMenuOpen(false);
     // No need to navigate, the auth state change will trigger a re-render
   };
 
-  const handleSearch = (query: string, filters?: any) => {
+  const handleSearch = (query: string) => {
     if (onSearch) {
       onSearch(query);
     } else {
@@ -109,12 +141,13 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
 
           {/* Desktop Search Bar */}
           <div className="hidden md:block flex-1 max-w-2xl mx-8">
-            <AdvancedSearchBar
+            {/* <AdvancedSearchBar
               onSearch={handleSearch}
               placeholder="Szukaj viralowych produktów..."
               showFilters={false}
               className="w-full"
-            />
+            /> */}
+            <SearchBar onSearch={handleSearch} />
           </div>
 
           {/* Desktop Navigation */}
@@ -152,7 +185,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-blue-600" />
                   </div>
-                  <span className="font-medium">{user?.email}</span>
+                  <span className="font-medium">{userName || user?.email}</span>
                 </button>
 
                 {isUserMenuOpen && (
@@ -234,8 +267,8 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
               <div className="flex items-center space-x-2">
                 <div className="flex-1">
                   <AdvancedSearchBar
-                    onSearch={(query, filters) => {
-                      handleSearch(query, filters);
+                    onSearch={(query) => {
+                      handleSearch(query);
                       setIsMobileSearchOpen(false); // Zamknij wyszukiwanie po wyszukaniu
                     }}
                     placeholder="Szukaj viralowych produktów..."

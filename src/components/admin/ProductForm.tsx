@@ -246,27 +246,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         );
       }
 
-      // Find the type ID that corresponds to this code
-      const typeObj = formData.productType
-        ? availableTypes.find((type) => type.code === formData.productType)
-        : undefined;
-
-      console.log("🏷️ Found type object for code generation:", typeObj);
       console.log("🔧 Generating code with params:", {
         categoryId: categoryObj.id,
-        typeId: typeObj?.id,
       });
 
-      const code = await productCodeService.generateCode(
-        categoryObj.id,
-        typeObj?.id
-      );
+      const code = await productCodeService.generateCode(categoryObj.id);
 
       console.log("✅ Generated product code:", code);
 
-      const alias = productCodeService.generateUrlAlias(code, formData.title);
-
-      console.log("🔗 Generated URL alias:", alias);
+      // Generuj alias tylko z tytułu (jeśli tytuł jest dostępny)
+      let alias = "";
+      if (formData.title && formData.title.trim()) {
+        try {
+          alias = productCodeService.generateUrlAlias(formData.title);
+          console.log("🔗 Generated URL alias:", alias);
+        } catch (error) {
+          console.warn("⚠️ Could not generate URL alias:", error);
+        }
+      }
 
       setFormData((prev) => ({
         ...prev,
@@ -290,13 +287,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const handleCodeChange = (newCode: string) => {
     setFormData((prev) => ({ ...prev, code: newCode }));
 
-    if (newCode && productCodeService.validateCode(newCode)) {
-      const alias = productCodeService.generateUrlAlias(
-        newCode,
-        formData.title
-      );
-      setFormData((prev) => ({ ...prev, urlAlias: alias }));
-    }
+    // Nie generuj automatycznie aliasu przy zmianie kodu
+    // Alias jest generowany tylko z tytułu
   };
 
   const copyToClipboard = (text: string) => {
@@ -328,7 +320,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     // Validate product code if provided
     if (formData.code && !productCodeService.validateCode(formData.code)) {
       console.warn("⚠️ Invalid product code format:", formData.code);
-      alert("Nieprawidłowy format kodu produktu (wymagany format: XX-XX-XXX)");
+      alert("Nieprawidłowy format kodu produktu (wymagany format: KK-NNNN)");
       return;
     }
 
@@ -523,8 +515,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         value={formData.code || ""}
                         onChange={(e) => handleCodeChange(e.target.value)}
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
-                        placeholder="XX-XX-XXX"
-                        pattern="[A-Z]{2}-[A-Z]{2}-\d{3}"
+                        placeholder="KK-NNNN"
+                        pattern="[A-Z]{2}-\d{4}"
                       />
                       <button
                         type="button"
@@ -541,7 +533,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Format: KK-TT-NNN (Kategoria-Typ-Numer)
+                      Format: KK-NNNN (Kategoria-Numer)
                     </p>
                   </div>
 

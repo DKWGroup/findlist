@@ -9,9 +9,10 @@ interface LoginCredentials {
 }
 
 interface RegisterCredentials {
+  full_name: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
 }
 
 // SIMPLIFIED AUTH HOOK - maksymalnie uproszczona wersja
@@ -24,10 +25,8 @@ export const useSimplifiedAuth = () => {
   // Simple login
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<{ success: boolean }> => {
-      console.log("SimplifiedAuth: Starting login...");
       setIsLoading(true);
       setError(null);
-
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: credentials.email.trim().toLowerCase(),
@@ -36,35 +35,18 @@ export const useSimplifiedAuth = () => {
 
         if (error) {
           // Map Supabase errors to user-friendly Polish messages
-          let errorMessage = error.message;
-
+          let errorMessage = error.message || "Błąd logowania";
           if (error.message.includes("Invalid login credentials")) {
             errorMessage = "Nieprawidłowy email lub hasło";
-          } else if (error.message.includes("Email not confirmed")) {
-            errorMessage =
-              "Adres email nie został potwierdzony. Sprawdź swoją skrzynkę pocztową.";
-          } else if (error.message.includes("Too many requests")) {
-            errorMessage =
-              "Zbyt wiele prób logowania. Spróbuj ponownie za chwilę.";
-          } else if (error.message.includes("User not found")) {
-            errorMessage = "Nie znaleziono użytkownika o podanym adresie email";
-          } else if (error.message.includes("Invalid email")) {
-            errorMessage = "Nieprawidłowy format adresu email";
           }
-
-          throw new Error(errorMessage);
+          setError(errorMessage);
+          return { success: false };
         }
 
-        if (!data.user) throw new Error("Wystąpił błąd podczas logowania");
-
-        console.log("SimplifiedAuth: Login successful");
+        if (data?.user) setUser(data.user);
         return { success: true };
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Wystąpił błąd podczas logowania";
-        console.error("SimplifiedAuth: Login error:", message);
+        const message = err instanceof Error ? err.message : "Login failed";
         setError(message);
         return { success: false };
       } finally {
@@ -74,70 +56,107 @@ export const useSimplifiedAuth = () => {
     []
   );
 
-  // Simple logout
-  const logout = useCallback(async () => {
-    console.log("SimplifiedAuth: Logging out...");
+  // Register (sign up) with polling for profile creation (trigger)
+  const register = useCallback(
+    async (
+      credentials: RegisterCredentials
+    ): Promise<{
+      success: boolean;
+      profileCreated?: boolean;
+      warning?: string;
+    }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: credentials.email.trim().toLowerCase(),
+          password: credentials.password,
+          options: {
+            data: { full_name: credentials.full_name },
+            emailRedirectTo: `${window.location.origin}/logowanie?verified=1`,
+          },
+        });
+
+        if (error) {
+          // Map supabase errors
+          let msg = error.message || "Błąd rejestracji";
+          if (
+            error.status === 429 ||
+            msg.includes("rate limit") ||
+            msg.includes("Too Many Requests")
+          ) {
+            msg =
+              "Zbyt wiele prób rejestracji. Spróbuj ponownie za kilka minut.";
+          }
+          setError(msg);
+          return { success: false };
+        }
+
+        if (!data?.user) {
+          setError("Brak danych użytkownika w odpowiedzi z serwera");
+          return { success: false };
+        }
+
+        // Poll for profile created by DB trigger
+        const maxAttempts = 5;
+        let attempt = 0;
+        let profileFound: any = null;
+        let lastErr: any = null;
+
+        while (attempt < maxAttempts) {
+          attempt += 1;
+          const backoff = 300 * Math.pow(2, attempt - 1);
+          try {
+            const { data: profile, error: checkErr } = await supabase
+              .from("profiles")
+              .select("id, email, full_name, wishlist, reviews")
+              .eq("id", data.user.id)
+              .maybeSingle();
+
+            if (checkErr) {
+              lastErr = checkErr;
+            } else if (profile) {
+              profileFound = profile;
+              break;
+            }
+          } catch (e) {
+            lastErr = e;
+          }
+
+          // wait
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((r) => setTimeout(r, backoff));
+        }
+
+        // success
+        return { success: true, profileCreated: true };
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Registration failed";
+        setError(message);
+        return { success: false };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  // Logout
+  const logout = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
       await supabase.auth.signOut();
-      console.log("SimplifiedAuth: Logout successful");
+      setUser(null);
     } catch (err) {
-      console.error("SimplifiedAuth: Logout error:", err);
+      console.error("Logout error:", err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Simple register
-  const register = useCallback(
-    async (credentials: RegisterCredentials): Promise<{ success: boolean }> => {
-      console.log("SimplifiedAuth: Starting registration...");
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        if (credentials.password !== credentials.confirmPassword) {
-          throw new Error("Hasła nie są identyczne");
-        }
-
-        const { error } = await supabase.auth.signUp({
-          email: credentials.email.trim().toLowerCase(),
-          password: credentials.password,
-        });
-
-        if (error) {
-          // Map Supabase errors to user-friendly Polish messages
-          let errorMessage = error.message;
-
-          if (error.message.includes("User already registered")) {
-            errorMessage = "Użytkownik z tym adresem email już istnieje";
-          } else if (error.message.includes("Password should be at least")) {
-            errorMessage = "Hasło musi mieć co najmniej 6 znaków";
-          } else if (error.message.includes("Invalid email")) {
-            errorMessage = "Nieprawidłowy format adresu email";
-          } else if (error.message.includes("Signup is disabled")) {
-            errorMessage = "Rejestracja jest obecnie niedostępna";
-          }
-
-          throw new Error(errorMessage);
-        }
-
-        console.log("SimplifiedAuth: Registration successful");
-        return { success: true };
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Registration failed";
-        console.error("SimplifiedAuth: Registration error:", message);
-        setError(message);
-        return { success: false };
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  // Password validation function
+  // Password validation
   const validatePassword = useCallback((password: string): boolean => {
     return (
       password.length >= 8 &&
@@ -147,39 +166,26 @@ export const useSimplifiedAuth = () => {
     );
   }, []);
 
-  // Reset password function
+  // Reset password
   const resetPassword = useCallback(
     async (email: string): Promise<{ success: boolean }> => {
       setIsLoading(true);
       setError(null);
-
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/update-password`,
         });
-
         if (error) {
-          // Map Supabase errors to user-friendly Polish messages
-          let errorMessage = error.message;
-
-          if (error.message.includes("User not found")) {
-            errorMessage = "Nie znaleziono użytkownika o podanym adresie email";
-          } else if (error.message.includes("Invalid email")) {
-            errorMessage = "Nieprawidłowy format adresu email";
-          } else if (error.message.includes("Too many requests")) {
-            errorMessage =
-              "Zbyt wiele próśb resetowania hasła. Spróbuj ponownie za chwilę.";
-          }
-
-          throw new Error(errorMessage);
+          let msg = error.message || "Błąd wysyłania emaila";
+          if (msg.includes("User not found"))
+            msg = "Nie znaleziono użytkownika o podanym adresie email";
+          setError(msg);
+          return { success: false };
         }
-
-        console.log("SimplifiedAuth: Password reset email sent");
         return { success: true };
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Reset password failed";
-        console.error("SimplifiedAuth: Reset password error:", message);
         setError(message);
         return { success: false };
       } finally {
@@ -189,36 +195,23 @@ export const useSimplifiedAuth = () => {
     []
   );
 
-  // Update password function
+  // Update password
   const updatePassword = useCallback(
     async (newPassword: string): Promise<{ success: boolean }> => {
       setIsLoading(true);
       setError(null);
-
       try {
         const { error } = await supabase.auth.updateUser({
           password: newPassword,
         });
-
         if (error) {
-          // Map Supabase errors to user-friendly Polish messages
-          let errorMessage = error.message;
-
-          if (error.message.includes("Password should be at least")) {
-            errorMessage = "Hasło musi mieć co najmniej 6 znaków";
-          } else if (error.message.includes("Same password")) {
-            errorMessage = "Nowe hasło musi różnić się od poprzedniego";
-          }
-
-          throw new Error(errorMessage);
+          setError(error.message || "Błąd aktualizacji hasła");
+          return { success: false };
         }
-
-        console.log("SimplifiedAuth: Password updated successfully");
         return { success: true };
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Update password failed";
-        console.error("SimplifiedAuth: Update password error:", message);
         setError(message);
         return { success: false };
       } finally {
@@ -232,7 +225,6 @@ export const useSimplifiedAuth = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
     const getInitialSession = async () => {
       try {
         const {
@@ -241,19 +233,15 @@ export const useSimplifiedAuth = () => {
         if (mounted) {
           setUser(session?.user ?? null);
           setIsLoading(false);
-          console.log("SimplifiedAuth: Initial session loaded");
 
-          // Check if user is admin and update role
           if (session?.user) {
             isUserAdmin()
               .then((isAdmin) => {
-                if (isAdmin) {
-                  setUserRole("admin");
-                }
+                if (isAdmin) setUserRole("admin");
               })
-              .catch((err) => {
-                console.error("Error checking admin status:", err);
-              });
+              .catch((err) =>
+                console.error("Error checking admin status:", err)
+              );
           }
         }
       } catch (err) {
@@ -267,33 +255,13 @@ export const useSimplifiedAuth = () => {
 
     getInitialSession();
 
-    // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("SimplifiedAuth: Auth state change:", event);
-
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
-
       try {
-        if (event === "SIGNED_OUT") {
-          setUser(null);
-        } else if (
-          event === "SIGNED_IN" ||
-          event === "TOKEN_REFRESHED" ||
-          event === "USER_UPDATED" ||
-          event === "PASSWORD_RECOVERY"
-        ) {
-          if (session?.user) {
-            setUser(session.user);
-          }
-          // If no session, keep previous user to avoid flicker
-        } else {
-          // For INITIAL_SESSION and other events, update only if session exists
-          if (session?.user) {
-            setUser(session.user);
-          }
-        }
+        if (event === "SIGNED_OUT") setUser(null);
+        else if (session?.user) setUser(session.user);
         setError(null);
       } finally {
         setIsLoading(false);
@@ -302,7 +270,11 @@ export const useSimplifiedAuth = () => {
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      try {
+        subscription.unsubscribe();
+      } catch (e) {
+        /* ignore */
+      }
     };
   }, []);
 
