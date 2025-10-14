@@ -1,22 +1,11 @@
-import {
-  AlertCircle,
-  Check,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  Shield,
-} from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { AlertCircle, Check, Eye, EyeOff, Lock } from "lucide-react";
+import React, { useState } from "react";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 import { supabase } from "../../services/supabaseStorage";
 
 export const SecuritySettings: React.FC = () => {
   const { user } = useSimplifiedAuthContext();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [isChangingEmail, setIsChangingEmail] = useState(false);
-  const [emailChangeRequested, setEmailChangeRequested] = useState(false);
-  const [emailVerificationSent, setEmailVerificationSent] = useState(false);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -24,45 +13,12 @@ export const SecuritySettings: React.FC = () => {
     confirmPassword: "",
   });
 
-  const [emailData, setEmailData] = useState({
-    newEmail: "",
-    password: "",
-  });
-
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showEmailPassword, setShowEmailPassword] = useState(false);
 
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
-  const [emailFormError, setEmailFormError] = useState("");
-  const [emailFormSuccess, setEmailFormSuccess] = useState("");
-
-  useEffect(() => {
-    if (user) {
-      checkEmailVerificationStatus();
-    }
-  }, [user]);
-
-  const checkEmailVerificationStatus = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("email_verification_token, email_verification_sent_at")
-        .eq("id", user?.id)
-        .single();
-
-      if (error) throw error;
-
-      if (data?.email_verification_token && data?.email_verification_sent_at) {
-        setEmailChangeRequested(true);
-        setEmailVerificationSent(true);
-      }
-    } catch (error) {
-      console.error("Error checking email verification status:", error);
-    }
-  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +27,13 @@ export const SecuritySettings: React.FC = () => {
     setIsChangingPassword(true);
 
     try {
+      if (!user?.email) {
+        setFormError(
+          "Nie udało się zweryfikować użytkownika. Zaloguj się ponownie."
+        );
+        return;
+      }
+
       if (passwordData.newPassword !== passwordData.confirmPassword) {
         setFormError("Nowe hasła nie są identyczne");
         return;
@@ -81,8 +44,39 @@ export const SecuritySettings: React.FC = () => {
         return;
       }
 
-      // TODO: Implement password change with Supabase
-      console.log("Zmiana hasła - do implementacji");
+      // Verify current password by re-authenticating
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwordData.currentPassword,
+      });
+
+      if (verifyError) {
+        if (verifyError.message.includes("Invalid login credentials")) {
+          setFormError("Nieprawidłowe obecne hasło");
+        } else {
+          setFormError(
+            "Nie udało się potwierdzić obecnego hasła. Spróbuj ponownie."
+          );
+        }
+        return;
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+      });
+
+      if (updateError) {
+        let message =
+          updateError.message || "Wystąpił błąd podczas zmiany hasła";
+        if (message.includes("Password should be at least")) {
+          message = "Hasło musi mieć co najmniej 6 znaków";
+        } else if (message.includes("Same password")) {
+          message = "Nowe hasło musi być inne niż obecne";
+        }
+        setFormError(message);
+        return;
+      }
+
       setFormSuccess("Hasło zostało zmienione pomyślnie");
       setPasswordData({
         currentPassword: "",
@@ -90,88 +84,10 @@ export const SecuritySettings: React.FC = () => {
         confirmPassword: "",
       });
     } catch (error) {
+      console.error("Error changing password", error);
       setFormError("Wystąpił błąd podczas zmiany hasła");
     } finally {
       setIsChangingPassword(false);
-    }
-  };
-
-  const handleEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEmailFormError("");
-    setEmailFormSuccess("");
-    setIsChangingEmail(true);
-
-    try {
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailData.newEmail)) {
-        setEmailFormError("Podany adres email jest nieprawidłowy");
-        setIsChangingEmail(false);
-        return;
-      }
-
-      // Verify current password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || "",
-        password: emailData.password,
-      });
-
-      if (signInError) {
-        setEmailFormError("Nieprawidłowe hasło");
-        setIsChangingEmail(false);
-        return;
-      }
-
-      // Update profile with new email (this will trigger the verification process)
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          email: emailData.newEmail,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user?.id);
-
-      if (updateError) throw updateError;
-
-      setEmailFormSuccess(
-        "Link weryfikacyjny został wysłany na nowy adres email"
-      );
-      setEmailChangeRequested(true);
-      setEmailVerificationSent(true);
-      setEmailData({
-        newEmail: "",
-        password: "",
-      });
-    } catch (error: any) {
-      setEmailFormError(
-        error.message || "Wystąpił błąd podczas zmiany adresu email"
-      );
-    } finally {
-      setIsChangingEmail(false);
-    }
-  };
-
-  const cancelEmailChange = async () => {
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          email_verification_token: null,
-          email_verification_sent_at: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user?.id);
-
-      if (error) throw error;
-
-      setEmailChangeRequested(false);
-      setEmailVerificationSent(false);
-      setEmailFormSuccess("Zmiana adresu email została anulowana");
-    } catch (error: any) {
-      setEmailFormError(
-        error.message || "Wystąpił błąd podczas anulowania zmiany adresu email"
-      );
     }
   };
 
