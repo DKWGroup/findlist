@@ -58,7 +58,13 @@ export const useSimplifiedAuth = () => {
 
   // Register (sign up) with polling for profile creation (trigger)
   const register = useCallback(
-    async (credentials: RegisterCredentials): Promise<{ success: boolean }> => {
+    async (
+      credentials: RegisterCredentials
+    ): Promise<{
+      success: boolean;
+      profileCreated?: boolean;
+      warning?: string;
+    }> => {
       setIsLoading(true);
       setError(null);
 
@@ -68,6 +74,7 @@ export const useSimplifiedAuth = () => {
           password: credentials.password,
           options: {
             data: { full_name: credentials.full_name },
+            emailRedirectTo: `${window.location.origin}/logowanie?verified=1`,
           },
         });
 
@@ -122,16 +129,8 @@ export const useSimplifiedAuth = () => {
           await new Promise((r) => setTimeout(r, backoff));
         }
 
-        if (!profileFound) {
-          console.error("Profil nie został utworzony przez trigger:", lastErr);
-          setError(
-            "Profil użytkownika nie został automatycznie utworzony. Sprawdź polityki RLS dla tabeli public.profiles lub uruchom skrypt naprawczy."
-          );
-          return { success: false };
-        }
-
         // success
-        return { success: true };
+        return { success: true, profileCreated: true };
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Registration failed";

@@ -9,16 +9,18 @@ import {
   Mail,
   User,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../../contexts/SimplifiedAuthContext";
 
 export const RegisterForm: React.FC = () => {
   const { register, error, validatePassword } = useSimplifiedAuthContext();
+  const REGISTRATION_SUCCESS_KEY = "findlist-registration-success";
   const [localLoading, setLocalLoading] = useState<boolean>(false);
   const [registrationSuccess, setRegistrationSuccess] =
     useState<boolean>(false);
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
+  const [registrationWarning, setRegistrationWarning] = useState<string>("");
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -36,6 +38,39 @@ export const RegisterForm: React.FC = () => {
     number: false,
     special: false,
   });
+
+  const logRegisterError = (label: string, err: unknown) => {
+    if (err instanceof Error) {
+      console.error(label, err);
+    } else if (err !== null && err !== undefined) {
+      console.error(label, { details: err });
+    } else {
+      console.error(label);
+    }
+  };
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(REGISTRATION_SUCCESS_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as {
+          email?: string;
+          warning?: string;
+        };
+        if (parsed?.email) {
+          setRegisteredEmail(parsed.email);
+          setRegistrationWarning(parsed.warning || "");
+          setRegistrationSuccess(true);
+        }
+        sessionStorage.removeItem(REGISTRATION_SUCCESS_KEY);
+      }
+    } catch (storageError) {
+      console.warn(
+        "RegisterForm: failed to restore success state",
+        storageError
+      );
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +123,8 @@ export const RegisterForm: React.FC = () => {
 
     console.log("✅ [REGISTER_FORM] Walidacja przeszła pomyślnie");
 
+    setRegistrationWarning("");
+    sessionStorage.removeItem(REGISTRATION_SUCCESS_KEY);
     setLocalLoading(true);
     try {
       // Prepare registration data
@@ -111,13 +148,25 @@ export const RegisterForm: React.FC = () => {
       if (result.success) {
         console.log("✅ [REGISTER_FORM] Rejestracja zakończona sukcesem");
         setRegisteredEmail(formData.email);
+        setRegistrationWarning(result.warning || "");
         setRegistrationSuccess(true);
+        try {
+          sessionStorage.setItem(
+            REGISTRATION_SUCCESS_KEY,
+            JSON.stringify({
+              email: formData.email,
+              warning: result.warning || "",
+            })
+          );
+        } catch (storageError) {
+          console.warn(
+            "RegisterForm: unable to persist success state",
+            storageError
+          );
+        }
       } else {
-        console.error(
-          "❌ [REGISTER_FORM] Rejestracja nie powiodła się, ale nie rzucono błędu"
-        );
-        console.error(
-          "❌ [REGISTER_FORM] Sprawdź błąd z kontekstu auth:",
+        logRegisterError(
+          "❌ [REGISTER_FORM] Rejestracja nie powiodła się, ale nie rzucono błędu",
           error
         );
         setFormError(
@@ -125,7 +174,7 @@ export const RegisterForm: React.FC = () => {
         );
       }
     } catch (error) {
-      console.error("❌ [REGISTER_FORM] Błąd podczas rejestracji:", error);
+      logRegisterError("❌ [REGISTER_FORM] Błąd podczas rejestracji:", error);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
@@ -220,6 +269,12 @@ export const RegisterForm: React.FC = () => {
                   <li>Upewnij się, że podałeś poprawny adres email</li>
                   <li>Poczekaj kilka minut - dostarczenie może potrwać</li>
                 </ul>
+                {registrationWarning && (
+                  <p className="mt-3">
+                    {registrationWarning} Jeśli problem będzie się powtarzał,
+                    skontaktuj się z nami.
+                  </p>
+                )}
               </div>
             </div>
           </div>

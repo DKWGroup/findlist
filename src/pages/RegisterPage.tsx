@@ -6,8 +6,28 @@ import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
 export const RegisterPage: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useSimplifiedAuthContext();
 
+  const hasVerifiedSession = Boolean(
+    user?.email_confirmed_at || user?.confirmed_at || user?.last_sign_in_at
+  );
+
+  const shouldSkipRedirect = (() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return Boolean(sessionStorage.getItem("findlist-registration-success"));
+    } catch (err) {
+      console.warn("RegisterPage: unable to inspect sessionStorage", err);
+      return false;
+    }
+  })();
+
   // Only redirect if we're not loading and the user is authenticated
-  if (isAuthenticated && !isLoading && user) {
+  if (
+    !shouldSkipRedirect &&
+    isAuthenticated &&
+    !isLoading &&
+    user &&
+    hasVerifiedSession
+  ) {
     return <Navigate to="/profil" replace />;
   }
 
