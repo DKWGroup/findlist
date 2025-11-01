@@ -15,15 +15,16 @@ class SearchService {
     }
 
     try {
-      // Sprawdź czy query wygląda jak kod produktu (format: XX-XX-000)
-      const isProductCodeQuery = /^[A-Z]{2}-[A-Z]{2}-\d{1,3}$/i.test(
-        query.trim()
-      );
+      const trimmedQuery = query.trim();
+      const normalizedCodeQuery = trimmedQuery.replace(/\s+/g, "");
+      const escapedCodeQuery = normalizedCodeQuery.replace(/[%_]/g, "\\$&");
+      const escapedTitleQuery = trimmedQuery.replace(/[%_]/g, "\\$&");
+      const isProductCodeQuery = normalizedCodeQuery.length >= 2;
+      
 
       let searchResults: any[] = [];
 
       if (isProductCodeQuery) {
-        // Wyszukiwanie po kodzie produktu (case-insensitive, exact match)
         const { data: productsByCode, error: codeError } = await supabase
           .from("products")
           .select(
@@ -35,18 +36,20 @@ class SearchService {
             code
           `
           )
-          .ilike("code", query.trim())
+          .ilike("code", `%${escapedCodeQuery}%`)
           .order("title")
           .limit(10);
 
         if (codeError) {
           console.error("Error fetching products by code:", codeError);
-          return [];
         }
 
-        searchResults = productsByCode || [];
-      } else {
-        // Standardowe wyszukiwanie po tytule
+        if (productsByCode && productsByCode.length > 0) {
+          searchResults = productsByCode;
+        }
+      }
+
+      if (searchResults.length === 0) {
         const { data: productsByTitle, error: titleError } = await supabase
           .from("products")
           .select(
@@ -58,7 +61,7 @@ class SearchService {
             code
           `
           )
-          .ilike("title", `%${query}%`)
+          .ilike("title", `%${escapedTitleQuery}%`)
           .order("title")
           .limit(10);
 
@@ -70,7 +73,6 @@ class SearchService {
         searchResults = productsByTitle || [];
       }
 
-      // Jeśli brak wyników
       if (!searchResults || searchResults.length === 0) {
         return [
           {
@@ -81,14 +83,12 @@ class SearchService {
         ];
       }
 
-      // Pobieranie pierwszego zdjęcia dla każdego produktu
       const productIds = searchResults.map((p) => p.id);
       const { data: productImages, error: imagesError } = await supabase
         .from("product_images")
         .select("product_id, url")
         .in("product_id", productIds);
 
-      // Mapa product_id -> pierwsze zdjęcie
       const imageMap: Record<string, string> = {};
       if (!imagesError && productImages) {
         productImages.forEach((img: any) => {
@@ -98,7 +98,6 @@ class SearchService {
         });
       }
 
-      // Pobieranie kategorii dla znalezionych produktów
       const categoryIds = [
         ...new Set(searchResults.map((p) => p.category_id).filter(Boolean)),
       ];
@@ -118,7 +117,6 @@ class SearchService {
         }
       }
 
-      // Mapowanie produktów na sugestie
       const productSuggestions: SearchSuggestion[] = searchResults.map(
         (product: any) => ({
           id: `product_${product.id}`,
@@ -132,7 +130,6 @@ class SearchService {
         })
       );
 
-      // Zbieranie unikalnych kategorii
       const uniqueCategories = new Set<string>(
         searchResults
           .map((p: any) => categoryNames[p.category_id])
@@ -148,7 +145,6 @@ class SearchService {
         url: `/produkty?category=${encodeURIComponent(categoryName)}`,
       }));
 
-      // Sortowanie wyników: kategorie najpierw, potem produkty
       const finalSuggestions = [...categorySuggestions, ...productSuggestions];
 
       this.suggestionCache.set(cacheKey, finalSuggestions);
