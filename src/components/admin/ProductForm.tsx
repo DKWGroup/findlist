@@ -342,20 +342,42 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       },
     };
 
-    console.log("🧹 Cleaned data prepared:", cleanedData);
+    const normalizedCode =
+      cleanedData.code && cleanedData.code.trim()
+        ? cleanedData.code.trim().toUpperCase()
+        : undefined;
+
+    const sanitizedData = {
+      ...cleanedData,
+      code: normalizedCode,
+    };
+
+    console.log("🧹 Cleaned data prepared:", sanitizedData);
     console.log("🖼️ Images to be saved:", uploadedImages);
 
     // Clear saved draft (we're submitting)
     handleFormSubmit();
 
     // Save to database
-    saveProductToDatabase(cleanedData);
+    saveProductToDatabase(sanitizedData);
   };
 
   const saveProductToDatabase = async (productData: Partial<Product>) => {
     console.log("🚀 Starting saveProductToDatabase with data:", productData);
 
     try {
+      if (productData.code) {
+        const codeExists = await productService.isProductCodeTaken(
+          productData.code,
+          product?.id
+        );
+
+        if (codeExists) {
+          alert("Kod produktu jest już w użyciu. Wybierz inny kod.");
+          return;
+        }
+      }
+
       // Find the category UUID based on the category code
       console.log("🔍 Looking for category with code:", productData.category);
       console.log("📋 Available categories:", availableCategories);
