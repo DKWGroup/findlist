@@ -320,7 +320,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     // Validate product code if provided
     if (formData.code && !productCodeService.validateCode(formData.code)) {
       console.warn("⚠️ Invalid product code format:", formData.code);
-      alert("Nieprawidłowy format kodu produktu (wymagany format: KK-NNNN)");
+      alert("Nieprawidłowy format kodu produktu (wymagany format: LL-000)");
       return;
     }
 
@@ -515,8 +515,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         value={formData.code || ""}
                         onChange={(e) => handleCodeChange(e.target.value)}
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
-                        placeholder="KK-NNNN"
-                        pattern="[A-Z]{2}-\d{4}"
+                        placeholder="LL-000"
+                        pattern="[A-Z]{2}-\d{3}"
                       />
                       <button
                         type="button"
@@ -533,7 +533,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Format: KK-NNNN (Kategoria-Numer)
+                      Format: LL-000 (2 litery kategorii + 3 cyfry numeru)
                     </p>
                   </div>
 

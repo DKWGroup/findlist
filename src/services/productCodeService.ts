@@ -24,27 +24,19 @@ class ProductCodeService {
   // Inicjalizacja sekwencji dla istniejących kombinacji
   private initializeSequences(): void {
     categoryMappings.forEach((category) => {
-      const categoryTypes = typeMappings.filter(
-        (type) => type.categoryId === category.id
-      );
-      categoryTypes.forEach((type) => {
-        const key = `${category.code}-${type.code}`;
+      const key = category.code;
+      if (!this.codeSequences.has(key)) {
         this.codeSequences.set(key, 0);
-      });
+      }
     });
   }
 
   private ensureSequencesForCategories(categories: CategoryMapping[]): void {
     categories.forEach((category) => {
-      const categoryTypes = typeMappings.filter(
-        (type) => type.categoryId === category.id
-      );
-      categoryTypes.forEach((type) => {
-        const key = `${category.code}-${type.code}`;
-        if (!this.codeSequences.has(key)) {
-          this.codeSequences.set(key, 0);
-        }
-      });
+      const key = category.code;
+      if (!this.codeSequences.has(key)) {
+        this.codeSequences.set(key, 0);
+      }
     });
   }
 
@@ -122,9 +114,8 @@ class ProductCodeService {
 
     // Nowy format: tylko kategoria + sekwencja (bez typu)
     const sequenceNumber = await this.getNextSequenceNumber(category.code);
-    const code = `${category.code}-${sequenceNumber
-      .toString()
-      .padStart(4, "0")}`;
+    const sequence = sequenceNumber.toString();
+    const code = `${category.code}-${sequence.padStart(3, "0")}`;
 
     // Sprawdź unikalność (case-insensitive)
     if (
@@ -143,6 +134,12 @@ class ProductCodeService {
     const key = categoryCode; // Tylko kod kategorii bez typu
     const currentSequence = this.codeSequences.get(key) || 0;
     const nextSequence = currentSequence + 1;
+
+    if (nextSequence > 999) {
+      throw new Error(
+        `Przekroczono limit numerów sekwencji dla kategorii ${categoryCode}`
+      );
+    }
 
     this.codeSequences.set(key, nextSequence);
     return nextSequence;
@@ -177,7 +174,7 @@ class ProductCodeService {
 
   // Walidacja formatu kodu
   validateCode(code: string): boolean {
-    const regex = /^[A-Z]{2}-\d{4}$/;
+    const regex = /^[A-Z]{2}-\d{3}$/;
     return regex.test(code);
   }
 
@@ -359,7 +356,27 @@ class ProductCodeService {
     try {
       const parsed = JSON.parse(data);
       this.productCodes = parsed.productCodes || [];
-      this.codeSequences = new Map(parsed.sequences || []);
+
+      const rawSequences: Array<[string, number]> = parsed.sequences || [];
+      const normalizedSequences = new Map<string, number>();
+
+      rawSequences.forEach(([key, value]) => {
+        if (!key) {
+          return;
+        }
+
+        const numericValue = Number(value) || 0;
+        const normalizedKey = key.includes("-") ? key.split("-")[0] : key;
+        const currentMax = normalizedSequences.get(normalizedKey) || 0;
+
+        normalizedSequences.set(
+          normalizedKey,
+          Math.min(999, Math.max(currentMax, numericValue))
+        );
+      });
+
+      this.codeSequences = normalizedSequences;
+      this.ensureSequencesForCategories(this.categories);
     } catch (error) {
       throw new Error("Błąd importu kodów produktów");
     }

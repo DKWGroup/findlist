@@ -28,10 +28,13 @@ export interface TypeMapping {
 }
 
 export interface ProductCodeGenerator {
-  generateCode(categoryCode: string, typeCode: string): Promise<string>;
+  generateCode(categoryId: string): Promise<string>;
   validateCode(code: string): boolean;
-  parseCode(code: string): { categoryCode: string; typeCode: string; sequenceNumber: number } | null;
-  getNextSequenceNumber(categoryCode: string, typeCode: string): Promise<number>;
+  parseCode(code: string): {
+    categoryCode: string;
+    sequenceNumber: number;
+  } | null;
+  getNextSequenceNumber(categoryCode: string): Promise<number>;
 }
 
 export interface ProductCodeStats {
