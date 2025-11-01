@@ -13,6 +13,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSimplifiedAuthContext } from "../contexts/SimplifiedAuthContext";
+import { productCodeService } from "../services/productCodeService";
 import { supabase } from "../services/supabaseStorage";
 import { isUserAdmin } from "../utils/adminUtils";
 import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
@@ -88,12 +89,24 @@ export const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   };
 
   const handleSearch = (query: string) => {
-    if (onSearch) {
-      onSearch(query);
-    } else {
-      // Navigate to search page with query
-      navigate(`/szukaj?q=${encodeURIComponent(query)}`);
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      return;
     }
+
+    const normalizedQuery = trimmedQuery.toUpperCase();
+
+    if (productCodeService.validateCode(normalizedQuery)) {
+      navigate(`/${normalizedQuery}`);
+      return;
+    }
+
+    if (onSearch) {
+      onSearch(trimmedQuery);
+      return;
+    }
+
+    navigate(`/szukaj?q=${encodeURIComponent(trimmedQuery)}`);
   };
 
   // Close mobile search when clicking outside or opening menu

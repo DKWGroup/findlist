@@ -8,27 +8,28 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { productCodeService } from "../services/productCodeService";
 import { AdvancedSearchBar } from "./search/AdvancedSearchBar";
 import { SearchBar } from "./search/SearchBar";
 
 export const Hero: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-
   const handleSearch = (query: string) => {
-    if (query.trim()) {
-      window.location.href = `/szukaj?q=${encodeURIComponent(query)}`;
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      return;
     }
-  };
 
-  const trendingSearches = [
-    "gadżety z TikToka",
-    "prezenty na Dzień Matki",
-    "viralowe kosmetyki",
-    "smart home",
-    "letnie trendy",
-  ];
+    const normalizedQuery = trimmedQuery.toUpperCase();
+
+    if (productCodeService.validateCode(normalizedQuery)) {
+      window.location.href = `/${normalizedQuery}`;
+      return;
+    }
+
+    window.location.href = `/szukaj?q=${encodeURIComponent(trimmedQuery)}`;
+  };
 
   return (
     <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 lg:py-24 overflow-hidden">
