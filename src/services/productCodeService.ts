@@ -132,17 +132,41 @@ class ProductCodeService {
   // Pobieranie następnego numeru sekwencyjnego
   async getNextSequenceNumber(categoryCode: string): Promise<number> {
     const key = categoryCode; // Tylko kod kategorii bez typu
-    const currentSequence = this.codeSequences.get(key) || 0;
-    const nextSequence = currentSequence + 1;
 
-    if (nextSequence > 999) {
-      throw new Error(
-        `Przekroczono limit numerów sekwencji dla kategorii ${categoryCode}`
-      );
+    const usedNumbers = new Set<number>();
+
+    this.productCodes
+      .filter((pc) => pc.categoryCode === categoryCode && pc.isActive)
+      .forEach((pc) => usedNumbers.add(pc.sequenceNumber));
+
+    for (let candidate = 1; candidate <= 999; candidate += 1) {
+      if (usedNumbers.has(candidate)) {
+        continue;
+      }
+
+      const candidateCode = `${categoryCode}-${candidate
+        .toString()
+        .padStart(3, "0")}`;
+
+      let isTaken = false;
+      try {
+        isTaken = await productService.isProductCodeTaken(candidateCode);
+      } catch (error) {
+        console.warn(
+          "Nie udało się zweryfikować unikalności kodu w bazie, używam lokalnej walidacji:",
+          error
+        );
+      }
+
+      if (!isTaken) {
+        this.codeSequences.set(key, candidate);
+        return candidate;
+      }
+
+      usedNumbers.add(candidate);
     }
 
-    this.codeSequences.set(key, nextSequence);
-    return nextSequence;
+    throw new Error(`Brak dostępnych kodów dla kategorii ${categoryCode}`);
   }
 
   // Rejestracja nowego kodu produktu
