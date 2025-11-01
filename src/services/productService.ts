@@ -143,6 +143,39 @@ class ProductService {
     }
   }
 
+  async isProductCodeTaken(
+    code: string,
+    excludeProductId?: string
+  ): Promise<boolean> {
+    if (!code || !code.trim()) {
+      return false;
+    }
+
+    const normalizedCode = code.trim().toUpperCase();
+
+    try {
+      let query = supabase
+        .from("products")
+        .select("id")
+        .eq("code", normalizedCode);
+
+      if (excludeProductId) {
+        query = query.neq("id", excludeProductId);
+      }
+
+      const { data, error } = await query.limit(1);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data?.length ?? 0) > 0;
+    } catch (error: any) {
+      console.error("Error checking product code uniqueness:", error);
+      throw new Error(error.message || "Failed to verify product code");
+    }
+  }
+
   /**
    * Update a product
    */

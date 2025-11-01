@@ -1,29 +1,49 @@
 import { SearchSuggestion } from "../types/search";
 import { supabase } from "./supabaseStorage";
 
+const PRODUCT_CODE_PREFIX_REGEX = /^[A-Z]{2}-\d{0,3}$/;
+const PRODUCT_CODE_FULL_REGEX = /^[A-Z]{2}-\d{3}$/;
+
 class SearchService {
   private suggestionCache = new Map<string, SearchSuggestion[]>();
 
-  async getSuggestions(query: string): Promise<SearchSuggestion[]> {
-    if (query.length < 2) {
+  private escapeIlikeTerm(term: string) {
+    return term.replace(/[%_]/g, (match) => "\\" + match);
+  }
+
+  async getSuggestions(
+    rawQuery: string,
+    limit = 10
+  ): Promise<SearchSuggestion[]> {
+    const trimmedQuery = rawQuery.trim();
+    const normalizedQuery = trimmedQuery.toUpperCase();
+    const cacheKey = `suggestions_${normalizedQuery}_${limit}`;
+
+    // For general search we still require at least 2 characters.
+    if (
+      !PRODUCT_CODE_PREFIX_REGEX.test(normalizedQuery) &&
+      normalizedQuery.length < 2
+    ) {
       return [];
     }
 
-    const cacheKey = `suggestions_${query}`;
     if (this.suggestionCache.has(cacheKey)) {
       return this.suggestionCache.get(cacheKey)!;
     }
 
     try {
-      // Sprawdź czy query wygląda jak kod produktu (format: XX-XX-000)
-      const isProductCodeQuery = /^[A-Z]{2}-[A-Z]{2}-\d{1,3}$/i.test(
-        query.trim()
-      );
+      const isPotentialCodeQuery =
+        PRODUCT_CODE_PREFIX_REGEX.test(normalizedQuery);
+      const isCompleteCodeQuery = PRODUCT_CODE_FULL_REGEX.test(normalizedQuery);
 
       let searchResults: any[] = [];
+      let treatAsCodeResult = false;
 
-      if (isProductCodeQuery) {
-        // Wyszukiwanie po kodzie produktu (case-insensitive, exact match)
+      if (isPotentialCodeQuery) {
+        const ilikePattern = isCompleteCodeQuery
+          ? normalizedQuery
+          : `${normalizedQuery}%`;
+
         const { data: productsByCode, error: codeError } = await supabase
           .from("products")
           .select(
@@ -35,9 +55,9 @@ class SearchService {
             code
           `
           )
-          .ilike("code", query.trim())
-          .order("title")
-          .limit(10);
+          .ilike("code", ilikePattern)
+          .order("code", { ascending: true })
+          .limit(limit);
 
         if (codeError) {
           console.error("Error fetching products by code:", codeError);
@@ -45,9 +65,14 @@ class SearchService {
         }
 
         searchResults = productsByCode || [];
-      } else {
-        // Standardowe wyszukiwanie po tytule
-        const { data: productsByTitle, error: titleError } = await supabase
+        treatAsCodeResult = searchResults.length > 0;
+      }
+
+      if (!treatAsCodeResult) {
+        const escapedQuery = this.escapeIlikeTerm(trimmedQuery);
+        const escapedCodeQuery = this.escapeIlikeTerm(normalizedQuery);
+
+        const { data: productsBySearch, error: searchError } = await supabase
           .from("products")
           .select(
             `
@@ -58,19 +83,20 @@ class SearchService {
             code
           `
           )
-          .ilike("title", `%${query}%`)
-          .order("title")
-          .limit(10);
+          .or(
+            `title.ilike.%${escapedQuery}%,description.ilike.%${escapedQuery}%,code.ilike.%${escapedCodeQuery}%`
+          )
+          .order("title", { ascending: true })
+          .limit(limit);
 
-        if (titleError) {
-          console.error("Error fetching products by title:", titleError);
+        if (searchError) {
+          console.error("Error fetching products by search:", searchError);
           return [];
         }
 
-        searchResults = productsByTitle || [];
+        searchResults = productsBySearch || [];
       }
 
-      // Jeśli brak wyników
       if (!searchResults || searchResults.length === 0) {
         return [
           {
@@ -81,14 +107,12 @@ class SearchService {
         ];
       }
 
-      // Pobieranie pierwszego zdjęcia dla każdego produktu
       const productIds = searchResults.map((p) => p.id);
       const { data: productImages, error: imagesError } = await supabase
         .from("product_images")
         .select("product_id, url")
         .in("product_id", productIds);
 
-      // Mapa product_id -> pierwsze zdjęcie
       const imageMap: Record<string, string> = {};
       if (!imagesError && productImages) {
         productImages.forEach((img: any) => {
@@ -98,7 +122,6 @@ class SearchService {
         });
       }
 
-      // Pobieranie kategorii dla znalezionych produktów
       const categoryIds = [
         ...new Set(searchResults.map((p) => p.category_id).filter(Boolean)),
       ];
@@ -106,33 +129,38 @@ class SearchService {
 
       if (categoryIds.length > 0) {
         const { data: categories, error: categoriesError } = await supabase
-          .from("categories")
+          .from("product_categories")
           .select("id, name")
           .in("id", categoryIds);
 
         if (!categoriesError && categories) {
-          categoryNames = categories.reduce((acc: any, cat: any) => {
-            acc[cat.id] = cat.name;
-            return acc;
-          }, {});
+          categoryNames = categories.reduce(
+            (acc: Record<string, string>, cat: any) => {
+              acc[cat.id] = cat.name;
+              return acc;
+            },
+            {}
+          );
         }
       }
 
-      // Mapowanie produktów na sugestie
       const productSuggestions: SearchSuggestion[] = searchResults.map(
         (product: any) => ({
           id: `product_${product.id}`,
-          text:
-            isProductCodeQuery && product.code
-              ? `${product.code} - ${product.title}`
-              : product.title,
+          text: product.code
+            ? `${product.code} - ${product.title}`
+            : product.title,
           type: "product",
           imageUrl: imageMap[product.id] || undefined,
-          url: `/produkty/${product.url_alias}`,
+          url: product.url_alias
+            ? `/produkty/${product.url_alias}`
+            : product.code
+            ? `/${product.code}`
+            : `/produkt/${product.id}`,
+          productId: product.id,
         })
       );
 
-      // Zbieranie unikalnych kategorii
       const uniqueCategories = new Set<string>(
         searchResults
           .map((p: any) => categoryNames[p.category_id])
@@ -148,7 +176,6 @@ class SearchService {
         url: `/produkty?category=${encodeURIComponent(categoryName)}`,
       }));
 
-      // Sortowanie wyników: kategorie najpierw, potem produkty
       const finalSuggestions = [...categorySuggestions, ...productSuggestions];
 
       this.suggestionCache.set(cacheKey, finalSuggestions);

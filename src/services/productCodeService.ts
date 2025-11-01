@@ -24,27 +24,19 @@ class ProductCodeService {
   // Inicjalizacja sekwencji dla istniejących kombinacji
   private initializeSequences(): void {
     categoryMappings.forEach((category) => {
-      const categoryTypes = typeMappings.filter(
-        (type) => type.categoryId === category.id
-      );
-      categoryTypes.forEach((type) => {
-        const key = `${category.code}-${type.code}`;
+      const key = category.code;
+      if (!this.codeSequences.has(key)) {
         this.codeSequences.set(key, 0);
-      });
+      }
     });
   }
 
   private ensureSequencesForCategories(categories: CategoryMapping[]): void {
     categories.forEach((category) => {
-      const categoryTypes = typeMappings.filter(
-        (type) => type.categoryId === category.id
-      );
-      categoryTypes.forEach((type) => {
-        const key = `${category.code}-${type.code}`;
-        if (!this.codeSequences.has(key)) {
-          this.codeSequences.set(key, 0);
-        }
-      });
+      const key = category.code;
+      if (!this.codeSequences.has(key)) {
+        this.codeSequences.set(key, 0);
+      }
     });
   }
 
@@ -122,9 +114,8 @@ class ProductCodeService {
 
     // Nowy format: tylko kategoria + sekwencja (bez typu)
     const sequenceNumber = await this.getNextSequenceNumber(category.code);
-    const code = `${category.code}-${sequenceNumber
-      .toString()
-      .padStart(4, "0")}`;
+    const sequence = sequenceNumber.toString();
+    const code = `${category.code}-${sequence.padStart(3, "0")}`;
 
     // Sprawdź unikalność (case-insensitive)
     if (
@@ -141,11 +132,41 @@ class ProductCodeService {
   // Pobieranie następnego numeru sekwencyjnego
   async getNextSequenceNumber(categoryCode: string): Promise<number> {
     const key = categoryCode; // Tylko kod kategorii bez typu
-    const currentSequence = this.codeSequences.get(key) || 0;
-    const nextSequence = currentSequence + 1;
 
-    this.codeSequences.set(key, nextSequence);
-    return nextSequence;
+    const usedNumbers = new Set<number>();
+
+    this.productCodes
+      .filter((pc) => pc.categoryCode === categoryCode && pc.isActive)
+      .forEach((pc) => usedNumbers.add(pc.sequenceNumber));
+
+    for (let candidate = 1; candidate <= 999; candidate += 1) {
+      if (usedNumbers.has(candidate)) {
+        continue;
+      }
+
+      const candidateCode = `${categoryCode}-${candidate
+        .toString()
+        .padStart(3, "0")}`;
+
+      let isTaken = false;
+      try {
+        isTaken = await productService.isProductCodeTaken(candidateCode);
+      } catch (error) {
+        console.warn(
+          "Nie udało się zweryfikować unikalności kodu w bazie, używam lokalnej walidacji:",
+          error
+        );
+      }
+
+      if (!isTaken) {
+        this.codeSequences.set(key, candidate);
+        return candidate;
+      }
+
+      usedNumbers.add(candidate);
+    }
+
+    throw new Error(`Brak dostępnych kodów dla kategorii ${categoryCode}`);
   }
 
   // Rejestracja nowego kodu produktu
@@ -177,7 +198,7 @@ class ProductCodeService {
 
   // Walidacja formatu kodu
   validateCode(code: string): boolean {
-    const regex = /^[A-Z]{2}-\d{4}$/;
+    const regex = /^[A-Z]{2}-\d{3}$/;
     return regex.test(code);
   }
 
@@ -359,7 +380,27 @@ class ProductCodeService {
     try {
       const parsed = JSON.parse(data);
       this.productCodes = parsed.productCodes || [];
-      this.codeSequences = new Map(parsed.sequences || []);
+
+      const rawSequences: Array<[string, number]> = parsed.sequences || [];
+      const normalizedSequences = new Map<string, number>();
+
+      rawSequences.forEach(([key, value]) => {
+        if (!key) {
+          return;
+        }
+
+        const numericValue = Number(value) || 0;
+        const normalizedKey = key.includes("-") ? key.split("-")[0] : key;
+        const currentMax = normalizedSequences.get(normalizedKey) || 0;
+
+        normalizedSequences.set(
+          normalizedKey,
+          Math.min(999, Math.max(currentMax, numericValue))
+        );
+      });
+
+      this.codeSequences = normalizedSequences;
+      this.ensureSequencesForCategories(this.categories);
     } catch (error) {
       throw new Error("Błąd importu kodów produktów");
     }
